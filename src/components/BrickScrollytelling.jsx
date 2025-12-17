@@ -16,7 +16,7 @@ const projectsData = [
     videoLabel: "Ver Teaser",
     bgImage: "/assets/100hor.webp",
     monolithImage: "/assets/100atuverti.webp",
-    vimeoId: "1060607336"
+    vimeoId: "1060607336",
     vimeoHash: "1da9d0145b"
   },
   {
