@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, X, ChevronDown, MousePointer2, Mail, Instagram, Youtube, ArrowRight, Grid, Plus, Download } from 'lucide-react';
 
-// --- DADOS DOS PROJETOS (Corrigidos com vírgulas) ---
+// --- DADOS DOS PROJETOS ---
 const projectsData = [
   {
     id: 2,
@@ -16,8 +16,8 @@ const projectsData = [
     videoLabel: "Ver Teaser",
     bgImage: "/assets/100hor.webp",
     monolithImage: "/assets/100atuverti.webp",
-    vimeoId: "1060607336",    // VÍRGULA AQUI
-    vimeoHash: "1da9d0145b"   // CHAVE DE SEGURANÇA
+    vimeoId: "1060607336",
+    vimeoHash: "1da9d0145b"
   },
   {
     id: 4,
@@ -114,50 +114,22 @@ const projectsData = [
 
 // --- COMPONENTES AUXILIARES ---
 
-// Novo Background Atmosférico Interativo para a Hero
+// Novo Background: Apenas Textura em Movimento (Sem Grid, Sem Luz)
 const CinematicHeroBackground = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleMouseMove = (ev) => {
-      // Otimização: requestAnimationFrame para suavidade
-      requestAnimationFrame(() => {
-        setMousePosition({ x: ev.clientX, y: ev.clientY });
-      });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
   return (
     <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden bg-black">
       
-      {/* 1. TEXTURA DE GRANULAÇÃO (FILM NOISE) */}
-      <div className="absolute inset-0 opacity-[0.04] pointer-events-none z-20 mix-blend-overlay" 
+      {/* TEXTURA DE GRANULAÇÃO (FILM NOISE) EM MOVIMENTO */}
+      {/* Aumentei a opacidade para 0.07 para ser visível e apliquei animate-pan */}
+      <div className="absolute inset-0 opacity-[0.07] pointer-events-none z-20 mix-blend-overlay animate-pan" 
            style={{ 
-             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` 
+             backgroundSize: '200px 200px', // Repetição suave
+             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` 
            }}
       ></div>
 
-      {/* 2. GRID MODULAR ANIMADO */}
-      <div 
-        className="absolute inset-0 z-0 opacity-20 animate-pan"
-        style={{
-          backgroundSize: '40px 40px',
-          backgroundImage: 'linear-gradient(to right, #333 1px, transparent 1px), linear-gradient(to bottom, #333 1px, transparent 1px)',
-        }}
-      />
-
-      {/* 3. SPOTLIGHT (LANTERNA INTERATIVA) */}
-      <div 
-        className="absolute inset-0 z-10 transition-opacity duration-75"
-        style={{
-          background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, transparent 0%, black 85%)`
-        }}
-      ></div>
-      
-      {/* 4. VIGNETTE CINEMATOGRÁFICA */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)] z-10 opacity-80"></div>
+      {/* VIGNETTE SUAVE (Foco no centro) */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)] z-10 opacity-60"></div>
     </div>
   );
 };
@@ -294,7 +266,6 @@ const Slide = ({ project, isActive, onPlay }) => {
 
       <div className="absolute inset-0 z-0">
          <div 
-           // VELOCIDADE MELHORADA: duration-1000 (era 2000ms)
            className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 ease-out opacity-20 grayscale"
            style={{ 
              backgroundImage: `url(${project.bgImage})`,
@@ -306,7 +277,6 @@ const Slide = ({ project, isActive, onPlay }) => {
 
       <div className={`container mx-auto px-6 md:px-12 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 h-full items-center`}>
         
-        {/* TEXTO MAIS RÁPIDO: duration-700 delay-100 */}
         <div className={`lg:col-span-6 flex flex-col justify-center transition-all duration-700 delay-100 relative z-30 pointer-events-none ${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
           <div className="pointer-events-auto">
             <div className="flex items-center gap-3 mb-8">
@@ -338,7 +308,6 @@ const Slide = ({ project, isActive, onPlay }) => {
           </div>
         </div>
 
-        {/* MONOLITO MAIS RÁPIDO: duration-700 delay-200 */}
         <div className={`lg:col-span-6 h-full flex items-center justify-center lg:justify-end transition-all duration-700 delay-200 relative z-20 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
            <div 
              className="relative w-[300px] md:w-[400px] aspect-[1/2] max-h-[85vh] bg-zinc-950 overflow-hidden shadow-2xl group cursor-pointer border border-zinc-900 transition-transform duration-500 hover:scale-[1.02]" 
@@ -412,7 +381,7 @@ export default function BrickScrollytelling() {
         ))}
       </div>
 
-      {/* --- HERO SLIDE (ATUALIZADO) --- */}
+      {/* --- HERO SLIDE (LIMPO: TEXTURA APENAS) --- */}
       <section 
         ref={el => sectionsRef.current[0] = el}
         className="relative h-screen w-full snap-start flex flex-col items-center justify-center bg-black overflow-hidden"
@@ -421,14 +390,12 @@ export default function BrickScrollytelling() {
         
         <div className="relative z-20 text-center flex flex-col items-center justify-center h-full pb-20 px-4"> 
           
-          <div className="group relative mb-8">
-              <div className="absolute -inset-1 bg-red-600/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-full"></div>
-              <img 
-                src="/assets/brick_logo_rgb-1.png" 
-                alt="Brick Filmmaking House" 
-                className="relative w-64 md:w-96 mix-blend-difference z-10 drop-shadow-2xl"
-              />
-          </div>
+          {/* Logo Estático e Limpo (Sem Glow, Sem Grupo) */}
+          <img 
+            src="/assets/brick_logo_rgb-1.png" 
+            alt="Brick Filmmaking House" 
+            className="relative w-64 md:w-96 mix-blend-difference z-10 drop-shadow-2xl mb-8"
+          />
           
           <div className="flex items-center gap-4 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
             <div className="h-[1px] w-8 md:w-16 bg-gradient-to-r from-transparent to-zinc-500"></div>
