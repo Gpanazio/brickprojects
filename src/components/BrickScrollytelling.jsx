@@ -46,7 +46,7 @@ const projectsData = [
     videoLabel: "Ver Teaser",
     bgImage: "/assets/tcfhor.webp",
     monolithImage: "/assets/tfvert.webp",
-    vimeoId: "76979871"
+    vimeoId: "1110027782" // ID REAL DO VIMEO (Troca de Chefia)
   },
   {
     id: 4,
@@ -153,10 +153,10 @@ const VideoModal = ({ project, onClose }) => {
                <div className="w-full aspect-video relative bg-zinc-900">
                    {project.vimeoId ? (
                      <iframe 
-                       src={`https://player.vimeo.com/video/${project.vimeoId}?title=0&byline=0&portrait=0`} 
+                       src={`https://player.vimeo.com/video/${project.vimeoId}?h=6295e6a248&badge=0&autopause=0&player_id=0&app_id=58479`} 
                        className="absolute inset-0 w-full h-full" 
                        frameBorder="0" 
-                       allow="autoplay; fullscreen; picture-in-picture" 
+                       allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
                        allowFullScreen
                        title={project.title}
                      ></iframe>
