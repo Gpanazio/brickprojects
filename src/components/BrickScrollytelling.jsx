@@ -129,62 +129,98 @@ const VideoModal = ({ project, onClose }) => {
   if (!project) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-8 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
-      <div className="relative w-full max-w-7xl h-full md:h-auto md:aspect-video bg-zinc-950 border border-zinc-800 flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
+      <div className="relative w-full max-w-5xl h-full md:h-auto max-h-[90vh] bg-zinc-950 border border-zinc-800 flex flex-col shadow-2xl overflow-hidden rounded-lg">
         
         {/* Header do Modal */}
-        <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-50 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
+        <div className="flex justify-between items-center p-6 border-b border-zinc-900 bg-zinc-950 z-50">
           <div className="flex flex-col">
              <span className="text-red-600 font-bold text-xs tracking-widest uppercase mb-1">Brick Originals</span>
              <h2 className="text-2xl font-black text-white uppercase tracking-tighter">{project.title}</h2>
           </div>
           <button 
             onClick={onClose}
-            className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors pointer-events-auto bg-black/50 p-2 rounded backdrop-blur-md"
+            className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors bg-zinc-900 hover:bg-zinc-800 px-3 py-2 rounded-full border border-zinc-800"
           >
-            Fechar <X size={24} className="group-hover:text-red-600 transition-colors" />
+            Fechar <X size={18} className="group-hover:text-red-600 transition-colors" />
           </button>
         </div>
 
-        {/* Player REAL - Vimeo Embed */}
-        <div className="flex-1 relative bg-black aspect-video">
-           {project.vimeoId ? (
-             <iframe 
-               src={`https://player.vimeo.com/video/${project.vimeoId}?autoplay=1&title=0&byline=0&portrait=0`} 
-               className="absolute inset-0 w-full h-full" 
-               frameBorder="0" 
-               allow="autoplay; fullscreen; picture-in-picture" 
-               allowFullScreen
-               title={project.title}
-             ></iframe>
-           ) : (
-             // Fallback se não tiver ID
-             <div className="absolute inset-0 flex items-center justify-center text-zinc-500">
-               <p>Vídeo indisponível</p>
-             </div>
-           )}
-        </div>
+        <div className="flex flex-col md:flex-row h-full overflow-hidden">
+            {/* ÁREA PRINCIPAL: PLAYER DE VÍDEO (EMBED) */}
+            <div className="w-full md:w-2/3 bg-black flex flex-col relative group">
+               {/* Container do Vídeo (Aspect Ratio 16:9) */}
+               <div className="w-full aspect-video relative bg-zinc-900">
+                   {project.vimeoId ? (
+                     <iframe 
+                       src={`https://player.vimeo.com/video/${project.vimeoId}?title=0&byline=0&portrait=0`} 
+                       className="absolute inset-0 w-full h-full" 
+                       frameBorder="0" 
+                       allow="autoplay; fullscreen; picture-in-picture" 
+                       allowFullScreen
+                       title={project.title}
+                     ></iframe>
+                   ) : (
+                     <div className="absolute inset-0 flex items-center justify-center text-zinc-500">
+                       <p>Vídeo indisponível</p>
+                     </div>
+                   )}
+               </div>
+               
+               {/* Descrição abaixo do vídeo (Mobile) ou escondida se preferir layout limpo */}
+               <div className="p-6 md:hidden">
+                  <p className="text-zinc-300 text-sm leading-relaxed">{project.longDescription}</p>
+               </div>
+            </div>
 
-        {/* Footer do Modal */}
-        <div className="p-8 border-t border-zinc-900 bg-zinc-950 grid grid-cols-1 md:grid-cols-3 gap-8">
-           <div className="md:col-span-2">
-              <p className="text-zinc-300 text-sm leading-relaxed max-w-2xl">{project.longDescription}</p>
-           </div>
-           <div className="flex flex-col gap-4 border-l border-zinc-900 pl-8">
-              <div className="flex justify-between items-center border-b border-zinc-900 pb-2">
-                <span className="text-zinc-500 text-xs uppercase tracking-wider">Formato</span>
-                <span className="text-white text-xs font-bold uppercase">{project.format}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-zinc-900 pb-2">
-                <span className="text-zinc-500 text-xs uppercase tracking-wider">Gênero</span>
-                <span className="text-white text-xs font-bold uppercase">{project.genre}</span>
-              </div>
-              <button className="mt-2 w-full py-3 bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-colors flex items-center justify-center gap-2">
+            {/* BARRA LATERAL: INFORMAÇÕES */}
+            <div className="hidden md:flex w-1/3 flex-col border-l border-zinc-900 bg-zinc-950 overflow-y-auto">
+               <div className="p-8 flex-1">
+                  <div className="mb-8">
+                    <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2 font-bold">Sinopse</span>
+                    <p className="text-zinc-300 text-sm leading-relaxed">{project.longDescription}</p>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div>
+                        <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-1 font-bold">Formato</span>
+                        <span className="text-white text-sm font-bold">{project.format}</span>
+                    </div>
+                    <div>
+                        <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-1 font-bold">Gênero</span>
+                        <span className="text-white text-sm font-bold">{project.genre}</span>
+                    </div>
+                    {project.host && (
+                        <div>
+                            <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-1 font-bold">Apresentação</span>
+                            <span className="text-white text-sm font-bold">{project.host}</span>
+                        </div>
+                    )}
+                  </div>
+               </div>
+
+               {/* Botão de Ação no rodapé da barra lateral */}
+               <div className="p-8 border-t border-zinc-900 bg-zinc-900/30">
+                  <button className="w-full py-4 bg-white hover:bg-gray-200 text-black text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 rounded-sm shadow-lg hover:shadow-xl hover:-translate-y-1">
+                    <Plus size={16} />
+                    BAIXAR PROJETO
+                  </button>
+               </div>
+            </div>
+        </div>
+        
+        {/* Info adicional para Mobile (Botão) */}
+        <div className="md:hidden p-6 border-t border-zinc-900 bg-zinc-950">
+            <div className="flex justify-between items-center mb-6 text-xs text-zinc-500 font-mono">
+                <span>{project.format}</span>
+                <span>{project.genre}</span>
+            </div>
+            <button className="w-full py-4 bg-white text-black text-xs font-black uppercase tracking-widest rounded-sm flex items-center justify-center gap-2">
                 <Plus size={16} />
                 BAIXAR PROJETO
-              </button>
-           </div>
+            </button>
         </div>
+
       </div>
     </div>
   );
@@ -247,10 +283,10 @@ const Slide = ({ project, isActive, onPlay }) => {
         <div className={`lg:col-span-6 h-full flex items-center justify-center lg:justify-end transition-all duration-1000 delay-500 relative z-20 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
            {/* O Monolito - Formato Vertical Estrito (1:2.5 ratio approx) */}
            <div 
-             className="relative w-[300px] md:w-[400px] aspect-[1/2] max-h-[85vh] bg-zinc-950 overflow-hidden shadow-2xl group cursor-pointer border border-zinc-900 transition-transform duration-500 hover:scale-[1.02]" // Efeito de hover suave
+             className="relative w-[300px] md:w-[400px] aspect-[1/2] max-h-[85vh] bg-zinc-950 overflow-hidden shadow-2xl group cursor-pointer border border-zinc-900 transition-transform duration-500 hover:scale-[1.02]" 
              onClick={() => onPlay(project)}
            >
-              {/* Imagem DENTRO do Monolito */}
+              {/* Imagem DENTRO do Monolito - COLORIDA */}
               <div 
                 className="absolute inset-0 bg-cover bg-center transition-all duration-700 opacity-100" 
                 style={{ 
@@ -337,7 +373,7 @@ export default function BrickScrollytelling() {
           <img 
             src="/assets/brick_logo_rgb-1.png" 
             alt="Brick Filmmaking House" 
-            className="w-64 md:w-80 mb-8 mix-blend-difference hover:scale-105 transition-transform duration-500" // Adicionei um hover sutil na logo também
+            className="w-64 md:w-80 mb-8 mix-blend-difference hover:scale-105 transition-transform duration-500"
           />
           
           <div className="flex items-center gap-4 mb-12">
@@ -350,7 +386,7 @@ export default function BrickScrollytelling() {
 
           <button 
             onClick={() => scrollToSection(1)}
-            className="px-10 py-4 bg-white hover:bg-red-600 text-black hover:text-white font-black text-sm tracking-[0.2em] uppercase transition-all duration-300 transform hover:scale-105" // Hover sutil no botão
+            className="px-10 py-4 bg-white hover:bg-red-600 text-black hover:text-white font-black text-sm tracking-[0.2em] uppercase transition-all duration-300 transform hover:scale-105"
           >
             Explorar Catálogo
           </button>
