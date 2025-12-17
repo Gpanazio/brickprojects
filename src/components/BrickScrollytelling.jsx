@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, X, ChevronDown, MousePointer2, Mail, Instagram, Youtube, ArrowRight, Grid, Plus, Download } from 'lucide-react';
 
-// --- Dados dos Projetos ---
+// --- DADOS DOS PROJETOS (Ordem Alfabética) ---
 // As imagens devem estar na pasta /public/assets/ do seu projeto.
 
 const projectsData = [
@@ -47,7 +47,7 @@ const projectsData = [
     videoLabel: "Ver Pitch",
     bgImage: "/assets/mbhor.webp",
     monolithImage: "/assets/mbverti.webp",
-    vimeoId: null // Sem vídeo, mostra banner estático no modal
+    vimeoId: null // Sem vídeo
   },
   {
     id: 5,
@@ -113,7 +113,7 @@ const projectsData = [
   }
 ];
 
-// --- Componentes ---
+// --- COMPONENTES AUXILIARES ---
 
 const ScrollIndicator = () => (
   <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 z-20 mix-blend-difference pointer-events-none">
@@ -122,7 +122,6 @@ const ScrollIndicator = () => (
   </div>
 );
 
-// Padrão de Grid Modular
 const ModularGridBackground = () => (
   <div className="absolute inset-0 pointer-events-none z-0">
     <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:40px_40px]"></div>
@@ -133,8 +132,7 @@ const ModularGridBackground = () => (
 const VideoModal = ({ project, onClose }) => {
   if (!project) return null;
 
-  // Monta a URL do Vimeo corretamente, verificando se existe hash
-  // ALTERAÇÃO AQUI: mudei autoplay=1 para autoplay=0
+  // URL do Vimeo sem Autoplay
   const videoSrc = project.vimeoId 
     ? `https://player.vimeo.com/video/${project.vimeoId}?autoplay=0&title=0&byline=0&portrait=0${project.vimeoHash ? `&h=${project.vimeoHash}` : ''}`
     : null;
@@ -143,6 +141,7 @@ const VideoModal = ({ project, onClose }) => {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
       <div className="relative w-full max-w-5xl h-full md:h-auto max-h-[90vh] bg-zinc-950 border border-zinc-800 flex flex-col shadow-2xl overflow-hidden rounded-lg">
         
+        {/* Header do Modal */}
         <div className="flex justify-between items-center p-6 border-b border-zinc-900 bg-zinc-950 z-50">
           <div className="flex flex-col">
              <span className="text-red-600 font-bold text-xs tracking-widest uppercase mb-1">Brick Originals</span>
@@ -157,19 +156,21 @@ const VideoModal = ({ project, onClose }) => {
         </div>
 
         <div className="flex flex-col md:flex-row h-full overflow-hidden">
+            {/* ÁREA PRINCIPAL: PLAYER DE VÍDEO (EMBED) */}
             <div className="w-full md:w-2/3 bg-black flex flex-col relative group">
+               {/* Container do Vídeo (Aspect Ratio 16:9) */}
                <div className="w-full aspect-video relative bg-zinc-900 overflow-hidden">
                    {project.vimeoId ? (
                      <iframe 
                        src={videoSrc} 
                        className="absolute inset-0 w-full h-full" 
                        frameBorder="0" 
-                       // Removi 'autoplay' da lista de permissões para garantir
                        allow="fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
                        allowFullScreen
                        title={project.title}
                      ></iframe>
                    ) : (
+                     // Fallback para projetos sem vídeo (Ex: Mistérios da Bola)
                      <div className="absolute inset-0 w-full h-full">
                         <div 
                           className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] hover:scale-105"
@@ -188,11 +189,13 @@ const VideoModal = ({ project, onClose }) => {
                    )}
                </div>
                
+               {/* Descrição abaixo do vídeo (Mobile) */}
                <div className="p-6 md:hidden">
                   <p className="text-zinc-300 text-sm leading-relaxed">{project.longDescription}</p>
                </div>
             </div>
 
+            {/* BARRA LATERAL: INFORMAÇÕES */}
             <div className="hidden md:flex w-1/3 flex-col border-l border-zinc-900 bg-zinc-950 overflow-y-auto">
                <div className="p-8 flex-1">
                   <div className="mb-8">
@@ -218,6 +221,7 @@ const VideoModal = ({ project, onClose }) => {
                   </div>
                </div>
 
+               {/* Botão de Ação */}
                <div className="p-8 border-t border-zinc-900 bg-zinc-900/30">
                   <button className="w-full py-4 bg-white hover:bg-gray-200 text-black text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 rounded-sm shadow-lg hover:shadow-xl hover:-translate-y-1">
                     <Download size={16} />
@@ -227,6 +231,7 @@ const VideoModal = ({ project, onClose }) => {
             </div>
         </div>
         
+        {/* Info Mobile */}
         <div className="md:hidden p-6 border-t border-zinc-900 bg-zinc-950">
             <div className="flex justify-between items-center mb-6 text-xs text-zinc-500 font-mono">
                 <span>{project.format}</span>
@@ -248,6 +253,7 @@ const Slide = ({ project, isActive, onPlay }) => {
     <section className="relative h-screen w-full overflow-hidden snap-start flex items-center border-b border-zinc-900 bg-black">
       <ModularGridBackground />
 
+      {/* Background Image */}
       <div className="absolute inset-0 z-0">
          <div 
            className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] ease-out opacity-20 grayscale"
@@ -261,6 +267,7 @@ const Slide = ({ project, isActive, onPlay }) => {
 
       <div className={`container mx-auto px-6 md:px-12 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 h-full items-center`}>
         
+        {/* Text Content */}
         <div className={`lg:col-span-6 flex flex-col justify-center transition-all duration-1000 delay-300 relative z-30 pointer-events-none ${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
           <div className="pointer-events-auto">
             <div className="flex items-center gap-3 mb-8">
@@ -281,6 +288,7 @@ const Slide = ({ project, isActive, onPlay }) => {
             </div>
 
             <div className="flex flex-wrap items-center gap-6">
+              {/* Botão VER AGORA */}
               <button 
                 onClick={() => onPlay(project)}
                 className="group relative px-8 py-4 bg-white text-black font-black text-sm uppercase tracking-widest hover:bg-gray-200 transition-all flex items-center gap-3 shadow-lg shadow-white/5"
@@ -292,11 +300,13 @@ const Slide = ({ project, isActive, onPlay }) => {
           </div>
         </div>
 
+        {/* Visual Element - Monolito */}
         <div className={`lg:col-span-6 h-full flex items-center justify-center lg:justify-end transition-all duration-1000 delay-500 relative z-20 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
            <div 
              className="relative w-[300px] md:w-[400px] aspect-[1/2] max-h-[85vh] bg-zinc-950 overflow-hidden shadow-2xl group cursor-pointer border border-zinc-900 transition-transform duration-500 hover:scale-[1.02]" 
              onClick={() => onPlay(project)}
            >
+              {/* Imagem Colorida no Monolito */}
               <div 
                 className="absolute inset-0 bg-cover bg-center transition-all duration-700 opacity-100" 
                 style={{ 
@@ -322,6 +332,8 @@ const Slide = ({ project, isActive, onPlay }) => {
     </section>
   );
 };
+
+// --- COMPONENTE PRINCIPAL (App) ---
 
 export default function BrickScrollytelling() {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -351,6 +363,7 @@ export default function BrickScrollytelling() {
   return (
     <div className="bg-black text-white font-sans selection:bg-red-600 selection:text-white h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar cursor-default">
       
+      {/* Navigation */}
       <div className="fixed right-8 top-1/2 transform -translate-y-1/2 z-50 hidden lg:flex flex-col gap-6">
         {['INTRO', ...projectsData.map((_, i) => String(i + 1).padStart(2, '0')), 'CONTATO'].map((label, idx) => (
           <div key={idx} className="group flex items-center justify-end gap-3 cursor-pointer" onClick={() => scrollToSection(idx)}>
@@ -362,13 +375,14 @@ export default function BrickScrollytelling() {
         ))}
       </div>
 
-      {/* --- HERO SLIDE (The Monolith Concept) --- */}
+      {/* --- HERO SLIDE --- */}
       <section 
         ref={el => sectionsRef.current[0] = el}
         className="relative h-screen w-full snap-start flex flex-col items-center justify-center bg-black overflow-hidden"
       >
         <ModularGridBackground />
         
+        {/* Ajuste de centralização e margem */}
         <div className="relative z-10 text-center flex flex-col items-center justify-center h-full pb-20"> 
           
           <img 
@@ -436,7 +450,7 @@ export default function BrickScrollytelling() {
             </a>
           </div>
 
-          {/* Elemento Visual Final - Monolito Vermelho Puro com a proporção 1:2 */}
+          {/* Monolito Vermelho no Slide de Contato (Agora com a proporção 1:2) */}
           <div className="hidden md:flex justify-center items-center">
              <div className="w-[300px] md:w-[400px] aspect-[1/2] bg-red-600 shadow-[0_0_100px_rgba(220,38,38,0.3)] relative overflow-hidden flex items-center justify-center transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_0_150px_rgba(220,38,38,0.5)]">
              </div>
