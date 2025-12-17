@@ -16,7 +16,8 @@ const projectsData = [
     longDescription: "Uma investigação irreverente sobre os crimes mais surreais que aconteceram no Rio de Janeiro. Um True Crime à brasileira que foge do óbvio e mergulha no caos urbano carioca.",
     videoLabel: "Ver Promo", 
     bgImage: "/assets/TTRJHOR.webp",
-    monolithImage: "/assets/ttrjvert.webp"
+    monolithImage: "/assets/ttrjvert.webp",
+    vimeoId: "76979871"
   },
   {
     id: 2,
@@ -30,7 +31,8 @@ const projectsData = [
     longDescription: "Uma viagem no tempo mostrando como o mercado cinza, a pirataria e a paixão dos brasileiros transformaram o país em uma potência dos games.",
     videoLabel: "Ver Teaser",
     bgImage: "/assets/100hor.webp",
-    monolithImage: "/assets/100atuverti.webp"
+    monolithImage: "/assets/100atuverti.webp",
+    vimeoId: "76979871"
   },
   {
     id: 3,
@@ -43,7 +45,8 @@ const projectsData = [
     longDescription: "O que acontece quando um dono de padaria troca de lugar com a dona de uma oficina mecânica? Um reality show ágil sobre os desafios reais de empreender.",
     videoLabel: "Ver Teaser",
     bgImage: "/assets/tcfhor.webp",
-    monolithImage: "/assets/tfvert.webp"
+    monolithImage: "/assets/tfvert.webp",
+    vimeoId: "76979871"
   },
   {
     id: 4,
@@ -56,7 +59,8 @@ const projectsData = [
     longDescription: "Uma série documental que entra onde o público não pode ir: as reservas técnicas dos museus. Já exibido no History Channel e Bandplay.",
     videoLabel: "Ver Trailer",
     bgImage: "/assets/bmhorizontal.webp", 
-    monolithImage: "/assets/bmvertical.webp"
+    monolithImage: "/assets/bmvertical.webp",
+    vimeoId: "76979871"
   },
   {
     id: 5,
@@ -70,7 +74,8 @@ const projectsData = [
     longDescription: "Andrey Raychtock comanda este formato curto e ágil, perfeito para redes sociais e intervalos comerciais, desvendando as curiosidades do esporte.",
     videoLabel: "Ver Piloto",
     bgImage: "/assets/nvzhorizontal.webp",
-    monolithImage: "/assets/nvzvert.webp"
+    monolithImage: "/assets/nvzvert.webp",
+    vimeoId: "76979871"
   },
   {
     id: 6,
@@ -83,7 +88,8 @@ const projectsData = [
     longDescription: "O futebol é uma caixinha de surpresas, ou seria uma caixinha de mistérios? Uma série documental com tom de suspense noir sobre o esporte mais amado do mundo.",
     videoLabel: "Ver Pitch",
     bgImage: "/assets/mbhor.webp",
-    monolithImage: "/assets/mbverti.webp"
+    monolithImage: "/assets/mbverti.webp",
+    vimeoId: "76979871"
   },
   {
     id: 7,
@@ -97,7 +103,8 @@ const projectsData = [
     longDescription: "Mari Goldfarb conduz entrevistas e experiências em busca dos segredos para uma vida longa, saudável e equilibrada.",
     videoLabel: "Ver Manifesto",
     bgImage: "/assets/schor.webp",
-    monolithImage: "/assets/scorvert.webp"
+    monolithImage: "/assets/scorvert.webp",
+    vimeoId: "76979871"
   }
 ];
 
@@ -126,31 +133,36 @@ const VideoModal = ({ project, onClose }) => {
       <div className="relative w-full max-w-7xl h-full md:h-auto md:aspect-video bg-zinc-950 border border-zinc-800 flex flex-col shadow-2xl overflow-hidden">
         
         {/* Header do Modal */}
-        <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-50 bg-gradient-to-b from-black/80 to-transparent">
+        <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-50 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
           <div className="flex flex-col">
              <span className="text-red-600 font-bold text-xs tracking-widest uppercase mb-1">Brick Originals</span>
              <h2 className="text-2xl font-black text-white uppercase tracking-tighter">{project.title}</h2>
           </div>
           <button 
             onClick={onClose}
-            className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
+            className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors pointer-events-auto bg-black/50 p-2 rounded backdrop-blur-md"
           >
             Fechar <X size={24} className="group-hover:text-red-600 transition-colors" />
           </button>
         </div>
 
         {/* Player Simulado */}
-        <div className="flex-1 relative flex items-center justify-center group bg-black">
-           {/* Background Imersivo (Usa a bgImage Wide para preencher) */}
-           <div className="absolute inset-0 opacity-30 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700 ease-out scale-105 group-hover:scale-100" style={{ backgroundImage: `url(${project.bgImage})` }} />
-           <div className="absolute inset-0 bg-black/50" />
-           
-           <div className="z-10 flex flex-col items-center">
-              <div className="w-24 h-24 border border-white/20 hover:border-red-600 hover:bg-red-600/10 flex items-center justify-center transition-all duration-300 cursor-pointer backdrop-blur-sm group-hover:scale-110">
-                <Play size={32} fill="white" className="text-white ml-1" />
-              </div>
-              <p className="mt-6 text-sm font-mono text-zinc-400 uppercase tracking-widest">Reproduzir Teaser</p>
-           </div>
+        <div className="flex-1 relative bg-black aspect-video">
+           {project.vimeoId ? (
+             <iframe 
+               src={`https://player.vimeo.com/video/${project.vimeoId}?autoplay=1&title=0&byline=0&portrait=0`} 
+               className="absolute inset-0 w-full h-full" 
+               frameBorder="0" 
+               allow="autoplay; fullscreen; picture-in-picture" 
+               allowFullScreen
+               title={project.title}
+             ></iframe>
+           ) : (
+             // Fallback se não tiver ID
+             <div className="absolute inset-0 flex items-center justify-center text-zinc-500">
+               <p>Vídeo indisponível</p>
+             </div>
+           )}
         </div>
 
         {/* Footer do Modal */}
@@ -167,8 +179,9 @@ const VideoModal = ({ project, onClose }) => {
                 <span className="text-zinc-500 text-xs uppercase tracking-wider">Gênero</span>
                 <span className="text-white text-xs font-bold uppercase">{project.genre}</span>
               </div>
-              <button className="mt-2 w-full py-3 bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-colors">
-                Baixar One-Sheet
+              <button className="mt-2 w-full py-3 bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-colors flex items-center justify-center gap-2">
+                <Plus size={16} />
+                BAIXAR PROJETO
               </button>
            </div>
         </div>
