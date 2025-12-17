@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, X, ChevronDown, MousePointer2, Mail, Instagram, Youtube, ArrowRight, Grid, Plus, Download } from 'lucide-react';
 
-// --- DADOS DOS PROJETOS (Mantidos Originais) ---
+// --- DADOS DOS PROJETOS (Corrigidos com vírgulas) ---
 const projectsData = [
   {
     id: 2,
@@ -16,8 +16,8 @@ const projectsData = [
     videoLabel: "Ver Teaser",
     bgImage: "/assets/100hor.webp",
     monolithImage: "/assets/100atuverti.webp",
-    vimeoId: "1060607336",
-    vimeoHash: "1da9d0145b"
+    vimeoId: "1060607336",    // VÍRGULA AQUI
+    vimeoHash: "1da9d0145b"   // CHAVE DE SEGURANÇA
   },
   {
     id: 4,
@@ -120,7 +120,7 @@ const CinematicHeroBackground = () => {
 
   useEffect(() => {
     const handleMouseMove = (ev) => {
-      // Otimização simples para evitar re-renders excessivos, se necessário
+      // Otimização: requestAnimationFrame para suavidade
       requestAnimationFrame(() => {
         setMousePosition({ x: ev.clientX, y: ev.clientY });
       });
@@ -149,7 +149,6 @@ const CinematicHeroBackground = () => {
       />
 
       {/* 3. SPOTLIGHT (LANTERNA INTERATIVA) */}
-      {/* Cria uma máscara escura que revela o fundo apenas onde o mouse está */}
       <div 
         className="absolute inset-0 z-10 transition-opacity duration-75"
         style={{
@@ -295,7 +294,8 @@ const Slide = ({ project, isActive, onPlay }) => {
 
       <div className="absolute inset-0 z-0">
          <div 
-           className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] ease-out opacity-20 grayscale"
+           // VELOCIDADE MELHORADA: duration-1000 (era 2000ms)
+           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 ease-out opacity-20 grayscale"
            style={{ 
              backgroundImage: `url(${project.bgImage})`,
              transform: isActive ? 'scale(1.0)' : 'scale(1.1)' 
@@ -306,7 +306,8 @@ const Slide = ({ project, isActive, onPlay }) => {
 
       <div className={`container mx-auto px-6 md:px-12 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 h-full items-center`}>
         
-        <div className={`lg:col-span-6 flex flex-col justify-center transition-all duration-1000 delay-300 relative z-30 pointer-events-none ${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
+        {/* TEXTO MAIS RÁPIDO: duration-700 delay-100 */}
+        <div className={`lg:col-span-6 flex flex-col justify-center transition-all duration-700 delay-100 relative z-30 pointer-events-none ${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
           <div className="pointer-events-auto">
             <div className="flex items-center gap-3 mb-8">
                <div className="h-[1px] w-12 bg-red-600"></div>
@@ -337,7 +338,8 @@ const Slide = ({ project, isActive, onPlay }) => {
           </div>
         </div>
 
-        <div className={`lg:col-span-6 h-full flex items-center justify-center lg:justify-end transition-all duration-1000 delay-500 relative z-20 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
+        {/* MONOLITO MAIS RÁPIDO: duration-700 delay-200 */}
+        <div className={`lg:col-span-6 h-full flex items-center justify-center lg:justify-end transition-all duration-700 delay-200 relative z-20 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
            <div 
              className="relative w-[300px] md:w-[400px] aspect-[1/2] max-h-[85vh] bg-zinc-950 overflow-hidden shadow-2xl group cursor-pointer border border-zinc-900 transition-transform duration-500 hover:scale-[1.02]" 
              onClick={() => onPlay(project)}
@@ -415,13 +417,10 @@ export default function BrickScrollytelling() {
         ref={el => sectionsRef.current[0] = el}
         className="relative h-screen w-full snap-start flex flex-col items-center justify-center bg-black overflow-hidden"
       >
-        {/* Fundo Cinemático Interativo */}
         <CinematicHeroBackground />
         
-        {/* Conteúdo Central */}
         <div className="relative z-20 text-center flex flex-col items-center justify-center h-full pb-20 px-4"> 
           
-          {/* Logo com Glow no Hover */}
           <div className="group relative mb-8">
               <div className="absolute -inset-1 bg-red-600/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-full"></div>
               <img 
@@ -431,7 +430,6 @@ export default function BrickScrollytelling() {
               />
           </div>
           
-          {/* Slogan com Divisores */}
           <div className="flex items-center gap-4 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
             <div className="h-[1px] w-8 md:w-16 bg-gradient-to-r from-transparent to-zinc-500"></div>
             <p className="text-xs md:text-sm text-zinc-400 font-mono tracking-[0.3em] uppercase">
@@ -440,7 +438,6 @@ export default function BrickScrollytelling() {
             <div className="h-[1px] w-8 md:w-16 bg-gradient-to-l from-transparent to-zinc-500"></div>
           </div>
 
-          {/* Botão Minimalista com Fill Effect */}
           <button 
             onClick={() => scrollToSection(1)}
             className="group relative px-10 py-4 bg-transparent border border-zinc-800 hover:border-red-600 text-white font-bold text-xs tracking-[0.25em] uppercase transition-all duration-500 overflow-hidden"
