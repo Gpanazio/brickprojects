@@ -17,7 +17,7 @@ const projectsData = [
     videoLabel: "Ver Promo", 
     bgImage: "/assets/TTRJHOR.webp",
     monolithImage: "/assets/ttrjvert.webp",
-    vimeoId: "76979871"
+    vimeoId: "76979871" 
   },
   {
     id: 2,
@@ -146,7 +146,7 @@ const VideoModal = ({ project, onClose }) => {
           </button>
         </div>
 
-        {/* Player Simulado */}
+        {/* Player REAL - Vimeo Embed */}
         <div className="flex-1 relative bg-black aspect-video">
            {project.vimeoId ? (
              <iframe 
@@ -247,26 +247,30 @@ const Slide = ({ project, isActive, onPlay }) => {
         <div className={`lg:col-span-6 h-full flex items-center justify-center lg:justify-end transition-all duration-1000 delay-500 relative z-20 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
            {/* O Monolito - Formato Vertical Estrito (1:2.5 ratio approx) */}
            <div 
-             className="relative w-[300px] md:w-[400px] aspect-[1/2] max-h-[85vh] bg-zinc-950 overflow-hidden shadow-2xl group cursor-pointer border border-zinc-900"
+             className="relative w-[300px] md:w-[400px] aspect-[1/2] max-h-[85vh] bg-zinc-950 overflow-hidden shadow-2xl group cursor-pointer border border-zinc-900 transition-transform duration-500 hover:scale-[1.02]" // Efeito de hover suave
              onClick={() => onPlay(project)}
            >
               {/* Imagem DENTRO do Monolito */}
               <div 
-                className="absolute inset-0 bg-cover bg-center transition-all duration-700 grayscale group-hover:grayscale-0 group-hover:scale-105 opacity-80"
+                className="absolute inset-0 bg-cover bg-center transition-all duration-700 opacity-100" 
                 style={{ 
                   backgroundImage: `url(${project.monolithImage})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}
               />
-              {/* Red Overlay on Hover */}
-              <div className="absolute inset-0 bg-red-900/0 group-hover:bg-red-900/10 transition-colors duration-500 mix-blend-overlay"></div>
+              
+              {/* Efeito de Brilho Sutil no Hover */}
+              <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-500 pointer-events-none"></div>
+
+              {/* Red Overlay on Hover (mais sutil agora) */}
+              <div className="absolute inset-0 bg-red-900/0 group-hover:bg-red-900/5 transition-colors duration-500 mix-blend-overlay"></div>
               
               {/* Reflexo Monolito */}
               <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none"></div>
 
               {/* Texto Vertical */}
-              <div className="absolute bottom-8 left-8 transform -rotate-90 origin-bottom-left">
+              <div className="absolute bottom-8 left-8 transform -rotate-90 origin-bottom-left transition-opacity duration-300 group-hover:opacity-80">
                  <span className="text-6xl font-black text-transparent stroke-white text-stroke opacity-30 select-none">
                     {String(project.id).padStart(2, '0')}
                  </span>
@@ -333,7 +337,7 @@ export default function BrickScrollytelling() {
           <img 
             src="/assets/brick_logo_rgb-1.png" 
             alt="Brick Filmmaking House" 
-            className="w-64 md:w-80 mb-8 mix-blend-difference"
+            className="w-64 md:w-80 mb-8 mix-blend-difference hover:scale-105 transition-transform duration-500" // Adicionei um hover sutil na logo também
           />
           
           <div className="flex items-center gap-4 mb-12">
@@ -346,7 +350,7 @@ export default function BrickScrollytelling() {
 
           <button 
             onClick={() => scrollToSection(1)}
-            className="px-10 py-4 bg-white hover:bg-red-600 text-black hover:text-white font-black text-sm tracking-[0.2em] uppercase transition-all duration-300"
+            className="px-10 py-4 bg-white hover:bg-red-600 text-black hover:text-white font-black text-sm tracking-[0.2em] uppercase transition-all duration-300 transform hover:scale-105" // Hover sutil no botão
           >
             Explorar Catálogo
           </button>
@@ -395,9 +399,9 @@ export default function BrickScrollytelling() {
             </a>
           </div>
 
-          {/* Elemento Visual Final - Monolito Vermelho Puro */}
+          {/* Elemento Visual Final - Monolito Vermelho Puro com Hover Sutil */}
           <div className="hidden md:flex justify-center items-center">
-             <div className="w-[300px] h-[500px] bg-red-600 shadow-[0_0_100px_rgba(220,38,38,0.3)] relative overflow-hidden flex items-center justify-center">
+             <div className="w-[300px] h-[500px] bg-red-600 shadow-[0_0_100px_rgba(220,38,38,0.3)] relative overflow-hidden flex items-center justify-center transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_0_150px_rgba(220,38,38,0.5)]">
              </div>
           </div>
         </div>
