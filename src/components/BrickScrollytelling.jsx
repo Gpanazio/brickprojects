@@ -6,21 +6,6 @@ import { Play, X, ChevronDown, MousePointer2, Mail, Instagram, Youtube, ArrowRig
 
 const projectsData = [
   {
-    id: 1,
-    title: "TU TÁ NO RJ",
-    category: "Documentário",
-    genre: "True Crime / Humor",
-    format: "10 EPISÓDIOS DE 8 MIN",
-    status: "Em Desenvolvimento",
-    description: "Esqueça o serial killer! Uma investigação irreverente sobre os crimes mais surreais que aconteceram no Rio de Janeiro.",
-    longDescription: "Uma investigação irreverente sobre os crimes mais surreais que aconteceram no Rio de Janeiro. Um True Crime à brasileira que foge do óbvio e mergulha no caos urbano carioca.",
-    videoLabel: "Ver Promo", 
-    bgImage: "/assets/TTRJHOR.webp",
-    monolithImage: "/assets/ttrjvert.webp",
-    vimeoId: "1091288426",
-    vimeoHash: "59bc6e3eb4"
-  },
-  {
     id: 2,
     title: "100% ATUALIZADO",
     category: "Documentário",
@@ -36,21 +21,6 @@ const projectsData = [
     vimeoId: "1060607336"
   },
   {
-    id: 3,
-    title: "TROCA DE CHEFIA",
-    category: "Reality",
-    genre: "Empreendedorismo",
-    format: "10 EPISÓDIOS DE 10 MIN",
-    status: "Formato Pronto",
-    description: "Dois donos de negócios vivem por um dia os desafios um do outro. Empatia e gestão na prática.",
-    longDescription: "O que acontece quando um dono de padaria troca de lugar com a dona de uma oficina mecânica? Um reality show ágil sobre os desafios reais de empreender.",
-    videoLabel: "Ver Teaser",
-    bgImage: "/assets/tcfhor.webp",
-    monolithImage: "/assets/tfvert.webp",
-    vimeoId: "1110027782",
-    vimeoHash: "6295e6a248"
-  },
-  {
     id: 4,
     title: "BASTIDORES DA MEMÓRIA",
     category: "Documentário",
@@ -64,6 +34,20 @@ const projectsData = [
     monolithImage: "/assets/bmvertical.webp",
     vimeoId: "1147440138",
     vimeoHash: "4b6785c3fc"
+  },
+  {
+    id: 6,
+    title: "MISTÉRIOS DA BOLA",
+    category: "Documentário",
+    genre: "Esportes / Mistério",
+    format: "10 EPISÓDIOS DE 10 MIN",
+    status: "Em Desenvolvimento",
+    description: "Investigação do lado oculto do futebol: maldições, fraudes e histórias que transcendem o campo.",
+    longDescription: "O futebol é uma caixinha de surpresas, ou seria uma caixinha de mistérios? Uma série documental com tom de suspense noir sobre o esporte mais amado do mundo.",
+    videoLabel: "Ver Pitch",
+    bgImage: "/assets/mbhor.webp",
+    monolithImage: "/assets/mbverti.webp",
+    vimeoId: null // Sem vídeo, mostra banner estático no modal
   },
   {
     id: 5,
@@ -82,22 +66,6 @@ const projectsData = [
     vimeoHash: "fb313f7730"
   },
   {
-    id: 6,
-    title: "MISTÉRIOS DA BOLA",
-    category: "Documentário",
-    genre: "Esportes / Mistério",
-    format: "10 EPISÓDIOS DE 10 MIN",
-    status: "Em Desenvolvimento",
-    description: "Investigação do lado oculto do futebol: maldições, fraudes e histórias que transcendem o campo.",
-    longDescription: "O futebol é uma caixinha de surpresas, ou seria uma caixinha de mistérios? Uma série documental com tom de suspense noir sobre o esporte mais amado do mundo.",
-    // --- SEM VIMEO ID PARA ESTE PROJETO ---
-    // O modal vai detectar isso e mostrar o layout estático.
-    videoLabel: "Ver Pitch",
-    bgImage: "/assets/mbhor.webp",
-    monolithImage: "/assets/mbverti.webp",
-    vimeoId: null // Explicitamente sem vídeo
-  },
-  {
     id: 7,
     title: "SUPER CORPO",
     category: "Documentário",
@@ -112,6 +80,36 @@ const projectsData = [
     monolithImage: "/assets/scorvert.webp",
     vimeoId: "1110052878",
     vimeoHash: "deca249548"
+  },
+  {
+    id: 3,
+    title: "TROCA DE CHEFIA",
+    category: "Reality",
+    genre: "Empreendedorismo",
+    format: "10 EPISÓDIOS DE 10 MIN",
+    status: "Formato Pronto",
+    description: "Dois donos de negócios vivem por um dia os desafios um do outro. Empatia e gestão na prática.",
+    longDescription: "O que acontece quando um dono de padaria troca de lugar com a dona de uma oficina mecânica? Um reality show ágil sobre os desafios reais de empreender.",
+    videoLabel: "Ver Teaser",
+    bgImage: "/assets/tcfhor.webp",
+    monolithImage: "/assets/tfvert.webp",
+    vimeoId: "1110027782",
+    vimeoHash: "6295e6a248"
+  },
+  {
+    id: 1,
+    title: "TU TÁ NO RJ",
+    category: "Documentário",
+    genre: "True Crime / Humor",
+    format: "10 EPISÓDIOS DE 8 MIN",
+    status: "Em Desenvolvimento",
+    description: "Esqueça o serial killer! Uma investigação irreverente sobre os crimes mais surreais que aconteceram no Rio de Janeiro.",
+    longDescription: "Uma investigação irreverente sobre os crimes mais surreais que aconteceram no Rio de Janeiro. Um True Crime à brasileira que foge do óbvio e mergulha no caos urbano carioca.",
+    videoLabel: "Ver Promo", 
+    bgImage: "/assets/TTRJHOR.webp",
+    monolithImage: "/assets/ttrjvert.webp",
+    vimeoId: "1091288426",
+    vimeoHash: "59bc6e3eb4"
   }
 ];
 
@@ -136,15 +134,15 @@ const VideoModal = ({ project, onClose }) => {
   if (!project) return null;
 
   // Monta a URL do Vimeo corretamente, verificando se existe hash
+  // ALTERAÇÃO AQUI: mudei autoplay=1 para autoplay=0
   const videoSrc = project.vimeoId 
-    ? `https://player.vimeo.com/video/${project.vimeoId}?autoplay=1&title=0&byline=0&portrait=0${project.vimeoHash ? `&h=${project.vimeoHash}` : ''}`
+    ? `https://player.vimeo.com/video/${project.vimeoId}?autoplay=0&title=0&byline=0&portrait=0${project.vimeoHash ? `&h=${project.vimeoHash}` : ''}`
     : null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
       <div className="relative w-full max-w-5xl h-full md:h-auto max-h-[90vh] bg-zinc-950 border border-zinc-800 flex flex-col shadow-2xl overflow-hidden rounded-lg">
         
-        {/* Header do Modal */}
         <div className="flex justify-between items-center p-6 border-b border-zinc-900 bg-zinc-950 z-50">
           <div className="flex flex-col">
              <span className="text-red-600 font-bold text-xs tracking-widest uppercase mb-1">Brick Originals</span>
@@ -159,22 +157,19 @@ const VideoModal = ({ project, onClose }) => {
         </div>
 
         <div className="flex flex-col md:flex-row h-full overflow-hidden">
-            {/* ÁREA PRINCIPAL: PLAYER OU BANNER (CONDICIONAL) */}
             <div className="w-full md:w-2/3 bg-black flex flex-col relative group">
-               {/* Container Visual (Aspect Ratio 16:9) */}
                <div className="w-full aspect-video relative bg-zinc-900 overflow-hidden">
                    {project.vimeoId ? (
-                     // SE TEM VÍDEO: MOSTRA O PLAYER
                      <iframe 
                        src={videoSrc} 
                        className="absolute inset-0 w-full h-full" 
                        frameBorder="0" 
-                       allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
+                       // Removi 'autoplay' da lista de permissões para garantir
+                       allow="fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
                        allowFullScreen
                        title={project.title}
                      ></iframe>
                    ) : (
-                     // SE NÃO TEM VÍDEO: MOSTRA BANNER ESTÁTICO (Caso Mistérios da Bola)
                      <div className="absolute inset-0 w-full h-full">
                         <div 
                           className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] hover:scale-105"
@@ -193,13 +188,11 @@ const VideoModal = ({ project, onClose }) => {
                    )}
                </div>
                
-               {/* Descrição abaixo do vídeo (Mobile) */}
                <div className="p-6 md:hidden">
                   <p className="text-zinc-300 text-sm leading-relaxed">{project.longDescription}</p>
                </div>
             </div>
 
-            {/* BARRA LATERAL: INFORMAÇÕES */}
             <div className="hidden md:flex w-1/3 flex-col border-l border-zinc-900 bg-zinc-950 overflow-y-auto">
                <div className="p-8 flex-1">
                   <div className="mb-8">
@@ -225,17 +218,15 @@ const VideoModal = ({ project, onClose }) => {
                   </div>
                </div>
 
-               {/* Botão de Ação no rodapé da barra lateral */}
                <div className="p-8 border-t border-zinc-900 bg-zinc-900/30">
                   <button className="w-full py-4 bg-white hover:bg-gray-200 text-black text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 rounded-sm shadow-lg hover:shadow-xl hover:-translate-y-1">
-                    <Download size={16} /> {/* Ícone Download é mais apropriado aqui */}
+                    <Download size={16} />
                     BAIXAR PROJETO
                   </button>
                </div>
             </div>
         </div>
         
-        {/* Info adicional para Mobile (Botão) */}
         <div className="md:hidden p-6 border-t border-zinc-900 bg-zinc-950">
             <div className="flex justify-between items-center mb-6 text-xs text-zinc-500 font-mono">
                 <span>{project.format}</span>
@@ -257,7 +248,6 @@ const Slide = ({ project, isActive, onPlay }) => {
     <section className="relative h-screen w-full overflow-hidden snap-start flex items-center border-b border-zinc-900 bg-black">
       <ModularGridBackground />
 
-      {/* Background Image - Cinematic & Dark (Usa a bgImage WIDE) */}
       <div className="absolute inset-0 z-0">
          <div 
            className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] ease-out opacity-20 grayscale"
@@ -271,7 +261,6 @@ const Slide = ({ project, isActive, onPlay }) => {
 
       <div className={`container mx-auto px-6 md:px-12 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 h-full items-center`}>
         
-        {/* Text Content - Camada superior (Z-30) para ficar sobre o Monolito se sobrepor */}
         <div className={`lg:col-span-6 flex flex-col justify-center transition-all duration-1000 delay-300 relative z-30 pointer-events-none ${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
           <div className="pointer-events-auto">
             <div className="flex items-center gap-3 mb-8">
@@ -292,7 +281,6 @@ const Slide = ({ project, isActive, onPlay }) => {
             </div>
 
             <div className="flex flex-wrap items-center gap-6">
-              {/* Botão ÚNICO: VER AGORA (Ou VER PROJETO se não tiver vídeo) */}
               <button 
                 onClick={() => onPlay(project)}
                 className="group relative px-8 py-4 bg-white text-black font-black text-sm uppercase tracking-widest hover:bg-gray-200 transition-all flex items-center gap-3 shadow-lg shadow-white/5"
@@ -304,15 +292,11 @@ const Slide = ({ project, isActive, onPlay }) => {
           </div>
         </div>
 
-        {/* Visual Element - Monolito (Z-20) - Abaixo do Texto */}
-        {/* USA A IMAGEM DEDICADA: monolithImage */}
         <div className={`lg:col-span-6 h-full flex items-center justify-center lg:justify-end transition-all duration-1000 delay-500 relative z-20 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
-           {/* O Monolito - Formato Vertical Estrito (1:2.5 ratio approx) */}
            <div 
              className="relative w-[300px] md:w-[400px] aspect-[1/2] max-h-[85vh] bg-zinc-950 overflow-hidden shadow-2xl group cursor-pointer border border-zinc-900 transition-transform duration-500 hover:scale-[1.02]" 
              onClick={() => onPlay(project)}
            >
-              {/* Imagem DENTRO do Monolito - COLORIDA */}
               <div 
                 className="absolute inset-0 bg-cover bg-center transition-all duration-700 opacity-100" 
                 style={{ 
@@ -322,16 +306,10 @@ const Slide = ({ project, isActive, onPlay }) => {
                 }}
               />
               
-              {/* Efeito de Brilho Sutil no Hover */}
               <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-500 pointer-events-none"></div>
-
-              {/* Red Overlay on Hover (mais sutil agora) */}
               <div className="absolute inset-0 bg-red-900/0 group-hover:bg-red-900/5 transition-colors duration-500 mix-blend-overlay"></div>
-              
-              {/* Reflexo Monolito */}
               <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none"></div>
 
-              {/* Texto Vertical */}
               <div className="absolute bottom-8 left-8 transform -rotate-90 origin-bottom-left transition-opacity duration-300 group-hover:opacity-80">
                  <span className="text-6xl font-black text-transparent stroke-white text-stroke opacity-30 select-none">
                     {String(project.id).padStart(2, '0')}
@@ -373,7 +351,6 @@ export default function BrickScrollytelling() {
   return (
     <div className="bg-black text-white font-sans selection:bg-red-600 selection:text-white h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar cursor-default">
       
-      {/* Navigation - Minimalista e Numérica */}
       <div className="fixed right-8 top-1/2 transform -translate-y-1/2 z-50 hidden lg:flex flex-col gap-6">
         {['INTRO', ...projectsData.map((_, i) => String(i + 1).padStart(2, '0')), 'CONTATO'].map((label, idx) => (
           <div key={idx} className="group flex items-center justify-end gap-3 cursor-pointer" onClick={() => scrollToSection(idx)}>
@@ -392,10 +369,8 @@ export default function BrickScrollytelling() {
       >
         <ModularGridBackground />
         
-        {/* Adicionei margem negativa superior (-mt-24 md:-mt-32) para puxar o conteúdo para cima */}
-        <div className="relative z-10 text-center flex flex-col items-center -mt-24 md:-mt-32">
+        <div className="relative z-10 text-center flex flex-col items-center justify-center h-full pb-20"> 
           
-          {/* Logo da Brick */}
           <img 
             src="/assets/brick_logo_rgb-1.png" 
             alt="Brick Filmmaking House" 
@@ -461,9 +436,9 @@ export default function BrickScrollytelling() {
             </a>
           </div>
 
-          {/* Elemento Visual Final - Monolito Vermelho Puro com Hover Sutil */}
+          {/* Elemento Visual Final - Monolito Vermelho Puro com a proporção 1:2 */}
           <div className="hidden md:flex justify-center items-center">
-             <div className="w-[300px] h-[500px] bg-red-600 shadow-[0_0_100px_rgba(220,38,38,0.3)] relative overflow-hidden flex items-center justify-center transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_0_150px_rgba(220,38,38,0.5)]">
+             <div className="w-[300px] md:w-[400px] aspect-[1/2] bg-red-600 shadow-[0_0_100px_rgba(220,38,38,0.3)] relative overflow-hidden flex items-center justify-center transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_0_150px_rgba(220,38,38,0.5)]">
              </div>
           </div>
         </div>
