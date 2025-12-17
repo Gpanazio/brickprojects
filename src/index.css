@@ -26,7 +26,7 @@ body {
 .text-stroke {
   -webkit-text-stroke: 1px currentColor;
   color: transparent;
-} /* <--- ESSA CHAVE ESTAVA FALTANDO OU NO LUGAR ERRADO */
+}
 
 /* Animação para o Grid do Background */
 @keyframes pan {
