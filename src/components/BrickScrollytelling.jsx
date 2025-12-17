@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, X, ChevronDown, MousePointer2, Mail, Instagram, Youtube, ArrowRight, Grid, Plus } from 'lucide-react';
+import { Play, X, ChevronDown, MousePointer2, Mail, Instagram, Youtube, ArrowRight, Grid, Plus, Download } from 'lucide-react';
 
 // --- Dados dos Projetos ---
 // As imagens devem estar na pasta /public/assets/ do seu projeto.
@@ -17,8 +17,8 @@ const projectsData = [
     videoLabel: "Ver Promo", 
     bgImage: "/assets/TTRJHOR.webp",
     monolithImage: "/assets/ttrjvert.webp",
-    vimeoId: "1091288426", // ID REAL (Tu Tá No RJ)
-    vimeoHash: "59bc6e3eb4" // Hash de segurança
+    vimeoId: "1091288426",
+    vimeoHash: "59bc6e3eb4"
   },
   {
     id: 2,
@@ -33,7 +33,7 @@ const projectsData = [
     videoLabel: "Ver Teaser",
     bgImage: "/assets/100hor.webp",
     monolithImage: "/assets/100atuverti.webp",
-    vimeoId: "1060607336" // ID REAL (100% Atualizado)
+    vimeoId: "1060607336"
   },
   {
     id: 3,
@@ -47,8 +47,8 @@ const projectsData = [
     videoLabel: "Ver Teaser",
     bgImage: "/assets/tcfhor.webp",
     monolithImage: "/assets/tfvert.webp",
-    vimeoId: "1110027782", // ID REAL (Troca de Chefia)
-    vimeoHash: "6295e6a248" // Hash de segurança
+    vimeoId: "1110027782",
+    vimeoHash: "6295e6a248"
   },
   {
     id: 4,
@@ -59,10 +59,11 @@ const projectsData = [
     status: "Exibido (History)",
     description: "Os tesouros ocultos nas reservas técnicas dos museus brasileiros que ajudam a recontar nossa história.",
     longDescription: "Uma série documental que entra onde o público não pode ir: as reservas técnicas dos museus. Já exibido no History Channel e Bandplay.",
-    videoLabel: "Ver Trailer",
+    videoLabel: "Assistir Episódio 1",
     bgImage: "/assets/bmhorizontal.webp", 
     monolithImage: "/assets/bmvertical.webp",
-    vimeoId: "76979871" // ID Genérico (Falta este)
+    vimeoId: "1147440138",
+    vimeoHash: "4b6785c3fc"
   },
   {
     id: 5,
@@ -77,8 +78,8 @@ const projectsData = [
     videoLabel: "Ver Piloto",
     bgImage: "/assets/nvzhorizontal.webp",
     monolithImage: "/assets/nvzvert.webp",
-    vimeoId: "1091855463", // ID REAL (Não Vai Zicar)
-    vimeoHash: "fb313f7730" // Hash de segurança
+    vimeoId: "1091855463",
+    vimeoHash: "fb313f7730"
   },
   {
     id: 6,
@@ -89,10 +90,12 @@ const projectsData = [
     status: "Em Desenvolvimento",
     description: "Investigação do lado oculto do futebol: maldições, fraudes e histórias que transcendem o campo.",
     longDescription: "O futebol é uma caixinha de surpresas, ou seria uma caixinha de mistérios? Uma série documental com tom de suspense noir sobre o esporte mais amado do mundo.",
+    // --- SEM VIMEO ID PARA ESTE PROJETO ---
+    // O modal vai detectar isso e mostrar o layout estático.
     videoLabel: "Ver Pitch",
     bgImage: "/assets/mbhor.webp",
     monolithImage: "/assets/mbverti.webp",
-    vimeoId: "76979871" // ID Genérico (Falta este)
+    vimeoId: null // Explicitamente sem vídeo
   },
   {
     id: 7,
@@ -107,8 +110,8 @@ const projectsData = [
     videoLabel: "Ver Manifesto",
     bgImage: "/assets/schor.webp",
     monolithImage: "/assets/scorvert.webp",
-    vimeoId: "1110052878", // ID REAL (Super Corpo)
-    vimeoHash: "deca249548" // Hash de segurança
+    vimeoId: "1110052878",
+    vimeoHash: "deca249548"
   }
 ];
 
@@ -156,11 +159,12 @@ const VideoModal = ({ project, onClose }) => {
         </div>
 
         <div className="flex flex-col md:flex-row h-full overflow-hidden">
-            {/* ÁREA PRINCIPAL: PLAYER DE VÍDEO (EMBED) */}
+            {/* ÁREA PRINCIPAL: PLAYER OU BANNER (CONDICIONAL) */}
             <div className="w-full md:w-2/3 bg-black flex flex-col relative group">
-               {/* Container do Vídeo (Aspect Ratio 16:9) */}
-               <div className="w-full aspect-video relative bg-zinc-900">
-                   {videoSrc ? (
+               {/* Container Visual (Aspect Ratio 16:9) */}
+               <div className="w-full aspect-video relative bg-zinc-900 overflow-hidden">
+                   {project.vimeoId ? (
+                     // SE TEM VÍDEO: MOSTRA O PLAYER
                      <iframe 
                        src={videoSrc} 
                        className="absolute inset-0 w-full h-full" 
@@ -170,13 +174,26 @@ const VideoModal = ({ project, onClose }) => {
                        title={project.title}
                      ></iframe>
                    ) : (
-                     <div className="absolute inset-0 flex items-center justify-center text-zinc-500">
-                       <p>Vídeo indisponível</p>
+                     // SE NÃO TEM VÍDEO: MOSTRA BANNER ESTÁTICO (Caso Mistérios da Bola)
+                     <div className="absolute inset-0 w-full h-full">
+                        <div 
+                          className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] hover:scale-105"
+                          style={{ backgroundImage: `url(${project.bgImage})` }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 via-transparent to-transparent" />
+                        <div className="absolute bottom-6 left-6 right-6">
+                           <span className="inline-block px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded text-xs text-white uppercase tracking-wider mb-2">
+                             Em Desenvolvimento
+                           </span>
+                           <p className="text-zinc-400 text-sm italic">
+                             Material de vídeo confidencial ou em produção. Baixe o projeto para saber mais.
+                           </p>
+                        </div>
                      </div>
                    )}
                </div>
                
-               {/* Descrição abaixo do vídeo (Mobile) ou escondida se preferir layout limpo */}
+               {/* Descrição abaixo do vídeo (Mobile) */}
                <div className="p-6 md:hidden">
                   <p className="text-zinc-300 text-sm leading-relaxed">{project.longDescription}</p>
                </div>
@@ -211,7 +228,7 @@ const VideoModal = ({ project, onClose }) => {
                {/* Botão de Ação no rodapé da barra lateral */}
                <div className="p-8 border-t border-zinc-900 bg-zinc-900/30">
                   <button className="w-full py-4 bg-white hover:bg-gray-200 text-black text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 rounded-sm shadow-lg hover:shadow-xl hover:-translate-y-1">
-                    <Plus size={16} />
+                    <Download size={16} /> {/* Ícone Download é mais apropriado aqui */}
                     BAIXAR PROJETO
                   </button>
                </div>
@@ -225,7 +242,7 @@ const VideoModal = ({ project, onClose }) => {
                 <span>{project.genre}</span>
             </div>
             <button className="w-full py-4 bg-white text-black text-xs font-black uppercase tracking-widest rounded-sm flex items-center justify-center gap-2">
-                <Plus size={16} />
+                <Download size={16} />
                 BAIXAR PROJETO
             </button>
         </div>
@@ -275,13 +292,13 @@ const Slide = ({ project, isActive, onPlay }) => {
             </div>
 
             <div className="flex flex-wrap items-center gap-6">
-              {/* Botão ÚNICO: VER AGORA */}
+              {/* Botão ÚNICO: VER AGORA (Ou VER PROJETO se não tiver vídeo) */}
               <button 
                 onClick={() => onPlay(project)}
                 className="group relative px-8 py-4 bg-white text-black font-black text-sm uppercase tracking-widest hover:bg-gray-200 transition-all flex items-center gap-3 shadow-lg shadow-white/5"
               >
-                <Play size={16} className="fill-black" />
-                VER AGORA
+                {project.vimeoId ? <Play size={16} className="fill-black" /> : <Grid size={16} />}
+                {project.vimeoId ? "VER AGORA" : "VER PROJETO"}
               </button>
             </div>
           </div>
