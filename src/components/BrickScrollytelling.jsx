@@ -17,7 +17,8 @@ const projectsData = [
     videoLabel: "Ver Promo", 
     bgImage: "/assets/TTRJHOR.webp",
     monolithImage: "/assets/ttrjvert.webp",
-    vimeoId: "76979871" // ID Genérico (Trocar quando tiver o real)
+    vimeoId: "1091288426", // ID REAL (Tu Tá No RJ)
+    vimeoHash: "59bc6e3eb4" // Hash de segurança
   },
   {
     id: 2,
@@ -47,7 +48,7 @@ const projectsData = [
     bgImage: "/assets/tcfhor.webp",
     monolithImage: "/assets/tfvert.webp",
     vimeoId: "1110027782", // ID REAL (Troca de Chefia)
-    vimeoHash: "6295e6a248" // Hash de segurança do Vimeo
+    vimeoHash: "6295e6a248" // Hash de segurança
   },
   {
     id: 4,
@@ -61,7 +62,7 @@ const projectsData = [
     videoLabel: "Ver Trailer",
     bgImage: "/assets/bmhorizontal.webp", 
     monolithImage: "/assets/bmvertical.webp",
-    vimeoId: "76979871"
+    vimeoId: "76979871" // ID Genérico (Falta este)
   },
   {
     id: 5,
@@ -76,7 +77,8 @@ const projectsData = [
     videoLabel: "Ver Piloto",
     bgImage: "/assets/nvzhorizontal.webp",
     monolithImage: "/assets/nvzvert.webp",
-    vimeoId: "76979871"
+    vimeoId: "1091855463", // ID REAL (Não Vai Zicar)
+    vimeoHash: "fb313f7730" // Hash de segurança
   },
   {
     id: 6,
@@ -90,7 +92,7 @@ const projectsData = [
     videoLabel: "Ver Pitch",
     bgImage: "/assets/mbhor.webp",
     monolithImage: "/assets/mbverti.webp",
-    vimeoId: "76979871"
+    vimeoId: "76979871" // ID Genérico (Falta este)
   },
   {
     id: 7,
@@ -106,7 +108,7 @@ const projectsData = [
     bgImage: "/assets/schor.webp",
     monolithImage: "/assets/scorvert.webp",
     vimeoId: "1110052878", // ID REAL (Super Corpo)
-    vimeoHash: "deca249548" // Hash de segurança do Vimeo
+    vimeoHash: "deca249548" // Hash de segurança
   }
 ];
 
