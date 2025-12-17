@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, X, ArrowRight, Plus } from 'lucide-react';
+import { Play, X, ChevronDown, MousePointer2, Mail, Instagram, Youtube, ArrowRight, Grid, Plus } from 'lucide-react';
 
 // --- Dados dos Projetos ---
-// As imagens DEVEM estar em /public/assets/
+// As imagens devem estar na pasta /public/assets/ do seu projeto.
 
 const projectsData = [
   {
@@ -14,6 +14,7 @@ const projectsData = [
     status: "Em Desenvolvimento",
     description: "Esqueça o serial killer! Uma investigação irreverente sobre os crimes mais surreais que aconteceram no Rio de Janeiro.",
     longDescription: "Uma investigação irreverente sobre os crimes mais surreais que aconteceram no Rio de Janeiro. Um True Crime à brasileira que foge do óbvio e mergulha no caos urbano carioca.",
+    videoLabel: "Ver Promo", 
     bgImage: "/assets/TTRJHOR.webp",
     monolithImage: "/assets/ttrjvert.webp",
     vimeoId: "76979871"
@@ -25,8 +26,10 @@ const projectsData = [
     genre: "Games / Cultura Pop",
     format: "6 EPISÓDIOS DE 30 MIN",
     status: "Finalizado",
+    host: "BRKSEDU",
     description: "Da clonagem aos campeonatos milionários: a controversa e fascinante história do videogame no Brasil.",
     longDescription: "Uma viagem no tempo mostrando como o mercado cinza, a pirataria e a paixão dos brasileiros transformaram o país em uma potência dos games.",
+    videoLabel: "Ver Teaser",
     bgImage: "/assets/100hor.webp",
     monolithImage: "/assets/100atuverti.webp",
     vimeoId: "76979871"
@@ -40,6 +43,7 @@ const projectsData = [
     status: "Formato Pronto",
     description: "Dois donos de negócios vivem por um dia os desafios um do outro. Empatia e gestão na prática.",
     longDescription: "O que acontece quando um dono de padaria troca de lugar com a dona de uma oficina mecânica? Um reality show ágil sobre os desafios reais de empreender.",
+    videoLabel: "Ver Teaser",
     bgImage: "/assets/tcfhor.webp",
     monolithImage: "/assets/tfvert.webp",
     vimeoId: "76979871"
@@ -52,8 +56,9 @@ const projectsData = [
     format: "10 EPISÓDIOS DE 6 MIN",
     status: "Exibido (History)",
     description: "Os tesouros ocultos nas reservas técnicas dos museus brasileiros que ajudam a recontar nossa história.",
-    longDescription: "Uma série documental que entra onde o público não pode ir: as reservas técnicas dos museus.",
-    bgImage: "/assets/bmhorizontal.webp",
+    longDescription: "Uma série documental que entra onde o público não pode ir: as reservas técnicas dos museus. Já exibido no History Channel e Bandplay.",
+    videoLabel: "Ver Trailer",
+    bgImage: "/assets/bmhorizontal.webp", 
     monolithImage: "/assets/bmvertical.webp",
     vimeoId: "76979871"
   },
@@ -64,8 +69,10 @@ const projectsData = [
     genre: "Esportes",
     format: "10 EPISÓDIOS DE 4 MIN",
     status: "Piloto Disponível",
-    description: "Um mergulho factual, rápido e divertido no mundo dos esportes.",
-    longDescription: "Um formato ágil e direto sobre esportes, superstições e estatísticas.",
+    host: "Andrey Raychtock",
+    description: "Um mergulho factual, rápido e divertido no mundo dos esportes, superstições e estatísticas.",
+    longDescription: "Andrey Raychtock comanda este formato curto e ágil, perfeito para redes sociais e intervalos comerciais, desvendando as curiosidades do esporte.",
+    videoLabel: "Ver Piloto",
     bgImage: "/assets/nvzhorizontal.webp",
     monolithImage: "/assets/nvzvert.webp",
     vimeoId: "76979871"
@@ -77,8 +84,9 @@ const projectsData = [
     genre: "Esportes / Mistério",
     format: "10 EPISÓDIOS DE 10 MIN",
     status: "Em Desenvolvimento",
-    description: "Investigação do lado oculto do futebol.",
-    longDescription: "Uma série documental com tom de suspense noir sobre o esporte.",
+    description: "Investigação do lado oculto do futebol: maldições, fraudes e histórias que transcendem o campo.",
+    longDescription: "O futebol é uma caixinha de surpresas, ou seria uma caixinha de mistérios? Uma série documental com tom de suspense noir sobre o esporte mais amado do mundo.",
+    videoLabel: "Ver Pitch",
     bgImage: "/assets/mbhor.webp",
     monolithImage: "/assets/mbverti.webp",
     vimeoId: "76979871"
@@ -90,24 +98,196 @@ const projectsData = [
     genre: "Saúde / Lifestyle",
     format: "10 EPISÓDIOS DE 26 MIN",
     status: "Em Captação",
-    description: "Uma jornada em busca da longevidade.",
-    longDescription: "Entrevistas e experiências em busca de uma vida longa e equilibrada.",
+    host: "Mari Goldfarb",
+    description: "Estamos vivendo mais, mas como viver melhor? Uma jornada em busca da longevidade.",
+    longDescription: "Mari Goldfarb conduz entrevistas e experiências em busca dos segredos para uma vida longa, saudável e equilibrada.",
+    videoLabel: "Ver Manifesto",
     bgImage: "/assets/schor.webp",
     monolithImage: "/assets/scorvert.webp",
     vimeoId: "76979871"
   }
 ];
 
-// ---------------- COMPONENTES ----------------
+// --- Componentes ---
+
+const ScrollIndicator = () => (
+  <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 z-20 mix-blend-difference pointer-events-none">
+    <div className="h-16 w-[1px] bg-white animate-pulse"></div>
+    <span className="text-[10px] uppercase tracking-[0.3em] text-white font-bold">Scroll</span>
+  </div>
+);
+
+// Padrão de Grid Modular
+const ModularGridBackground = () => (
+  <div className="absolute inset-0 pointer-events-none z-0">
+    <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+    <div className="absolute inset-0 bg-black/80"></div> 
+  </div>
+);
+
+const VideoModal = ({ project, onClose }) => {
+  if (!project) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-8 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
+      <div className="relative w-full max-w-7xl h-full md:h-auto md:aspect-video bg-zinc-950 border border-zinc-800 flex flex-col shadow-2xl overflow-hidden">
+        
+        {/* Header do Modal */}
+        <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-50 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
+          <div className="flex flex-col">
+             <span className="text-red-600 font-bold text-xs tracking-widest uppercase mb-1">Brick Originals</span>
+             <h2 className="text-2xl font-black text-white uppercase tracking-tighter">{project.title}</h2>
+          </div>
+          <button 
+            onClick={onClose}
+            className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors pointer-events-auto bg-black/50 p-2 rounded backdrop-blur-md"
+          >
+            Fechar <X size={24} className="group-hover:text-red-600 transition-colors" />
+          </button>
+        </div>
+
+        {/* Player Simulado */}
+        <div className="flex-1 relative bg-black aspect-video">
+           {project.vimeoId ? (
+             <iframe 
+               src={`https://player.vimeo.com/video/${project.vimeoId}?autoplay=1&title=0&byline=0&portrait=0`} 
+               className="absolute inset-0 w-full h-full" 
+               frameBorder="0" 
+               allow="autoplay; fullscreen; picture-in-picture" 
+               allowFullScreen
+               title={project.title}
+             ></iframe>
+           ) : (
+             // Fallback se não tiver ID
+             <div className="absolute inset-0 flex items-center justify-center text-zinc-500">
+               <p>Vídeo indisponível</p>
+             </div>
+           )}
+        </div>
+
+        {/* Footer do Modal */}
+        <div className="p-8 border-t border-zinc-900 bg-zinc-950 grid grid-cols-1 md:grid-cols-3 gap-8">
+           <div className="md:col-span-2">
+              <p className="text-zinc-300 text-sm leading-relaxed max-w-2xl">{project.longDescription}</p>
+           </div>
+           <div className="flex flex-col gap-4 border-l border-zinc-900 pl-8">
+              <div className="flex justify-between items-center border-b border-zinc-900 pb-2">
+                <span className="text-zinc-500 text-xs uppercase tracking-wider">Formato</span>
+                <span className="text-white text-xs font-bold uppercase">{project.format}</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-zinc-900 pb-2">
+                <span className="text-zinc-500 text-xs uppercase tracking-wider">Gênero</span>
+                <span className="text-white text-xs font-bold uppercase">{project.genre}</span>
+              </div>
+              <button className="mt-2 w-full py-3 bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-colors flex items-center justify-center gap-2">
+                <Plus size={16} />
+                BAIXAR PROJETO
+              </button>
+           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Slide = ({ project, isActive, onPlay }) => {
+  return (
+    <section className="relative h-screen w-full overflow-hidden snap-start flex items-center border-b border-zinc-900 bg-black">
+      <ModularGridBackground />
+
+      {/* Background Image - Cinematic & Dark (Usa a bgImage WIDE) */}
+      <div className="absolute inset-0 z-0">
+         <div 
+           className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] ease-out opacity-20 grayscale"
+           style={{ 
+             backgroundImage: `url(${project.bgImage})`,
+             transform: isActive ? 'scale(1.0)' : 'scale(1.1)' 
+           }} 
+         />
+         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/90 to-transparent" />
+      </div>
+
+      <div className={`container mx-auto px-6 md:px-12 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 h-full items-center`}>
+        
+        {/* Text Content - Camada superior (Z-30) para ficar sobre o Monolito se sobrepor */}
+        <div className={`lg:col-span-6 flex flex-col justify-center transition-all duration-1000 delay-300 relative z-30 pointer-events-none ${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
+          <div className="pointer-events-auto">
+            <div className="flex items-center gap-3 mb-8">
+               <div className="h-[1px] w-12 bg-red-600"></div>
+               <span className="text-red-600 text-xs font-bold uppercase tracking-[0.2em]">
+                 {project.category}
+               </span>
+            </div>
+
+            <h2 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white mb-6 leading-[0.85] uppercase drop-shadow-2xl">
+              {project.title}
+            </h2>
+
+            <div className="max-w-xl pl-1 border-l-2 border-zinc-800 hover:border-red-600 transition-colors duration-500 pl-6 py-2 mb-10 bg-black/40 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none">
+              <p className="text-lg md:text-xl text-zinc-400 font-light leading-relaxed">
+                {project.description}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-6">
+              {/* Botão ÚNICO: VER AGORA */}
+              <button 
+                onClick={() => onPlay(project)}
+                className="group relative px-8 py-4 bg-white text-black font-black text-sm uppercase tracking-widest hover:bg-gray-200 transition-all flex items-center gap-3 shadow-lg shadow-white/5"
+              >
+                <Play size={16} className="fill-black" />
+                VER AGORA
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Visual Element - Monolito (Z-20) - Abaixo do Texto */}
+        {/* USA A IMAGEM DEDICADA: monolithImage */}
+        <div className={`lg:col-span-6 h-full flex items-center justify-center lg:justify-end transition-all duration-1000 delay-500 relative z-20 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
+           {/* O Monolito - Formato Vertical Estrito (1:2.5 ratio approx) */}
+           <div 
+             className="relative w-[300px] md:w-[400px] aspect-[1/2] max-h-[85vh] bg-zinc-950 overflow-hidden shadow-2xl group cursor-pointer border border-zinc-900"
+             onClick={() => onPlay(project)}
+           >
+              {/* Imagem DENTRO do Monolito */}
+              <div 
+                className="absolute inset-0 bg-cover bg-center transition-all duration-700 grayscale group-hover:grayscale-0 group-hover:scale-105 opacity-80"
+                style={{ 
+                  backgroundImage: `url(${project.monolithImage})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              />
+              {/* Red Overlay on Hover */}
+              <div className="absolute inset-0 bg-red-900/0 group-hover:bg-red-900/10 transition-colors duration-500 mix-blend-overlay"></div>
+              
+              {/* Reflexo Monolito */}
+              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none"></div>
+
+              {/* Texto Vertical */}
+              <div className="absolute bottom-8 left-8 transform -rotate-90 origin-bottom-left">
+                 <span className="text-6xl font-black text-transparent stroke-white text-stroke opacity-30 select-none">
+                    {String(project.id).padStart(2, '0')}
+                 </span>
+              </div>
+           </div>
+        </div>
+
+      </div>
+    </section>
+  );
+};
 
 export default function BrickScrollytelling() {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [selectedProject, setSelectedProject] = useState(null);
   const sectionsRef = useRef([]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const index = sectionsRef.current.indexOf(entry.target);
             if (index !== -1) setActiveSlide(index);
@@ -116,67 +296,124 @@ export default function BrickScrollytelling() {
       },
       { threshold: 0.5 }
     );
-
-    sectionsRef.current.forEach(section => section && observer.observe(section));
+    sectionsRef.current.forEach((section) => section && observer.observe(section));
     return () => observer.disconnect();
   }, []);
 
-  return (
-    <div className="h-screen overflow-y-scroll snap-y snap-mandatory bg-black text-white">
+  const scrollToSection = (index) => {
+    sectionsRef.current[index]?.scrollIntoView({ behavior: 'smooth' });
+  };
 
-      {/* HERO */}
-      <section
+  return (
+    <div className="bg-black text-white font-sans selection:bg-red-600 selection:text-white h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar cursor-default">
+      
+      {/* Navigation - Minimalista e Numérica */}
+      <div className="fixed right-8 top-1/2 transform -translate-y-1/2 z-50 hidden lg:flex flex-col gap-6">
+        {['INTRO', ...projectsData.map((_, i) => String(i + 1).padStart(2, '0')), 'CONTATO'].map((label, idx) => (
+          <div key={idx} className="group flex items-center justify-end gap-3 cursor-pointer" onClick={() => scrollToSection(idx)}>
+            <span className={`text-[9px] font-bold tracking-widest transition-all duration-300 ${activeSlide === idx ? 'text-red-600 opacity-100' : 'text-zinc-600 opacity-0 group-hover:opacity-100'}`}>
+              {label}
+            </span>
+            <div className={`w-[2px] transition-all duration-300 ${activeSlide === idx ? 'h-8 bg-red-600' : 'h-4 bg-zinc-800 group-hover:bg-zinc-600'}`} />
+          </div>
+        ))}
+      </div>
+
+      {/* --- HERO SLIDE (The Monolith Concept) --- */}
+      <section 
         ref={el => sectionsRef.current[0] = el}
-        className="h-screen snap-start flex flex-col items-center justify-center"
+        className="relative h-screen w-full snap-start flex flex-col items-center justify-center bg-black overflow-hidden"
       >
-        <img
-          src="/assets/brick_logo_rgb-1.png"
-          alt="Brick"
-          className="w-72 mb-12"
-        />
-        <button
-          onClick={() => sectionsRef.current[1]?.scrollIntoView({ behavior: 'smooth' })}
-          className="px-10 py-4 bg-white text-black font-bold uppercase"
-        >
-          Explorar Catálogo
-        </button>
+        <ModularGridBackground />
+        
+        {/* Adicionei margem negativa superior (-mt-24 md:-mt-32) para puxar o conteúdo para cima */}
+        <div className="relative z-10 text-center flex flex-col items-center -mt-24 md:-mt-32">
+          
+          {/* Logo da Brick */}
+          <img 
+            src="/assets/brick_logo_rgb-1.png" 
+            alt="Brick Filmmaking House" 
+            className="w-64 md:w-80 mb-8 mix-blend-difference"
+          />
+          
+          <div className="flex items-center gap-4 mb-12">
+            <div className="h-[1px] w-12 bg-zinc-700"></div>
+            <p className="text-sm md:text-base text-zinc-400 font-mono tracking-[0.2em] uppercase">
+              Projetos Originais
+            </p>
+            <div className="h-[1px] w-12 bg-zinc-700"></div>
+          </div>
+
+          <button 
+            onClick={() => scrollToSection(1)}
+            className="px-10 py-4 bg-white hover:bg-red-600 text-black hover:text-white font-black text-sm tracking-[0.2em] uppercase transition-all duration-300"
+          >
+            Explorar Catálogo
+          </button>
+        </div>
+
+        <div className="absolute bottom-8 left-8 text-[10px] text-zinc-600 uppercase tracking-widest font-mono hidden md:block">
+          Do Zero ao Todo
+        </div>
+        
+        <ScrollIndicator />
       </section>
 
-      {/* SLIDES */}
+      {/* --- PROJECT SLIDES --- */}
       {projectsData.map((project, index) => (
-        <section
-          key={project.id}
-          ref={el => sectionsRef.current[index + 1] = el}
-          className="h-screen snap-start relative flex items-center"
-        >
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-20"
-            style={{ backgroundImage: `url(${project.bgImage})` }}
+        <div key={project.id} ref={el => sectionsRef.current[index + 1] = el}>
+          <Slide 
+            project={project} 
+            isActive={activeSlide === index + 1}
+            onPlay={setSelectedProject}
           />
-          <div className="relative z-10 max-w-xl px-12">
-            <h2 className="text-6xl font-black uppercase mb-6">{project.title}</h2>
-            <p className="text-zinc-400 mb-8">{project.description}</p>
-            <img
-              src={project.monolithImage}
-              alt={project.title}
-              className="w-64"
-            />
-          </div>
-        </section>
+        </div>
       ))}
 
-      {/* CONTATO */}
-      <section
+      {/* --- CONTACT SLIDE --- */}
+      <section 
         ref={el => sectionsRef.current[projectsData.length + 1] = el}
-        className="h-screen snap-start flex items-center justify-center"
+        className="relative h-screen w-full snap-start flex items-center justify-center bg-zinc-950"
       >
-        <a
-          href="mailto:contato@brick.com.br"
-          className="text-4xl font-black uppercase flex items-center gap-4"
-        >
-          Fale Conosco <ArrowRight />
-        </a>
+        <ModularGridBackground />
+        
+        <div className="container mx-auto px-6 relative z-10 grid md:grid-cols-2 gap-16 items-center">
+          <div>
+            <span className="text-red-600 font-bold text-xs tracking-[0.3em] uppercase mb-4 block">Contato</span>
+            <h2 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9] uppercase text-white">
+              Vamos<br />Criar<br /><span className="text-transparent stroke-white text-stroke">Juntos?</span>
+            </h2>
+            <p className="text-zinc-400 text-lg leading-relaxed max-w-md mb-12 border-l border-zinc-800 pl-6">
+              Do zero ao todo. Nós conceituamos, desenvolvemos e entregamos conteúdo audiovisual extraordinário.
+            </p>
+            <a 
+              href="mailto:contato@brick.com.br"
+              className="inline-flex items-center gap-4 text-white hover:text-red-600 transition-colors group"
+            >
+              <span className="text-2xl font-bold tracking-widest uppercase border-b-2 border-white group-hover:border-red-600 pb-1">Fale Conosco</span>
+              <ArrowRight className="transform group-hover:translate-x-2 transition-transform" />
+            </a>
+          </div>
+
+          {/* Elemento Visual Final - Monolito Vermelho Puro */}
+          <div className="hidden md:flex justify-center items-center">
+             <div className="w-[300px] h-[500px] bg-red-600 shadow-[0_0_100px_rgba(220,38,38,0.3)] relative overflow-hidden flex items-center justify-center">
+             </div>
+          </div>
+        </div>
+
+        <footer className="absolute bottom-0 w-full border-t border-zinc-900 bg-black py-6">
+          <div className="container mx-auto px-6 flex justify-between items-center text-[10px] text-zinc-500 uppercase tracking-widest font-mono">
+            <span>© Brick Filmmaking House</span>
+            <div className="flex gap-6">
+               <a href="#" className="hover:text-white transition-colors">Instagram</a>
+               <a href="#" className="hover:text-white transition-colors">Linkedin</a>
+            </div>
+          </div>
+        </footer>
       </section>
+
+      <VideoModal project={selectedProject} onClose={() => setSelectedProject(null)} />
     </div>
   );
 }
