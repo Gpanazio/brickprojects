@@ -17,7 +17,7 @@ const projectsData = [
     videoLabel: "Ver Promo", 
     bgImage: "/assets/TTRJHOR.webp",
     monolithImage: "/assets/ttrjvert.webp",
-    vimeoId: "76979871" 
+    vimeoId: "76979871" // ID Genérico (Trocar quando tiver o real)
   },
   {
     id: 2,
@@ -32,7 +32,7 @@ const projectsData = [
     videoLabel: "Ver Teaser",
     bgImage: "/assets/100hor.webp",
     monolithImage: "/assets/100atuverti.webp",
-    vimeoId: "76979871"
+    vimeoId: "1060607336" // ID REAL (100% Atualizado)
   },
   {
     id: 3,
@@ -46,7 +46,8 @@ const projectsData = [
     videoLabel: "Ver Teaser",
     bgImage: "/assets/tcfhor.webp",
     monolithImage: "/assets/tfvert.webp",
-    vimeoId: "1110027782" // ID REAL DO VIMEO (Troca de Chefia)
+    vimeoId: "1110027782", // ID REAL (Troca de Chefia)
+    vimeoHash: "6295e6a248" // Hash de segurança do Vimeo
   },
   {
     id: 4,
@@ -104,7 +105,8 @@ const projectsData = [
     videoLabel: "Ver Manifesto",
     bgImage: "/assets/schor.webp",
     monolithImage: "/assets/scorvert.webp",
-    vimeoId: "76979871"
+    vimeoId: "1110052878", // ID REAL (Super Corpo)
+    vimeoHash: "deca249548" // Hash de segurança do Vimeo
   }
 ];
 
@@ -127,6 +129,11 @@ const ModularGridBackground = () => (
 
 const VideoModal = ({ project, onClose }) => {
   if (!project) return null;
+
+  // Monta a URL do Vimeo corretamente, verificando se existe hash
+  const videoSrc = project.vimeoId 
+    ? `https://player.vimeo.com/video/${project.vimeoId}?autoplay=1&title=0&byline=0&portrait=0${project.vimeoHash ? `&h=${project.vimeoHash}` : ''}`
+    : null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
@@ -151,9 +158,9 @@ const VideoModal = ({ project, onClose }) => {
             <div className="w-full md:w-2/3 bg-black flex flex-col relative group">
                {/* Container do Vídeo (Aspect Ratio 16:9) */}
                <div className="w-full aspect-video relative bg-zinc-900">
-                   {project.vimeoId ? (
+                   {videoSrc ? (
                      <iframe 
-                       src={`https://player.vimeo.com/video/${project.vimeoId}?h=6295e6a248&badge=0&autopause=0&player_id=0&app_id=58479`} 
+                       src={videoSrc} 
                        className="absolute inset-0 w-full h-full" 
                        frameBorder="0" 
                        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
