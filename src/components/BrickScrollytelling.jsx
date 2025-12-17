@@ -114,22 +114,22 @@ const projectsData = [
 
 // --- COMPONENTES AUXILIARES ---
 
-// Novo Background: Apenas Textura em Movimento (Sem Grid, Sem Luz)
+// Novo Background: Textura Visível (Sem Overlay)
 const CinematicHeroBackground = () => {
   return (
     <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden bg-black">
       
-      {/* TEXTURA DE GRANULAÇÃO (FILM NOISE) EM MOVIMENTO */}
-      {/* Aumentei a opacidade para 0.07 para ser visível e apliquei animate-pan */}
-      <div className="absolute inset-0 opacity-[0.07] pointer-events-none z-20 mix-blend-overlay animate-pan" 
+      {/* TEXTURA DE GRANULAÇÃO VISÍVEL */}
+      {/* Opacidade aumentada para 0.20 e removido mix-blend-overlay para garantir visibilidade */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none z-20 animate-pan" 
            style={{ 
-             backgroundSize: '200px 200px', // Repetição suave
+             backgroundSize: '200px 200px', 
              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` 
            }}
       ></div>
 
-      {/* VIGNETTE SUAVE (Foco no centro) */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)] z-10 opacity-60"></div>
+      {/* VIGNETTE MAIS SUAVE PARA NÃO ESCURECER DEMAIS O CENTRO */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_10%,black_100%)] z-10 opacity-70"></div>
     </div>
   );
 };
@@ -381,7 +381,7 @@ export default function BrickScrollytelling() {
         ))}
       </div>
 
-      {/* --- HERO SLIDE (LIMPO: TEXTURA APENAS) --- */}
+      {/* --- HERO SLIDE (LIMPO E VISÍVEL) --- */}
       <section 
         ref={el => sectionsRef.current[0] = el}
         className="relative h-screen w-full snap-start flex flex-col items-center justify-center bg-black overflow-hidden"
@@ -390,7 +390,6 @@ export default function BrickScrollytelling() {
         
         <div className="relative z-20 text-center flex flex-col items-center justify-center h-full pb-20 px-4"> 
           
-          {/* Logo Estático e Limpo (Sem Glow, Sem Grupo) */}
           <img 
             src="/assets/brick_logo_rgb-1.png" 
             alt="Brick Filmmaking House" 
