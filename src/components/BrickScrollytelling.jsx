@@ -11,7 +11,7 @@ const projectsData = [
     title: "100% ATUALIZADO",
     category: "Documentário",
     genre: "Doc-Série Pop / Games",
-    format: "6 EPISÓDIOS DE 30 MIN",
+    format: "6 episódios de 26 min",
     status: "Finalizado",
     description: "Da clonagem de cartuchos aos campeonatos milionários: a história não oficial de como a pirataria e a \"gambiarra\" construíram a cultura gamer no Brasil.",
     longDescription: "Uma viagem no tempo mostrando como o mercado cinza, a pirataria e a paixão dos brasileiros transformaram o país em uma potência dos games.",
@@ -42,14 +42,14 @@ const projectsData = [
     title: "MISTÉRIOS DA BOLA",
     category: "Documentário",
     genre: "Esportes / Mistério",
-    format: "EPISÓDIOS DE 26 MIN",
+    format: "TV aberta: 8 min\nPay TV e Streaming: 26 min", // ALTERADO
     status: "Em Desenvolvimento",
     description: "Investigação do lado oculto do futebol: maldições, fraudes e histórias que transcendem o campo.",
     longDescription: "O futebol é uma caixinha de surpresas, ou seria uma caixinha de mistérios? Uma série documental com tom de suspense noir sobre o esporte mais amado do mundo.",
     videoLabel: "Ver Pitch",
     bgImage: "/assets/mbhor.webp",
     monolithImage: "/assets/mbverti.webp",
-    vimeoId: null, // Sem vídeo, mostra banner estático no modal
+    vimeoId: null, 
     pdfUrl: "/projetos/PITCH_DECK_MISTERIOS_DA_BOLA.pdf"
   },
   {
@@ -57,7 +57,7 @@ const projectsData = [
     title: "NÃO VAI ZICAR",
     category: "Factual",
     genre: "Humor Esportivo",
-    format: "EPISÓDIOS DE 4 MIN",
+    format: "Episódios de 4 min",
     status: "Piloto Disponível",
     host: "Andrey Raychtock",
     description: "Uma sátira inteligente ao mundo das bets que usa estatísticas reais para dar sentido às coincidências mais incríveis do futebol.",
@@ -74,7 +74,7 @@ const projectsData = [
     title: "SUPER CORPO",
     category: "Documentário",
     genre: "Saúde / Lifestyle",
-    format: "EPISÓDIOS DE 26 MIN",
+    format: "TV aberta: 8 min\nPay TV e Streaming: 26 min", // ALTERADO
     status: "Em Captação",
     host: "Mari Goldfarb",
     description: "Estamos vivendo mais, mas como viver melhor? Uma jornada em busca da longevidade.",
@@ -91,7 +91,7 @@ const projectsData = [
     title: "TROCA DE CHEFIA",
     category: "Reality",
     genre: "Empreendedorismo",
-    format: "10 EPISÓDIOS DE 10 MIN",
+    format: "Episódios de 26 ou 56 min", // ALTERADO
     status: "Formato Pronto",
     description: "Dois donos de negócios vivem por um dia os desafios um do outro. Empatia e gestão na prática.",
     longDescription: "O que acontece quando um dono de padaria troca de lugar com a dona de uma oficina mecânica? Um reality show ágil sobre os desafios reais de empreender.",
@@ -107,7 +107,7 @@ const projectsData = [
     title: "TU TÁ NO RJ",
     category: "Documentário",
     genre: "True Crime de Humor",
-    format: "TV ABERTA: 8 MIN\nSTREAMING/TV A CABO: 26 MIN", // ALTERADO COM QUEBRA DE LINHA
+    format: "TV aberta: 8 min\nPay TV e Streaming: 26 min", // ALTERADO
     status: "Em Desenvolvimento",
     description: "Esqueça o serial killer. Uma investigação irreverente sobre os crimes mais surreais, criativos e ilógicos que só poderiam acontecer no Rio de Janeiro.",
     longDescription: "Uma investigação irreverente sobre os crimes mais surreais que aconteceram no Rio de Janeiro. Um True Crime à brasileira que foge do óbvio e mergulha no caos urbano carioca.",
@@ -213,7 +213,7 @@ const VideoModal = ({ project, onClose }) => {
                   <div className="space-y-6">
                     <div>
                         <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-1 font-bold">Formato</span>
-                        {/* ALTERADO: Adicionado whitespace-pre-line para respeitar quebras de linha */}
+                        {/* A classe whitespace-pre-line garante que o \n seja respeitado */}
                         <span className="text-white text-sm font-bold whitespace-pre-line">{project.format}</span>
                     </div>
                     <div>
@@ -254,7 +254,6 @@ const VideoModal = ({ project, onClose }) => {
         
         {/* Info Mobile */}
         <div className="md:hidden p-6 border-t border-zinc-900 bg-zinc-950">
-            {/* ALTERADO: Layout ajustado para suportar quebras de linha no mobile também */}
             <div className="flex justify-between items-start mb-6 text-xs text-zinc-500 font-mono">
                 <span className="whitespace-pre-line text-left">{project.format}</span>
                 <span className="text-right ml-4">{project.genre}</span>
