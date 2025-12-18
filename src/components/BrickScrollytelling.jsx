@@ -170,7 +170,7 @@ const VideoModal = ({ project, onClose, onNext, onPrev }) => {
         {/* Header do Modal */}
         <div className="flex justify-between items-center p-6 border-b border-zinc-900 bg-zinc-950 z-50">
           <div className="flex flex-col">
-             <span className="text-red-600 font-bold text-xs tracking-widest uppercase mb-1">Brick Originais</span>
+             <span className="text-red-600 font-bold text-xs tracking-widest uppercase mb-1">Originais Brick</span>
              <h2 className="text-2xl font-black text-white uppercase tracking-tighter">{project.title}</h2>
           </div>
           <button 
