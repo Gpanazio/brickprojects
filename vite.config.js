@@ -5,11 +5,14 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: process.env.PORT || 5173, // Usa a porta do Railway ou 5173 localmente
-    host: true // Necessário para expor a rede no Docker/Railway
+    port: process.env.PORT || 5173,
+    host: true 
   },
   preview: {
-    port: 4173, // Define a porta fixa 4173 para o preview
+    // AQUI ESTAVA O ERRO: A porta estava fixa em 4173.
+    // Agora, ela ouvirá a porta do Railway (process.env.PORT) 
+    // ou cairá para 4173 apenas se não houver variável definida.
+    port: process.env.PORT ? parseInt(process.env.PORT) : 4173,
     host: true
   }
 })
