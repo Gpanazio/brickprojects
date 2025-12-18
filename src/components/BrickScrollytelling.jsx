@@ -442,7 +442,7 @@ export default function BrickScrollytelling() {
               Do zero ao todo. Nós conceituamos, desenvolvemos e entregamos conteúdo audiovisual extraordinário.
             </p>
             <a 
-              href="mailto:contato@brick.com.br"
+              href="mailto:brick@brick.mov"
               className="inline-flex items-center gap-4 text-white hover:text-red-600 transition-colors group"
             >
               <span className="text-2xl font-bold tracking-widest uppercase border-b-2 border-white group-hover:border-red-600 pb-1">Fale Conosco</span>
