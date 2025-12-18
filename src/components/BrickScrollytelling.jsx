@@ -28,7 +28,7 @@ const projectsData = [
     format: "10 EPISÓDIOS DE 6 MIN",
     status: "Exibido (History)",
     description: "Os tesouros ocultos nas reservas técnicas dos museus brasileiros que ajudam a recontar nossa história.",
-    longDescription: "Uma série documental que entra onde o público não pode ir: as reservas técnicas dos museus. Já exibido no History Channel e Bandplay.",
+    longDescription: "Uma série documental que entra onde o público não pode ir: as reservas técnicas dos museus. Teve uma temporada exclusiva produzida para o History Channel, mas está dispomível para licenciamento e novas temporadas ",
     videoLabel: "Assistir Episódio 1",
     bgImage: "/assets/bmhorizontal.webp", 
     monolithImage: "/assets/bmvertical.webp",
