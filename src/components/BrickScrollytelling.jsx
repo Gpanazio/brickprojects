@@ -10,11 +10,10 @@ const projectsData = [
     id: 2,
     title: "100% ATUALIZADO",
     category: "Documentário",
-    genre: "Doc-Série Pop / Games", // ALTERADO
+    genre: "Doc-Série Pop / Games",
     format: "6 EPISÓDIOS DE 30 MIN",
     status: "Finalizado",
-    // host: "BRKSEDU", // REMOVIDO
-    description: "Da clonagem de cartuchos aos campeonatos milionários: a história não oficial de como a pirataria e a \"gambiarra\" construíram a cultura gamer no Brasil.", // ALTERADO (HOOK)
+    description: "Da clonagem de cartuchos aos campeonatos milionários: a história não oficial de como a pirataria e a \"gambiarra\" construíram a cultura gamer no Brasil.",
     longDescription: "Uma viagem no tempo mostrando como o mercado cinza, a pirataria e a paixão dos brasileiros transformaram o país em uma potência dos games.",
     videoLabel: "Ver Teaser",
     bgImage: "/assets/100hor.webp",
@@ -57,11 +56,11 @@ const projectsData = [
     id: 5,
     title: "NÃO VAI ZICAR",
     category: "Factual",
-    genre: "Humor Esportivo", // ALTERADO
+    genre: "Humor Esportivo",
     format: "EPISÓDIOS DE 4 MIN",
     status: "Piloto Disponível",
     host: "Andrey Raychtock",
-    description: "Uma sátira inteligente ao mundo das bets que usa estatísticas reais para dar sentido às coincidências mais incríveis do futebol.", // ALTERADO (HOOK)
+    description: "Uma sátira inteligente ao mundo das bets que usa estatísticas reais para dar sentido às coincidências mais incríveis do futebol.",
     longDescription: "Andrey Raychtock comanda este formato curto e ágil, perfeito para redes sociais e intervalos comerciais, desvendando as curiosidades do esporte.",
     videoLabel: "Ver Piloto",
     bgImage: "/assets/nvzhorizontal.webp",
@@ -107,10 +106,10 @@ const projectsData = [
     id: 1,
     title: "TU TÁ NO RJ",
     category: "Documentário",
-    genre: "True Crime de Humor", // ALTERADO
-    format: "10 EPISÓDIOS DE 8 MIN",
+    genre: "True Crime de Humor",
+    format: "TV ABERTA: 8 MIN\nSTREAMING/TV A CABO: 26 MIN", // ALTERADO COM QUEBRA DE LINHA
     status: "Em Desenvolvimento",
-    description: "Esqueça o serial killer. Uma investigação irreverente sobre os crimes mais surreais, criativos e ilógicos que só poderiam acontecer no Rio de Janeiro.", // ALTERADO (HOOK)
+    description: "Esqueça o serial killer. Uma investigação irreverente sobre os crimes mais surreais, criativos e ilógicos que só poderiam acontecer no Rio de Janeiro.",
     longDescription: "Uma investigação irreverente sobre os crimes mais surreais que aconteceram no Rio de Janeiro. Um True Crime à brasileira que foge do óbvio e mergulha no caos urbano carioca.",
     videoLabel: "Ver Promo", 
     bgImage: "/assets/TTRJHOR.webp",
@@ -214,7 +213,8 @@ const VideoModal = ({ project, onClose }) => {
                   <div className="space-y-6">
                     <div>
                         <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-1 font-bold">Formato</span>
-                        <span className="text-white text-sm font-bold">{project.format}</span>
+                        {/* ALTERADO: Adicionado whitespace-pre-line para respeitar quebras de linha */}
+                        <span className="text-white text-sm font-bold whitespace-pre-line">{project.format}</span>
                     </div>
                     <div>
                         <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-1 font-bold">Gênero</span>
@@ -254,9 +254,10 @@ const VideoModal = ({ project, onClose }) => {
         
         {/* Info Mobile */}
         <div className="md:hidden p-6 border-t border-zinc-900 bg-zinc-950">
-            <div className="flex justify-between items-center mb-6 text-xs text-zinc-500 font-mono">
-                <span>{project.format}</span>
-                <span>{project.genre}</span>
+            {/* ALTERADO: Layout ajustado para suportar quebras de linha no mobile também */}
+            <div className="flex justify-between items-start mb-6 text-xs text-zinc-500 font-mono">
+                <span className="whitespace-pre-line text-left">{project.format}</span>
+                <span className="text-right ml-4">{project.genre}</span>
             </div>
             
             {project.pdfUrl ? (
