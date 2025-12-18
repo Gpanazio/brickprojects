@@ -139,6 +139,11 @@ const ModularGridBackground = () => (
 const VideoModal = ({ project, onClose, onNext, onPrev }) => {
   if (!project) return null;
 
+  // Lógica para saber se é o primeiro ou último projeto
+  const currentIndex = projectsData.findIndex(p => p.id === project.id);
+  const isFirst = currentIndex === 0;
+  const isLast = currentIndex === projectsData.length - 1;
+
   // URL do Vimeo sem Autoplay
   const videoSrc = project.vimeoId 
     ? `https://player.vimeo.com/video/${project.vimeoId}?autoplay=0&title=0&byline=0&portrait=0${project.vimeoHash ? `&h=${project.vimeoHash}` : ''}`
@@ -147,38 +152,50 @@ const VideoModal = ({ project, onClose, onNext, onPrev }) => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
       
-      {/* Container Principal do Modal - Relativo para posicionar as setas */}
+      {/* Container Principal do Modal */}
       <div className="relative w-full max-w-5xl h-full md:h-auto max-h-[90vh] bg-zinc-950 border border-zinc-800 flex flex-col shadow-2xl overflow-hidden rounded-lg group/modal">
         
-        {/* Setas de Navegação Laterais (DESKTOP APENAS) */}
-        <button 
-            onClick={onPrev}
-            className="hidden md:flex absolute left-4 top-1/2 transform -translate-y-1/2 z-[60] w-12 h-12 items-center justify-center rounded-full bg-black/50 hover:bg-white text-white hover:text-black border border-white/20 hover:border-white transition-all duration-300 backdrop-blur-sm opacity-0 group-hover/modal:opacity-100 -translate-x-4 group-hover/modal:translate-x-0"
-            title="Projeto Anterior"
-        >
-            <ChevronLeft size={24} />
-        </button>
-
-        <button 
-            onClick={onNext}
-            className="hidden md:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-[60] w-12 h-12 items-center justify-center rounded-full bg-black/50 hover:bg-white text-white hover:text-black border border-white/20 hover:border-white transition-all duration-300 backdrop-blur-sm opacity-0 group-hover/modal:opacity-100 translate-x-4 group-hover/modal:translate-x-0"
-            title="Próximo Projeto"
-        >
-            <ChevronRight size={24} />
-        </button>
-
-        {/* Header do Modal */}
+        {/* Header do Modal com Navegação Integrada */}
         <div className="flex justify-between items-center p-6 border-b border-zinc-900 bg-zinc-950 z-50">
           <div className="flex flex-col">
-             <span className="text-red-600 font-bold text-xs tracking-widest uppercase mb-1">Originais Brick</span>
-             <h2 className="text-2xl font-black text-white uppercase tracking-tighter">{project.title}</h2>
+             <span className="text-red-600 font-bold text-xs tracking-widest uppercase mb-1">Brick Originais</span>
+             <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter truncate max-w-[200px] md:max-w-md">{project.title}</h2>
           </div>
-          <button 
-            onClick={onClose}
-            className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors bg-zinc-900 hover:bg-zinc-800 px-3 py-2 rounded-full border border-zinc-800"
-          >
-            Fechar <X size={18} className="group-hover:text-red-600 transition-colors" />
-          </button>
+          
+          {/* Controles de Navegação e Fechar (Lado Direito) */}
+          <div className="flex items-center gap-2 md:gap-3">
+              
+              {/* Botão Anterior (Escondido no Mobile, Escondido se for o primeiro) */}
+              {!isFirst && (
+                <button 
+                    onClick={onPrev}
+                    className="hidden md:flex group items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors bg-zinc-900 hover:bg-zinc-800 px-3 py-2 rounded-full border border-zinc-800"
+                >
+                    <ChevronLeft size={14} /> Anterior
+                </button>
+              )}
+
+              {/* Botão Próximo (Escondido no Mobile, Escondido se for o último) */}
+              {!isLast && (
+                <button 
+                    onClick={onNext}
+                    className="hidden md:flex group items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors bg-zinc-900 hover:bg-zinc-800 px-3 py-2 rounded-full border border-zinc-800"
+                >
+                    Próximo <ChevronRight size={14} />
+                </button>
+              )}
+
+              {/* Divisor Visual (apenas desktop) */}
+              <div className="hidden md:block w-[1px] h-6 bg-zinc-800 mx-1"></div>
+
+              {/* Botão Fechar */}
+              <button 
+                onClick={onClose}
+                className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors bg-zinc-900 hover:bg-zinc-800 px-3 py-2 rounded-full border border-zinc-800"
+              >
+                Fechar <X size={18} className="group-hover:text-red-600 transition-colors" />
+              </button>
+          </div>
         </div>
 
         <div className="flex flex-col md:flex-row h-full overflow-hidden">
@@ -244,7 +261,7 @@ const VideoModal = ({ project, onClose, onNext, onPrev }) => {
                       )}
                   </div>
 
-                  {/* Botão de Download Mobile (Sem navegação de setas) */}
+                  {/* Botão de Download Mobile */}
                   {project.pdfUrl ? (
                       <a 
                         href={project.pdfUrl}
@@ -296,7 +313,7 @@ const VideoModal = ({ project, onClose, onNext, onPrev }) => {
                   </div>
                </div>
 
-               {/* Rodapé da Sidebar: Ação */}
+               {/* Rodapé da Sidebar: Ação (Sem navegação redundante) */}
                <div className="p-8 border-t border-zinc-900 bg-zinc-900/50 backdrop-blur-sm sticky bottom-0">
                   {project.pdfUrl ? (
                     <a 
@@ -439,15 +456,17 @@ export default function BrickScrollytelling() {
   const handleNextProject = () => {
     if (!selectedProject) return;
     const currentIndex = projectsData.findIndex(p => p.id === selectedProject.id);
-    const nextIndex = (currentIndex + 1) % projectsData.length;
-    setSelectedProject(projectsData[nextIndex]);
+    if (currentIndex < projectsData.length - 1) {
+      setSelectedProject(projectsData[currentIndex + 1]);
+    }
   };
 
   const handlePrevProject = () => {
     if (!selectedProject) return;
     const currentIndex = projectsData.findIndex(p => p.id === selectedProject.id);
-    const prevIndex = (currentIndex - 1 + projectsData.length) % projectsData.length;
-    setSelectedProject(projectsData[prevIndex]);
+    if (currentIndex > 0) {
+      setSelectedProject(projectsData[currentIndex - 1]);
+    }
   };
 
   return (
