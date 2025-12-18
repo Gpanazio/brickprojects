@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, X, ChevronDown, MousePointer2, Mail, Instagram, Youtube, ArrowRight, Grid, Plus, Download } from 'lucide-react';
 
-// --- DADOS DOS PROJETOS ---
+// --- DADOS DOS PROJETOS (Ordem Alfabética) ---
+// As imagens devem estar na pasta /public/assets/ do seu projeto.
+
 const projectsData = [
   {
     id: 2,
@@ -16,8 +18,7 @@ const projectsData = [
     videoLabel: "Ver Teaser",
     bgImage: "/assets/100hor.webp",
     monolithImage: "/assets/100atuverti.webp",
-    vimeoId: "1060607336",
-    vimeoHash: "1da9d0145b"
+    vimeoId: "1060607336"
   },
   {
     id: 4,
@@ -46,7 +47,7 @@ const projectsData = [
     videoLabel: "Ver Pitch",
     bgImage: "/assets/mbhor.webp",
     monolithImage: "/assets/mbverti.webp",
-    vimeoId: null
+    vimeoId: null // Sem vídeo, mostra banner estático no modal
   },
   {
     id: 5,
@@ -114,34 +115,13 @@ const projectsData = [
 
 // --- COMPONENTES AUXILIARES ---
 
-// Novo Background: Textura Visível (Sem Overlay)
-const CinematicHeroBackground = () => {
-  return (
-    <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden bg-black">
-      
-      {/* TEXTURA DE GRANULAÇÃO VISÍVEL */}
-      {/* Opacidade aumentada para 0.20 e removido mix-blend-overlay para garantir visibilidade */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none z-20 animate-pan" 
-           style={{ 
-             backgroundSize: '200px 200px', 
-             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` 
-           }}
-      ></div>
-
-      {/* VIGNETTE MAIS SUAVE PARA NÃO ESCURECER DEMAIS O CENTRO */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_10%,black_100%)] z-10 opacity-70"></div>
-    </div>
-  );
-};
-
 const ScrollIndicator = () => (
-  <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 z-30 mix-blend-difference pointer-events-none">
+  <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 z-20 mix-blend-difference pointer-events-none">
     <div className="h-16 w-[1px] bg-white animate-pulse"></div>
     <span className="text-[10px] uppercase tracking-[0.3em] text-white font-bold">Scroll</span>
   </div>
 );
 
-// Mantido para uso nos slides internos
 const ModularGridBackground = () => (
   <div className="absolute inset-0 pointer-events-none z-0">
     <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:40px_40px]"></div>
@@ -152,6 +132,7 @@ const ModularGridBackground = () => (
 const VideoModal = ({ project, onClose }) => {
   if (!project) return null;
 
+  // URL do Vimeo sem Autoplay
   const videoSrc = project.vimeoId 
     ? `https://player.vimeo.com/video/${project.vimeoId}?autoplay=0&title=0&byline=0&portrait=0${project.vimeoHash ? `&h=${project.vimeoHash}` : ''}`
     : null;
@@ -160,6 +141,7 @@ const VideoModal = ({ project, onClose }) => {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
       <div className="relative w-full max-w-5xl h-full md:h-auto max-h-[90vh] bg-zinc-950 border border-zinc-800 flex flex-col shadow-2xl overflow-hidden rounded-lg">
         
+        {/* Header do Modal */}
         <div className="flex justify-between items-center p-6 border-b border-zinc-900 bg-zinc-950 z-50">
           <div className="flex flex-col">
              <span className="text-red-600 font-bold text-xs tracking-widest uppercase mb-1">Brick Originals</span>
@@ -174,7 +156,9 @@ const VideoModal = ({ project, onClose }) => {
         </div>
 
         <div className="flex flex-col md:flex-row h-full overflow-hidden">
+            {/* ÁREA PRINCIPAL: PLAYER DE VÍDEO (EMBED) */}
             <div className="w-full md:w-2/3 bg-black flex flex-col relative group">
+               {/* Container do Vídeo (Aspect Ratio 16:9) */}
                <div className="w-full aspect-video relative bg-zinc-900 overflow-hidden">
                    {project.vimeoId ? (
                      <iframe 
@@ -186,6 +170,7 @@ const VideoModal = ({ project, onClose }) => {
                        title={project.title}
                      ></iframe>
                    ) : (
+                     // Fallback para projetos sem vídeo (Ex: Mistérios da Bola)
                      <div className="absolute inset-0 w-full h-full">
                         <div 
                           className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] hover:scale-105"
@@ -204,11 +189,13 @@ const VideoModal = ({ project, onClose }) => {
                    )}
                </div>
                
+               {/* Descrição abaixo do vídeo (Mobile) */}
                <div className="p-6 md:hidden">
                   <p className="text-zinc-300 text-sm leading-relaxed">{project.longDescription}</p>
                </div>
             </div>
 
+            {/* BARRA LATERAL: INFORMAÇÕES */}
             <div className="hidden md:flex w-1/3 flex-col border-l border-zinc-900 bg-zinc-950 overflow-y-auto">
                <div className="p-8 flex-1">
                   <div className="mb-8">
@@ -234,6 +221,7 @@ const VideoModal = ({ project, onClose }) => {
                   </div>
                </div>
 
+               {/* Botão de Ação */}
                <div className="p-8 border-t border-zinc-900 bg-zinc-900/30">
                   <button className="w-full py-4 bg-white hover:bg-gray-200 text-black text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 rounded-sm shadow-lg hover:shadow-xl hover:-translate-y-1">
                     <Download size={16} />
@@ -243,6 +231,7 @@ const VideoModal = ({ project, onClose }) => {
             </div>
         </div>
         
+        {/* Info Mobile */}
         <div className="md:hidden p-6 border-t border-zinc-900 bg-zinc-950">
             <div className="flex justify-between items-center mb-6 text-xs text-zinc-500 font-mono">
                 <span>{project.format}</span>
@@ -264,9 +253,10 @@ const Slide = ({ project, isActive, onPlay }) => {
     <section className="relative h-screen w-full overflow-hidden snap-start flex items-center border-b border-zinc-900 bg-black">
       <ModularGridBackground />
 
+      {/* Background Image */}
       <div className="absolute inset-0 z-0">
          <div 
-           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 ease-out opacity-20 grayscale"
+           className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] ease-out opacity-20 grayscale"
            style={{ 
              backgroundImage: `url(${project.bgImage})`,
              transform: isActive ? 'scale(1.0)' : 'scale(1.1)' 
@@ -277,7 +267,8 @@ const Slide = ({ project, isActive, onPlay }) => {
 
       <div className={`container mx-auto px-6 md:px-12 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 h-full items-center`}>
         
-        <div className={`lg:col-span-6 flex flex-col justify-center transition-all duration-700 delay-100 relative z-30 pointer-events-none ${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
+        {/* Text Content */}
+        <div className={`lg:col-span-6 flex flex-col justify-center transition-all duration-1000 delay-300 relative z-30 pointer-events-none ${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
           <div className="pointer-events-auto">
             <div className="flex items-center gap-3 mb-8">
                <div className="h-[1px] w-12 bg-red-600"></div>
@@ -297,6 +288,7 @@ const Slide = ({ project, isActive, onPlay }) => {
             </div>
 
             <div className="flex flex-wrap items-center gap-6">
+              {/* Botão VER AGORA */}
               <button 
                 onClick={() => onPlay(project)}
                 className="group relative px-8 py-4 bg-white text-black font-black text-sm uppercase tracking-widest hover:bg-gray-200 transition-all flex items-center gap-3 shadow-lg shadow-white/5"
@@ -308,11 +300,13 @@ const Slide = ({ project, isActive, onPlay }) => {
           </div>
         </div>
 
-        <div className={`lg:col-span-6 h-full flex items-center justify-center lg:justify-end transition-all duration-700 delay-200 relative z-20 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
+        {/* Visual Element - Monolito */}
+        <div className={`lg:col-span-6 h-full flex items-center justify-center lg:justify-end transition-all duration-1000 delay-500 relative z-20 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
            <div 
              className="relative w-[300px] md:w-[400px] aspect-[1/2] max-h-[85vh] bg-zinc-950 overflow-hidden shadow-2xl group cursor-pointer border border-zinc-900 transition-transform duration-500 hover:scale-[1.02]" 
              onClick={() => onPlay(project)}
            >
+              {/* Imagem Colorida no Monolito */}
               <div 
                 className="absolute inset-0 bg-cover bg-center transition-all duration-700 opacity-100" 
                 style={{ 
@@ -369,7 +363,7 @@ export default function BrickScrollytelling() {
   return (
     <div className="bg-black text-white font-sans selection:bg-red-600 selection:text-white h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar cursor-default">
       
-      {/* Navigation */}
+      {/* Navigation - Minimalista e Numérica */}
       <div className="fixed right-8 top-1/2 transform -translate-y-1/2 z-50 hidden lg:flex flex-col gap-6">
         {['INTRO', ...projectsData.map((_, i) => String(i + 1).padStart(2, '0')), 'CONTATO'].map((label, idx) => (
           <div key={idx} className="group flex items-center justify-end gap-3 cursor-pointer" onClick={() => scrollToSection(idx)}>
@@ -381,38 +375,42 @@ export default function BrickScrollytelling() {
         ))}
       </div>
 
-      {/* --- HERO SLIDE (LIMPO E VISÍVEL) --- */}
+      {/* --- HERO SLIDE --- */}
       <section 
         ref={el => sectionsRef.current[0] = el}
         className="relative h-screen w-full snap-start flex flex-col items-center justify-center bg-black overflow-hidden"
       >
-        <CinematicHeroBackground />
+        <ModularGridBackground />
         
-        <div className="relative z-20 text-center flex flex-col items-center justify-center h-full pb-20 px-4"> 
+        {/* Ajuste de centralização e margem */}
+        <div className="relative z-10 text-center flex flex-col items-center justify-center h-full pb-20"> 
           
           <img 
             src="/assets/brick_logo_rgb-1.png" 
             alt="Brick Filmmaking House" 
-            className="relative w-64 md:w-96 mix-blend-difference z-10 drop-shadow-2xl mb-8"
+            className="w-64 md:w-80 mb-8 mix-blend-difference hover:scale-105 transition-transform duration-500"
           />
           
-          <div className="flex items-center gap-4 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
-            <div className="h-[1px] w-8 md:w-16 bg-gradient-to-r from-transparent to-zinc-500"></div>
-            <p className="text-xs md:text-sm text-zinc-400 font-mono tracking-[0.3em] uppercase">
-              Do Zero ao Todo
+          <div className="flex items-center gap-4 mb-12">
+            <div className="h-[1px] w-12 bg-zinc-700"></div>
+            <p className="text-sm md:text-base text-zinc-400 font-mono tracking-[0.2em] uppercase">
+              Projetos Originais
             </p>
-            <div className="h-[1px] w-8 md:w-16 bg-gradient-to-l from-transparent to-zinc-500"></div>
+            <div className="h-[1px] w-12 bg-zinc-700"></div>
           </div>
 
           <button 
             onClick={() => scrollToSection(1)}
-            className="group relative px-10 py-4 bg-transparent border border-zinc-800 hover:border-red-600 text-white font-bold text-xs tracking-[0.25em] uppercase transition-all duration-500 overflow-hidden"
+            className="px-10 py-4 bg-white hover:bg-red-600 text-black hover:text-white font-black text-sm tracking-[0.2em] uppercase transition-all duration-300 transform hover:scale-105"
           >
-            <span className="relative z-10 group-hover:text-black transition-colors duration-300">Explorar Catálogo</span>
-            <div className="absolute inset-0 bg-red-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-0"></div>
+            Explorar Catálogo
           </button>
         </div>
 
+        <div className="absolute bottom-8 left-8 text-[10px] text-zinc-600 uppercase tracking-widest font-mono hidden md:block">
+          Do Zero ao Todo
+        </div>
+        
         <ScrollIndicator />
       </section>
 
@@ -452,6 +450,7 @@ export default function BrickScrollytelling() {
             </a>
           </div>
 
+          {/* Elemento Visual Final - Monolito Vermelho Puro com a proporção 1:2 */}
           <div className="hidden md:flex justify-center items-center">
              <div className="w-[300px] md:w-[400px] aspect-[1/2] bg-red-600 shadow-[0_0_100px_rgba(220,38,38,0.3)] relative overflow-hidden flex items-center justify-center transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_0_150px_rgba(220,38,38,0.5)]">
              </div>
