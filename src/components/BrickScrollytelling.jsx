@@ -146,12 +146,31 @@ const VideoModal = ({ project, onClose, onNext, onPrev }) => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
-      <div className="relative w-full max-w-5xl h-full md:h-auto max-h-[90vh] bg-zinc-950 border border-zinc-800 flex flex-col shadow-2xl overflow-hidden rounded-lg">
+      
+      {/* Container Principal do Modal - Relativo para posicionar as setas */}
+      <div className="relative w-full max-w-5xl h-full md:h-auto max-h-[90vh] bg-zinc-950 border border-zinc-800 flex flex-col shadow-2xl overflow-hidden rounded-lg group/modal">
         
+        {/* Setas de Navegação Laterais (DESKTOP APENAS) */}
+        <button 
+            onClick={onPrev}
+            className="hidden md:flex absolute left-4 top-1/2 transform -translate-y-1/2 z-[60] w-12 h-12 items-center justify-center rounded-full bg-black/50 hover:bg-white text-white hover:text-black border border-white/20 hover:border-white transition-all duration-300 backdrop-blur-sm opacity-0 group-hover/modal:opacity-100 -translate-x-4 group-hover/modal:translate-x-0"
+            title="Projeto Anterior"
+        >
+            <ChevronLeft size={24} />
+        </button>
+
+        <button 
+            onClick={onNext}
+            className="hidden md:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-[60] w-12 h-12 items-center justify-center rounded-full bg-black/50 hover:bg-white text-white hover:text-black border border-white/20 hover:border-white transition-all duration-300 backdrop-blur-sm opacity-0 group-hover/modal:opacity-100 translate-x-4 group-hover/modal:translate-x-0"
+            title="Próximo Projeto"
+        >
+            <ChevronRight size={24} />
+        </button>
+
         {/* Header do Modal */}
         <div className="flex justify-between items-center p-6 border-b border-zinc-900 bg-zinc-950 z-50">
           <div className="flex flex-col">
-             <span className="text-red-600 font-bold text-xs tracking-widest uppercase mb-1">Brick Originals</span>
+             <span className="text-red-600 font-bold text-xs tracking-widest uppercase mb-1">Brick Originais</span>
              <h2 className="text-2xl font-black text-white uppercase tracking-tighter">{project.title}</h2>
           </div>
           <button 
@@ -225,7 +244,7 @@ const VideoModal = ({ project, onClose, onNext, onPrev }) => {
                       )}
                   </div>
 
-                  {/* Botão de Download Mobile */}
+                  {/* Botão de Download Mobile (Sem navegação de setas) */}
                   {project.pdfUrl ? (
                       <a 
                         href={project.pdfUrl}
@@ -243,16 +262,6 @@ const VideoModal = ({ project, onClose, onNext, onPrev }) => {
                           INDISPONÍVEL
                       </button>
                   )}
-
-                  {/* Navegação Mobile (Fundo) */}
-                  <div className="flex gap-2">
-                      <button onClick={onPrev} className="flex-1 py-3 bg-zinc-900 border border-zinc-800 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-800 flex items-center justify-center gap-2 rounded-sm">
-                          <ChevronLeft size={14} /> Ant
-                      </button>
-                      <button onClick={onNext} className="flex-1 py-3 bg-zinc-900 border border-zinc-800 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-800 flex items-center justify-center gap-2 rounded-sm">
-                          Próx <ChevronRight size={14} />
-                      </button>
-                  </div>
                </div>
             </div>
 
@@ -287,39 +296,25 @@ const VideoModal = ({ project, onClose, onNext, onPrev }) => {
                   </div>
                </div>
 
-               {/* Rodapé da Sidebar: Ação e Navegação */}
+               {/* Rodapé da Sidebar: Ação */}
                <div className="p-8 border-t border-zinc-900 bg-zinc-900/50 backdrop-blur-sm sticky bottom-0">
-                  
-                  {/* Botão de Download */}
-                  <div className="mb-6">
-                    {project.pdfUrl ? (
-                      <a 
-                        href={project.pdfUrl}
-                        download
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full py-4 bg-white hover:bg-gray-200 text-black text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 rounded-sm shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer"
-                      >
-                        <Download size={16} />
-                        BAIXAR PROJETO
-                      </a>
-                    ) : (
-                      <button disabled className="w-full py-4 bg-zinc-800 text-zinc-500 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-3 rounded-sm cursor-not-allowed">
-                        <Download size={16} />
-                        INDISPONÍVEL
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Navegação (Agora embaixo do Download) */}
-                  <div className="flex gap-3">
-                      <button onClick={onPrev} className="flex-1 py-3 bg-transparent border border-zinc-700 hover:border-white text-zinc-400 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 rounded-sm group">
-                          <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Anterior
-                      </button>
-                      <button onClick={onNext} className="flex-1 py-3 bg-transparent border border-zinc-700 hover:border-white text-zinc-400 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 rounded-sm group">
-                          Próximo <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                      </button>
-                  </div>
+                  {project.pdfUrl ? (
+                    <a 
+                      href={project.pdfUrl}
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-4 bg-white hover:bg-gray-200 text-black text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 rounded-sm shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+                    >
+                      <Download size={16} />
+                      BAIXAR PROJETO
+                    </a>
+                  ) : (
+                    <button disabled className="w-full py-4 bg-zinc-800 text-zinc-500 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-3 rounded-sm cursor-not-allowed">
+                      <Download size={16} />
+                      INDISPONÍVEL
+                    </button>
+                  )}
                </div>
             </div>
         </div>
