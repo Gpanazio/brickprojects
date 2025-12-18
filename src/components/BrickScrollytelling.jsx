@@ -12,7 +12,6 @@ const projectsData = [
     genre: "Games / Cultura Pop",
     format: "6 EPISÓDIOS DE 30 MIN",
     status: "Finalizado",
-    host: "BRKSEDU",
     description: "Da clonagem aos campeonatos milionários: a controversa e fascinante história do videogame no Brasil.",
     longDescription: "Uma viagem no tempo mostrando como o mercado cinza, a pirataria e a paixão dos brasileiros transformaram o país em uma potência dos games.",
     videoLabel: "Ver Teaser",
