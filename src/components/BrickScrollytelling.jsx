@@ -205,7 +205,7 @@ const VideoModal = ({ project, onClose, onNext, onPrev }) => {
                       <span className="text-white text-sm font-bold">{project.genre}</span>
                   </div>
 
-                  {/* Sinopse */}
+                  {/* Sinopse (Meio) */}
                   <div>
                       <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2 font-bold">Sinopse</span>
                       <p className="text-zinc-300 text-sm leading-relaxed">{project.longDescription}</p>
@@ -223,16 +223,6 @@ const VideoModal = ({ project, onClose, onNext, onPrev }) => {
                               <span className="text-white text-sm font-bold">{project.host}</span>
                           </div>
                       )}
-                  </div>
-
-                  {/* Navegação Mobile */}
-                  <div className="flex gap-2 mt-2">
-                      <button onClick={onPrev} className="flex-1 py-3 bg-zinc-900 border border-zinc-800 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-800 flex items-center justify-center gap-2 rounded-sm">
-                          <ChevronLeft size={14} /> Ant
-                      </button>
-                      <button onClick={onNext} className="flex-1 py-3 bg-zinc-900 border border-zinc-800 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-800 flex items-center justify-center gap-2 rounded-sm">
-                          Próx <ChevronRight size={14} />
-                      </button>
                   </div>
 
                   {/* Botão de Download Mobile */}
@@ -253,6 +243,16 @@ const VideoModal = ({ project, onClose, onNext, onPrev }) => {
                           INDISPONÍVEL
                       </button>
                   )}
+
+                  {/* Navegação Mobile (Fundo) */}
+                  <div className="flex gap-2">
+                      <button onClick={onPrev} className="flex-1 py-3 bg-zinc-900 border border-zinc-800 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-800 flex items-center justify-center gap-2 rounded-sm">
+                          <ChevronLeft size={14} /> Ant
+                      </button>
+                      <button onClick={onNext} className="flex-1 py-3 bg-zinc-900 border border-zinc-800 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-800 flex items-center justify-center gap-2 rounded-sm">
+                          Próx <ChevronRight size={14} />
+                      </button>
+                  </div>
                </div>
             </div>
 
@@ -287,10 +287,32 @@ const VideoModal = ({ project, onClose, onNext, onPrev }) => {
                   </div>
                </div>
 
-               {/* Rodapé da Sidebar: Navegação e Ação */}
+               {/* Rodapé da Sidebar: Ação e Navegação */}
                <div className="p-8 border-t border-zinc-900 bg-zinc-900/50 backdrop-blur-sm sticky bottom-0">
-                  {/* Navegação */}
-                  <div className="flex gap-3 mb-4">
+                  
+                  {/* Botão de Download */}
+                  <div className="mb-6">
+                    {project.pdfUrl ? (
+                      <a 
+                        href={project.pdfUrl}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-4 bg-white hover:bg-gray-200 text-black text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 rounded-sm shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+                      >
+                        <Download size={16} />
+                        BAIXAR PROJETO
+                      </a>
+                    ) : (
+                      <button disabled className="w-full py-4 bg-zinc-800 text-zinc-500 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-3 rounded-sm cursor-not-allowed">
+                        <Download size={16} />
+                        INDISPONÍVEL
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Navegação (Agora embaixo do Download) */}
+                  <div className="flex gap-3">
                       <button onClick={onPrev} className="flex-1 py-3 bg-transparent border border-zinc-700 hover:border-white text-zinc-400 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 rounded-sm group">
                           <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Anterior
                       </button>
@@ -298,25 +320,6 @@ const VideoModal = ({ project, onClose, onNext, onPrev }) => {
                           Próximo <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
                       </button>
                   </div>
-
-                  {/* Botão de Download */}
-                  {project.pdfUrl ? (
-                    <a 
-                      href={project.pdfUrl}
-                      download
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full py-4 bg-white hover:bg-gray-200 text-black text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 rounded-sm shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer"
-                    >
-                      <Download size={16} />
-                      BAIXAR PROJETO
-                    </a>
-                  ) : (
-                    <button disabled className="w-full py-4 bg-zinc-800 text-zinc-500 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-3 rounded-sm cursor-not-allowed">
-                      <Download size={16} />
-                      INDISPONÍVEL
-                    </button>
-                  )}
                </div>
             </div>
         </div>
