@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, X, ChevronDown, MousePointer2, Mail, Instagram, Youtube, ArrowRight, Grid, Plus, Download } from 'lucide-react';
+import { Play, X, ChevronDown, MousePointer2, Mail, Instagram, Youtube, ArrowRight, Grid, Plus, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // --- DADOS DOS PROJETOS (Ordem Alfabética) ---
 // As imagens devem estar na pasta /public/assets/ do seu projeto.
@@ -42,7 +42,7 @@ const projectsData = [
     title: "MISTÉRIOS DA BOLA",
     category: "Documentário",
     genre: "Esportes / Mistério",
-    format: "TV aberta: 8 min\nPay TV e Streaming: 26 min", // ALTERADO
+    format: "TV aberta: 8 min\nPay TV e Streaming: 26 min",
     status: "Em Desenvolvimento",
     description: "Investigação do lado oculto do futebol: maldições, fraudes e histórias que transcendem o campo.",
     longDescription: "O futebol é uma caixinha de surpresas, ou seria uma caixinha de mistérios? Uma série documental com tom de suspense noir sobre o esporte mais amado do mundo.",
@@ -74,7 +74,7 @@ const projectsData = [
     title: "SUPER CORPO",
     category: "Documentário",
     genre: "Saúde / Lifestyle",
-    format: "TV aberta: 8 min\nPay TV e Streaming: 26 min", // ALTERADO
+    format: "TV aberta: 8 min\nPay TV e Streaming: 26 min",
     status: "Em Captação",
     host: "Mari Goldfarb",
     description: "Estamos vivendo mais, mas como viver melhor? Uma jornada em busca da longevidade.",
@@ -91,7 +91,7 @@ const projectsData = [
     title: "TROCA DE CHEFIA",
     category: "Reality",
     genre: "Empreendedorismo",
-    format: "Episódios de 26 ou 56 min", // ALTERADO
+    format: "Episódios de 26 ou 56 min",
     status: "Formato Pronto",
     description: "Dois donos de negócios vivem por um dia os desafios um do outro. Empatia e gestão na prática.",
     longDescription: "O que acontece quando um dono de padaria troca de lugar com a dona de uma oficina mecânica? Um reality show ágil sobre os desafios reais de empreender.",
@@ -107,7 +107,7 @@ const projectsData = [
     title: "TU TÁ NO RJ",
     category: "Documentário",
     genre: "True Crime de Humor",
-    format: "TV aberta: 8 min\nPay TV e Streaming: 26 min", // ALTERADO
+    format: "TV aberta: 8 min\nPay TV e Streaming: 26 min",
     status: "Em Desenvolvimento",
     description: "Esqueça o serial killer. Uma investigação irreverente sobre os crimes mais surreais, criativos e ilógicos que só poderiam acontecer no Rio de Janeiro.",
     longDescription: "Uma investigação irreverente sobre os crimes mais surreais que aconteceram no Rio de Janeiro. Um True Crime à brasileira que foge do óbvio e mergulha no caos urbano carioca.",
@@ -136,7 +136,7 @@ const ModularGridBackground = () => (
   </div>
 );
 
-const VideoModal = ({ project, onClose }) => {
+const VideoModal = ({ project, onClose, onNext, onPrev }) => {
   if (!project) return null;
 
   // URL do Vimeo sem Autoplay
@@ -163,10 +163,10 @@ const VideoModal = ({ project, onClose }) => {
         </div>
 
         <div className="flex flex-col md:flex-row h-full overflow-hidden">
-            {/* ÁREA PRINCIPAL: PLAYER DE VÍDEO (EMBED) */}
-            <div className="w-full md:w-2/3 bg-black flex flex-col relative group">
+            {/* ÁREA PRINCIPAL: PLAYER E CONTEÚDO MOBILE */}
+            <div className="w-full md:w-2/3 bg-black flex flex-col relative group overflow-y-auto md:overflow-y-visible">
                {/* Container do Vídeo (Aspect Ratio 16:9) */}
-               <div className="w-full aspect-video relative bg-zinc-900 overflow-hidden">
+               <div className="w-full aspect-video relative bg-zinc-900 overflow-hidden flex-shrink-0">
                    {project.vimeoId ? (
                      <iframe 
                        src={videoSrc} 
@@ -177,7 +177,7 @@ const VideoModal = ({ project, onClose }) => {
                        title={project.title}
                      ></iframe>
                    ) : (
-                     // Fallback para projetos sem vídeo (Ex: Mistérios da Bola)
+                     // Fallback para projetos sem vídeo
                      <div className="absolute inset-0 w-full h-full">
                         <div 
                           className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] hover:scale-105"
@@ -196,29 +196,87 @@ const VideoModal = ({ project, onClose }) => {
                    )}
                </div>
                
-               {/* Descrição abaixo do vídeo (Mobile) */}
-               <div className="p-6 md:hidden">
-                  <p className="text-zinc-300 text-sm leading-relaxed">{project.longDescription}</p>
+               {/* CONTEÚDO MOBILE (Abaixo do vídeo) */}
+               <div className="md:hidden bg-zinc-950 p-6 flex flex-col gap-6">
+                  
+                  {/* Gênero (Topo) */}
+                  <div className="pb-4 border-b border-zinc-900">
+                      <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-1 font-bold">Gênero</span>
+                      <span className="text-white text-sm font-bold">{project.genre}</span>
+                  </div>
+
+                  {/* Sinopse */}
+                  <div>
+                      <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2 font-bold">Sinopse</span>
+                      <p className="text-zinc-300 text-sm leading-relaxed">{project.longDescription}</p>
+                  </div>
+
+                  {/* Formato e Host (Restante) */}
+                  <div className="space-y-4 pt-4 border-t border-zinc-900">
+                      <div>
+                          <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-1 font-bold">Formato</span>
+                          <span className="text-white text-sm font-bold whitespace-pre-line">{project.format}</span>
+                      </div>
+                      {project.host && (
+                          <div>
+                              <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-1 font-bold">Apresentação</span>
+                              <span className="text-white text-sm font-bold">{project.host}</span>
+                          </div>
+                      )}
+                  </div>
+
+                  {/* Navegação Mobile */}
+                  <div className="flex gap-2 mt-2">
+                      <button onClick={onPrev} className="flex-1 py-3 bg-zinc-900 border border-zinc-800 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-800 flex items-center justify-center gap-2 rounded-sm">
+                          <ChevronLeft size={14} /> Ant
+                      </button>
+                      <button onClick={onNext} className="flex-1 py-3 bg-zinc-900 border border-zinc-800 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-800 flex items-center justify-center gap-2 rounded-sm">
+                          Próx <ChevronRight size={14} />
+                      </button>
+                  </div>
+
+                  {/* Botão de Download Mobile */}
+                  {project.pdfUrl ? (
+                      <a 
+                        href={project.pdfUrl}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-4 bg-white text-black text-xs font-black uppercase tracking-widest rounded-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-transform shadow-lg"
+                      >
+                          <Download size={16} />
+                          BAIXAR PROJETO
+                      </a>
+                  ) : (
+                      <button disabled className="w-full py-4 bg-zinc-800 text-zinc-500 text-xs font-black uppercase tracking-widest rounded-sm flex items-center justify-center gap-2 cursor-not-allowed">
+                          <Download size={16} />
+                          INDISPONÍVEL
+                      </button>
+                  )}
                </div>
             </div>
 
-            {/* BARRA LATERAL: INFORMAÇÕES */}
+            {/* BARRA LATERAL: INFORMAÇÕES (DESKTOP) */}
             <div className="hidden md:flex w-1/3 flex-col border-l border-zinc-900 bg-zinc-950 overflow-y-auto">
                <div className="p-8 flex-1">
+                  
+                  {/* 1. Gênero (Topo) */}
+                  <div className="mb-8">
+                      <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-1 font-bold">Gênero</span>
+                      <span className="text-white text-sm font-bold">{project.genre}</span>
+                  </div>
+
+                  {/* 2. Sinopse */}
                   <div className="mb-8">
                     <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2 font-bold">Sinopse</span>
                     <p className="text-zinc-300 text-sm leading-relaxed">{project.longDescription}</p>
                   </div>
 
+                  {/* 3. Formato e Apresentação (Restante) */}
                   <div className="space-y-6">
                     <div>
                         <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-1 font-bold">Formato</span>
-                        {/* A classe whitespace-pre-line garante que o \n seja respeitado */}
                         <span className="text-white text-sm font-bold whitespace-pre-line">{project.format}</span>
-                    </div>
-                    <div>
-                        <span className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-1 font-bold">Gênero</span>
-                        <span className="text-white text-sm font-bold">{project.genre}</span>
                     </div>
                     {project.host && (
                         <div>
@@ -229,8 +287,19 @@ const VideoModal = ({ project, onClose }) => {
                   </div>
                </div>
 
-               {/* Botão de Ação */}
-               <div className="p-8 border-t border-zinc-900 bg-zinc-900/30">
+               {/* Rodapé da Sidebar: Navegação e Ação */}
+               <div className="p-8 border-t border-zinc-900 bg-zinc-900/50 backdrop-blur-sm sticky bottom-0">
+                  {/* Navegação */}
+                  <div className="flex gap-3 mb-4">
+                      <button onClick={onPrev} className="flex-1 py-3 bg-transparent border border-zinc-700 hover:border-white text-zinc-400 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 rounded-sm group">
+                          <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Anterior
+                      </button>
+                      <button onClick={onNext} className="flex-1 py-3 bg-transparent border border-zinc-700 hover:border-white text-zinc-400 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 rounded-sm group">
+                          Próximo <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                      </button>
+                  </div>
+
+                  {/* Botão de Download */}
                   {project.pdfUrl ? (
                     <a 
                       href={project.pdfUrl}
@@ -251,33 +320,6 @@ const VideoModal = ({ project, onClose }) => {
                </div>
             </div>
         </div>
-        
-        {/* Info Mobile */}
-        <div className="md:hidden p-6 border-t border-zinc-900 bg-zinc-950">
-            <div className="flex justify-between items-start mb-6 text-xs text-zinc-500 font-mono">
-                <span className="whitespace-pre-line text-left">{project.format}</span>
-                <span className="text-right ml-4">{project.genre}</span>
-            </div>
-            
-            {project.pdfUrl ? (
-                <a 
-                  href={project.pdfUrl}
-                  download
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-4 bg-white text-black text-xs font-black uppercase tracking-widest rounded-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-transform"
-                >
-                    <Download size={16} />
-                    BAIXAR PROJETO
-                </a>
-            ) : (
-                <button disabled className="w-full py-4 bg-zinc-800 text-zinc-500 text-xs font-black uppercase tracking-widest rounded-sm flex items-center justify-center gap-2 cursor-not-allowed">
-                    <Download size={16} />
-                    INDISPONÍVEL
-                </button>
-            )}
-        </div>
-
       </div>
     </div>
   );
@@ -395,6 +437,21 @@ export default function BrickScrollytelling() {
     sectionsRef.current[index]?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Funções de Navegação
+  const handleNextProject = () => {
+    if (!selectedProject) return;
+    const currentIndex = projectsData.findIndex(p => p.id === selectedProject.id);
+    const nextIndex = (currentIndex + 1) % projectsData.length;
+    setSelectedProject(projectsData[nextIndex]);
+  };
+
+  const handlePrevProject = () => {
+    if (!selectedProject) return;
+    const currentIndex = projectsData.findIndex(p => p.id === selectedProject.id);
+    const prevIndex = (currentIndex - 1 + projectsData.length) % projectsData.length;
+    setSelectedProject(projectsData[prevIndex]);
+  };
+
   return (
     <div className="bg-black text-white font-sans selection:bg-red-600 selection:text-white h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar cursor-default">
       
@@ -503,7 +560,12 @@ export default function BrickScrollytelling() {
         </footer>
       </section>
 
-      <VideoModal project={selectedProject} onClose={() => setSelectedProject(null)} />
+      <VideoModal 
+        project={selectedProject} 
+        onClose={() => setSelectedProject(null)} 
+        onNext={handleNextProject}
+        onPrev={handlePrevProject}
+      />
     </div>
   );
 }
