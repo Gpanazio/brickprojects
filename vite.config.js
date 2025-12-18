@@ -9,10 +9,12 @@ export default defineConfig({
     host: true 
   },
   preview: {
-    // AQUI ESTAVA O ERRO: A porta estava fixa em 4173.
-    // Agora, ela ouvirá a porta do Railway (process.env.PORT) 
-    // ou cairá para 4173 apenas se não houver variável definida.
+    // Mantém a lógica da porta dinâmica para o Railway
     port: process.env.PORT ? parseInt(process.env.PORT) : 4173,
-    host: true
+    host: true,
+    // CORREÇÃO: Permite o domínio do Railway
+    allowedHosts: [
+      'brickprojects-production.up.railway.app'
+    ]
   }
 })
