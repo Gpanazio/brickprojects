@@ -3,6 +3,7 @@ import { Play, X, ChevronDown, MousePointer2, Mail, Instagram, Youtube, ArrowRig
 
 // --- DADOS DOS PROJETOS (Ordem Alfabética) ---
 // As imagens devem estar na pasta /public/assets/ do seu projeto.
+// Os PDFs devem estar na pasta /public/projetos/ do seu projeto.
 
 const projectsData = [
   {
@@ -12,27 +13,30 @@ const projectsData = [
     genre: "Games / Cultura Pop",
     format: "6 EPISÓDIOS DE 30 MIN",
     status: "Finalizado",
+    host: "BRKSEDU",
     description: "Da clonagem aos campeonatos milionários: a controversa e fascinante história do videogame no Brasil.",
     longDescription: "Uma viagem no tempo mostrando como o mercado cinza, a pirataria e a paixão dos brasileiros transformaram o país em uma potência dos games.",
     videoLabel: "Ver Teaser",
     bgImage: "/assets/100hor.webp",
     monolithImage: "/assets/100atuverti.webp",
-    vimeoId: "1060607336"
+    vimeoId: "1060607336",
+    pdfUrl: "/projetos/PITCH_DECK_100_ATUALIZADO.pdf"
   },
   {
     id: 4,
     title: "BASTIDORES DA MEMÓRIA",
     category: "Documentário",
     genre: "História / Cultura",
-    format: "Diversos",
+    format: "10 EPISÓDIOS DE 6 MIN",
     status: "Exibido (History)",
     description: "Os tesouros ocultos nas reservas técnicas dos museus brasileiros que ajudam a recontar nossa história.",
-    longDescription: "Uma série documental que entra onde o público não pode ir: as reservas técnicas dos museus. Teve uma temporada exclusiva produzida para o History Channel, mas está dispomível para licenciamento e novas temporadas ",
+    longDescription: "Uma série documental que entra onde o público não pode ir: as reservas técnicas dos museus. Já exibido no History Channel e Bandplay.",
     videoLabel: "Assistir Episódio 1",
     bgImage: "/assets/bmhorizontal.webp", 
     monolithImage: "/assets/bmvertical.webp",
     vimeoId: "1147440138",
-    vimeoHash: "4b6785c3fc"
+    vimeoHash: "4b6785c3fc",
+    pdfUrl: "/projetos/PITCH_DECK_BASTIDORES.pdf"
   },
   {
     id: 6,
@@ -46,14 +50,15 @@ const projectsData = [
     videoLabel: "Ver Pitch",
     bgImage: "/assets/mbhor.webp",
     monolithImage: "/assets/mbverti.webp",
-    vimeoId: null // Sem vídeo, mostra banner estático no modal
+    vimeoId: null, // Sem vídeo, mostra banner estático no modal
+    pdfUrl: "/projetos/PITCH_DECK_MISTERIOS_DA_BOLA.pdf"
   },
   {
     id: 5,
     title: "NÃO VAI ZICAR",
     category: "Factual",
     genre: "Esportes",
-    format: "EPISÓDIOS DE 4 MIN",
+    format: "10 EPISÓDIOS DE 4 MIN",
     status: "Piloto Disponível",
     host: "Andrey Raychtock",
     description: "Um mergulho factual, rápido e divertido no mundo dos esportes, superstições e estatísticas.",
@@ -62,14 +67,15 @@ const projectsData = [
     bgImage: "/assets/nvzhorizontal.webp",
     monolithImage: "/assets/nvzvert.webp",
     vimeoId: "1091855463",
-    vimeoHash: "fb313f7730"
+    vimeoHash: "fb313f7730",
+    pdfUrl: "/projetos/PITCH_DECK_NAO_VAI_ZICAR.pdf"
   },
   {
     id: 7,
     title: "SUPER CORPO",
     category: "Documentário",
     genre: "Saúde / Lifestyle",
-    format: "EPISÓDIOS DE 26 MIN",
+    format: "10 EPISÓDIOS DE 26 MIN",
     status: "Em Captação",
     host: "Mari Goldfarb",
     description: "Estamos vivendo mais, mas como viver melhor? Uma jornada em busca da longevidade.",
@@ -78,14 +84,15 @@ const projectsData = [
     bgImage: "/assets/schor.webp",
     monolithImage: "/assets/scorvert.webp",
     vimeoId: "1110052878",
-    vimeoHash: "deca249548"
+    vimeoHash: "deca249548",
+    pdfUrl: "/projetos/PITCH_DECK_SUPERCORPO.pdf"
   },
   {
     id: 3,
     title: "TROCA DE CHEFIA",
     category: "Reality",
     genre: "Empreendedorismo",
-    format: "EPISÓDIOS DE 26 ou 56 MIN",
+    format: "10 EPISÓDIOS DE 10 MIN",
     status: "Formato Pronto",
     description: "Dois donos de negócios vivem por um dia os desafios um do outro. Empatia e gestão na prática.",
     longDescription: "O que acontece quando um dono de padaria troca de lugar com a dona de uma oficina mecânica? Um reality show ágil sobre os desafios reais de empreender.",
@@ -93,14 +100,15 @@ const projectsData = [
     bgImage: "/assets/tcfhor.webp",
     monolithImage: "/assets/tfvert.webp",
     vimeoId: "1110027782",
-    vimeoHash: "6295e6a248"
+    vimeoHash: "6295e6a248",
+    pdfUrl: "/projetos/PITCH_DECK_TROCA_DE_CHEFIA.pdf"
   },
   {
     id: 1,
     title: "TU TÁ NO RJ",
     category: "Documentário",
     genre: "True Crime / Humor",
-    format: "EPISÓDIOS DE 8 (QUADRO PARA TV) OU 26 MINUTOS",
+    format: "10 EPISÓDIOS DE 8 MIN",
     status: "Em Desenvolvimento",
     description: "Esqueça o serial killer! Uma investigação irreverente sobre os crimes mais surreais que aconteceram no Rio de Janeiro.",
     longDescription: "Uma investigação irreverente sobre os crimes mais surreais que aconteceram no Rio de Janeiro. Um True Crime à brasileira que foge do óbvio e mergulha no caos urbano carioca.",
@@ -108,7 +116,8 @@ const projectsData = [
     bgImage: "/assets/TTRJHOR.webp",
     monolithImage: "/assets/ttrjvert.webp",
     vimeoId: "1091288426",
-    vimeoHash: "59bc6e3eb4"
+    vimeoHash: "59bc6e3eb4",
+    pdfUrl: "/projetos/PITCH_DECK_TU_TA_NO_RJ.pdf"
   }
 ];
 
@@ -222,10 +231,23 @@ const VideoModal = ({ project, onClose }) => {
 
                {/* Botão de Ação */}
                <div className="p-8 border-t border-zinc-900 bg-zinc-900/30">
-                  <button className="w-full py-4 bg-white hover:bg-gray-200 text-black text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 rounded-sm shadow-lg hover:shadow-xl hover:-translate-y-1">
-                    <Download size={16} />
-                    BAIXAR PROJETO
-                  </button>
+                  {project.pdfUrl ? (
+                    <a 
+                      href={project.pdfUrl}
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-4 bg-white hover:bg-gray-200 text-black text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 rounded-sm shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+                    >
+                      <Download size={16} />
+                      BAIXAR PROJETO
+                    </a>
+                  ) : (
+                    <button disabled className="w-full py-4 bg-zinc-800 text-zinc-500 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-3 rounded-sm cursor-not-allowed">
+                      <Download size={16} />
+                      INDISPONÍVEL
+                    </button>
+                  )}
                </div>
             </div>
         </div>
@@ -236,10 +258,24 @@ const VideoModal = ({ project, onClose }) => {
                 <span>{project.format}</span>
                 <span>{project.genre}</span>
             </div>
-            <button className="w-full py-4 bg-white text-black text-xs font-black uppercase tracking-widest rounded-sm flex items-center justify-center gap-2">
-                <Download size={16} />
-                BAIXAR PROJETO
-            </button>
+            
+            {project.pdfUrl ? (
+                <a 
+                  href={project.pdfUrl}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-4 bg-white text-black text-xs font-black uppercase tracking-widest rounded-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-transform"
+                >
+                    <Download size={16} />
+                    BAIXAR PROJETO
+                </a>
+            ) : (
+                <button disabled className="w-full py-4 bg-zinc-800 text-zinc-500 text-xs font-black uppercase tracking-widest rounded-sm flex items-center justify-center gap-2 cursor-not-allowed">
+                    <Download size={16} />
+                    INDISPONÍVEL
+                </button>
+            )}
         </div>
 
       </div>
