@@ -8,7 +8,7 @@ const router = express.Router();
 
 // Rota de login
 router.post('/login', [
-  body('email').isEmail().withMessage('Email inválido'),
+  body('username').notEmpty().withMessage('Username é obrigatório'),
   body('password').notEmpty().withMessage('Senha é obrigatória')
 ], async (req, res) => {
   try {
@@ -18,12 +18,12 @@ router.post('/login', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
     // Busca o usuário no banco
     const result = await pool.query(
-      'SELECT * FROM master_users WHERE email = $1',
-      [email]
+      'SELECT * FROM master_users WHERE username = $1',
+      [username]
     );
 
     if (result.rows.length === 0) {
@@ -75,7 +75,8 @@ router.post('/login', [
 router.post('/register', [
   body('username').trim().isLength({ min: 3 }).withMessage('Username deve ter no mínimo 3 caracteres'),
   body('email').isEmail().withMessage('Email inválido'),
-  body('password').isLength({ min: 6 }).withMessage('Senha deve ter no mínimo 6 caracteres')
+  body('password').isLength({ min: 6 }).withMessage('Senha deve ter no mínimo 6 caracteres'),
+  body('password_path').optional().isString()
 ], async (req, res) => {
   try {
     // Valida os dados de entrada
@@ -84,7 +85,7 @@ router.post('/register', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { username, email, password, role = 'admin' } = req.body;
+    const { username, email, password, password_path, role = 'admin' } = req.body;
 
     // Verifica se o usuário já existe
     const existingUser = await pool.query(
@@ -103,8 +104,8 @@ router.post('/register', [
 
     // Insere o novo usuário
     const result = await pool.query(
-      'INSERT INTO master_users (username, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, username, email, role, created_at',
-      [username, email, passwordHash, role]
+      'INSERT INTO master_users (username, email, password_hash, password_path, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, username, email, role, password_path, created_at',
+      [username, email, passwordHash, password_path, role]
     );
 
     const newUser = result.rows[0];

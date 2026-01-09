@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Lock, Mail, AlertCircle } from 'lucide-react';
 
 export default function AdminLogin({ onLogin }) {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ export default function AdminLogin({ onLogin }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await response.json();
@@ -57,20 +57,20 @@ export default function AdminLogin({ onLogin }) {
         {/* Form Card */}
         <div className="bg-zinc-950 border border-zinc-800 p-8 shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
+            {/* Username Field */}
             <div>
-              <label htmlFor="email" className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
-                Email
+              <label htmlFor="username" className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
+                Usuário
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-600" size={18} />
                 <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="w-full bg-black border border-zinc-800 text-white pl-11 pr-4 py-3 focus:outline-none focus:border-red-600 transition-colors"
-                  placeholder="seu@email.com"
+                  placeholder="Seu usuário"
                   required
                   disabled={loading}
                 />

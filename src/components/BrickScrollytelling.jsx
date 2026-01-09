@@ -3,6 +3,122 @@ import { Play, X, ChevronDown, MousePointer2, Mail, Instagram, Youtube, ArrowRig
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
+// --- DADOS DOS PROJETOS (HARDCODED FALLBACK) ---
+const hardcodedProjects = [
+  {
+    id: 1,
+    title: "TU TÁ NO RJ",
+    category: "Documentário",
+    genre: "True Crime de Humor",
+    format: "TV aberta: 8 min\nPay TV e Streaming: 26 min",
+    status: "Em Desenvolvimento",
+    description: "Esqueça o serial killer. Uma investigação irreverente sobre os crimes mais surreais, criativos e ilógicos que só poderiam acontecer no Rio de Janeiro.",
+    longDescription: "Uma investigação irreverente sobre os crimes mais surreais que aconteceu no Rio de Janeiro. Um True Crime à brasileira que foge do óbvio e mergulha no caos urbano carioca.",
+    videoLabel: "Ver Promo",
+    bgImage: "/assets/TTRJHOR.webp",
+    monolithImage: "/assets/ttrjvert.webp",
+    vimeoId: "1091288426",
+    vimeoHash: "59bc6e3eb4",
+    pdfUrl: "/projetos/PITCH_DECK_TU_TA_NO_RJ.pdf"
+  },
+  {
+    id: 2,
+    title: "100% ATUALIZADO",
+    category: "Documentário",
+    genre: "Doc-Série Pop / Games",
+    format: "6 episódios de 26 min",
+    status: "Finalizado",
+    description: "Da clonagem de cartuchos aos campeonatos milionários: a história não oficial de como a pirataria e a \"gambiarra\" construíram a cultura gamer no Brasil.",
+    longDescription: "Uma viagem no tempo mostrando como o mercado cinza, a pirataria e a paixão dos brasileiros transformaram o país em uma potência dos games.",
+    videoLabel: "Ver Teaser",
+    bgImage: "/assets/100hor.webp",
+    monolithImage: "/assets/100atuverti.webp",
+    vimeoId: "1060607336",
+    pdfUrl: "/projetos/PITCH_DECK_100_ATUALIZADO.pdf"
+  },
+  {
+    id: 3,
+    title: "TROCA DE CHEFIA",
+    category: "Reality",
+    genre: "Empreendedorismo",
+    format: "Episódios de 26 ou 56 min",
+    status: "Formato Pronto",
+    description: "Dois donos de negócios vivem por um dia os desafios um do outro. Empatia e gestão na prática.",
+    longDescription: "O que acontece quando um dono de padaria troca de lugar com a dona de uma oficina mecânica? Um reality show ágil sobre os desafios reais de empreender.",
+    videoLabel: "Ver Teaser",
+    bgImage: "/assets/tcfhor.webp",
+    monolithImage: "/assets/tfvert.webp",
+    vimeoId: "1110027782",
+    vimeoHash: "6295e6a248",
+    pdfUrl: "/projetos/PITCH_DECK_TROCA_DE_CHEFIA.pdf"
+  },
+  {
+    id: 4,
+    title: "BASTIDORES DA MEMÓRIA",
+    category: "Documentário",
+    genre: "História / Cultura",
+    format: "Diversos",
+    status: "Exibido (History)",
+    description: "Os tesouros ocultos nas reservas técnicas dos museus brasileiros que ajudam a recontar nossa história.",
+    longDescription: "Uma série documental que revela o que o público não vê: as reservas técnicas dos museus. Já exibida no History Channel em reedição exclusiva, com a primeira temporada completa disponível na Bandplay e no UOL. Aberta para licenciamento e novas temporadas.",
+    videoLabel: "Assistir Episódio 1",
+    bgImage: "/assets/bmhorizontal.webp",
+    monolithImage: "/assets/bmvertical.webp",
+    vimeoId: "1147440138",
+    vimeoHash: "4b6785c3fc",
+    pdfUrl: "/projetos/PITCH_DECK_BASTIDORES.pdf"
+  },
+  {
+    id: 5,
+    title: "NÃO VAI ZICAR",
+    category: "Factual",
+    genre: "Humor Esportivo",
+    format: "Episódios de 4 min",
+    status: "Piloto Disponível",
+    host: "Andrey Raychtock",
+    description: "Uma sátira inteligente ao mundo das bets que usa estatísticas reais para dar sentido às coincidências mais incríveis do futebol.",
+    longDescription: "Andrey Raychtock comanda este formato curto e ágil, perfeito para redes sociais e intervalos comerciais, desvendando as curiosidades do esporte.",
+    videoLabel: "Ver Piloto",
+    bgImage: "/assets/nvzhorizontal.webp",
+    monolithImage: "/assets/nvzvert.webp",
+    vimeoId: "1091855463",
+    vimeoHash: "fb313f7730",
+    pdfUrl: "/projetos/PITCH_DECK_NAO_VAI_ZICAR.pdf"
+  },
+  {
+    id: 6,
+    title: "MISTÉRIOS DA BOLA",
+    category: "Documentário",
+    genre: "Esportes / Mistério",
+    format: "TV aberta: 8 min\nPay TV e Streaming: 26 min",
+    status: "Em Desenvolvimento",
+    description: "Investigação do lado oculto do futebol: maldições, fraudes e histórias que transcendem o campo.",
+    longDescription: "O futebol é uma caixinha de surpresas, ou seria uma caixinha de mistérios? Uma série documental com tom de suspense noir sobre o esporte mais amado do mundo.",
+    videoLabel: "Ver Pitch",
+    bgImage: "/assets/mbhor.webp",
+    monolithImage: "/assets/mbverti.webp",
+    vimeoId: null,
+    pdfUrl: "/projetos/PITCH_DECK_MISTERIOS_DA_BOLA.pdf"
+  },
+  {
+    id: 7,
+    title: "SUPER CORPO",
+    category: "Documentário",
+    genre: "Saúde / Lifestyle",
+    format: "TV aberta: 8 min\nPay TV e Streaming: 26 min",
+    status: "Em Captação",
+    host: "Mari Goldfarb",
+    description: "Estamos vivendo mais, mas como viver melhor? Uma jornada em busca da longevidade.",
+    longDescription: "Mari Goldfarb conduz entrevistas e experiências em busca dos segredos para uma vida longa, saudável e equilibrada.",
+    videoLabel: "Ver Manifesto",
+    bgImage: "/assets/schor.webp",
+    monolithImage: "/assets/scorvert.webp",
+    vimeoId: "1110052878",
+    vimeoHash: "deca249548",
+    pdfUrl: "/projetos/PITCH_DECK_SUPERCORPO.pdf"
+  }
+];
+
 // --- COMPONENTES AUXILIARES ---
 
 const ScrollIndicator = () => (
@@ -321,28 +437,36 @@ export default function BrickScrollytelling() {
     const fetchProjects = async () => {
       try {
         const response = await fetch(`${API_URL}/api/projects`);
+        if (!response.ok) throw new Error('Falha ao buscar do banco');
         const data = await response.json();
-        // Mapeia os nomes das colunas do banco para os nomes usados no componente (camelCase)
-        const mappedData = data.map(p => ({
-          id: p.id,
-          title: p.title,
-          category: p.category,
-          genre: p.genre,
-          format: p.format,
-          status: p.status,
-          description: p.description,
-          longDescription: p.long_description,
-          videoLabel: p.video_label,
-          bgImage: p.bg_image,
-          monolithImage: p.monolith_image,
-          vimeoId: p.vimeo_id,
-          vimeoHash: p.vimeo_hash,
-          pdfUrl: p.pdf_url,
-          host: p.host
-        }));
-        setProjectsData(mappedData);
+        
+        if (data && data.length > 0) {
+          // Mapeia os nomes das colunas do banco para os nomes usados no componente (camelCase)
+          const mappedData = data.map(p => ({
+            id: p.id,
+            title: p.title,
+            category: p.category,
+            genre: p.genre,
+            format: p.format,
+            status: p.status,
+            description: p.description,
+            longDescription: p.long_description,
+            videoLabel: p.video_label,
+            bgImage: p.bg_image,
+            monolithImage: p.monolith_image,
+            vimeoId: p.vimeo_id,
+            vimeoHash: p.vimeo_hash,
+            pdfUrl: p.pdf_url,
+            host: p.host
+          }));
+          setProjectsData(mappedData);
+        } else {
+          // Se o banco estiver vazio, usa o fallback
+          setProjectsData(hardcodedProjects);
+        }
       } catch (err) {
-        console.error('Erro ao buscar projetos:', err);
+        console.error('Erro ao buscar projetos do banco, usando fallback:', err);
+        setProjectsData(hardcodedProjects);
       } finally {
         setLoading(false);
       }

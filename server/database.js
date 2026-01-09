@@ -33,19 +33,6 @@ export async function initDatabase() {
   try {
     await client.query('BEGIN');
     
-    // Verifica se a tabela de usuários já existe (reaproveita do banco existente)
-    // Se não existir, cria uma tabela básica (usando master_users conforme solicitado)
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS master_users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(100) UNIQUE NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
-        role VARCHAR(50) DEFAULT 'admin',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
     
     // Tabela de projetos
     await client.query(`
