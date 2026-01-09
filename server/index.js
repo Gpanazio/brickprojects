@@ -33,6 +33,10 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+// Rotas da API (Devem vir ANTES dos arquivos estáticos)
+app.use('/api/auth', authRoutes);
+app.use('/api/projects', projectsRoutes);
+
 // Servir arquivos estáticos do React (Frontend)
 const buildPath = path.join(__dirname, '../dist');
 app.use(express.static(buildPath));
@@ -52,10 +56,6 @@ if (!fs.existsSync(downloadsPath)) {
   }
 }
 app.use('/downloads', express.static(downloadsPath));
-
-// Rotas da API
-app.use('/api/auth', authRoutes);
-app.use('/api/projects', projectsRoutes);
 
 // Rota de health check
 app.get('/health', (req, res) => {
