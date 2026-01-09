@@ -8,7 +8,11 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT * FROM originais_selections ORDER BY created_at DESC'
+      `SELECT s.*, COUNT(si.id) as project_count 
+       FROM originais_selections s
+       LEFT JOIN originais_selection_items si ON s.id = si.selection_id
+       GROUP BY s.id
+       ORDER BY s.created_at DESC`
     );
     res.json(result.rows);
   } catch (err) {

@@ -528,26 +528,58 @@ function SelectionsManager({ projects }) {
       )}
 
       <div className="grid gap-4">
-        {loading ? <p className="text-zinc-500">Carregando seleções...</p> : selections.length === 0 ? <p className="text-zinc-500 italic">Nenhuma seleção criada.</p> : selections.map(s => (
-          <div key={s.id} className="bg-zinc-950 border border-zinc-800 p-6 flex justify-between items-center group">
-            <div>
-              <h3 className="font-black text-white uppercase tracking-tighter text-lg">{s.name}</h3>
-              <div className="flex items-center gap-3 mt-1">
-                <span className="text-red-600 text-xs font-mono">originais.brick.mov/s/{s.slug}</span>
-                <button 
-                  onClick={() => {
-                    navigator.clipboard.writeText(`https://originais.brick.mov/s/${s.slug}`);
-                    alert('Link copiado!');
-                  }}
-                  className="text-zinc-600 hover:text-white transition-colors"
-                >
-                  <Eye size={14} />
-                </button>
+        <h3 className="text-xs font-bold text-zinc-600 uppercase tracking-widest mb-2">Histórico de Playlists</h3>
+        {loading ? (
+          <p className="text-zinc-500">Carregando seleções...</p>
+        ) : selections.length === 0 ? (
+          <div className="bg-zinc-950 border border-zinc-900 p-12 text-center">
+             <p className="text-zinc-500 italic text-sm">Nenhuma playlist criada no histórico.</p>
+          </div>
+        ) : selections.map(s => (
+          <div key={s.id} className="bg-zinc-950 border border-zinc-800 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 group hover:border-zinc-700 transition-all">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <h3 className="font-black text-white uppercase tracking-tighter text-lg">{s.name}</h3>
+                <span className="px-2 py-0.5 bg-zinc-900 text-zinc-500 text-[8px] font-bold uppercase rounded border border-zinc-800">
+                  {s.project_count} projetos
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-red-600 text-xs font-mono">originais.brick.mov/s/{s.slug}</span>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(`https://originais.brick.mov/s/${s.slug}`);
+                      alert('Link copiado!');
+                    }}
+                    className="p-1 hover:bg-zinc-800 rounded transition-colors text-zinc-500 hover:text-white"
+                    title="Copiar Link"
+                  >
+                    <Eye size={14} />
+                  </button>
+                </div>
+                <span className="text-zinc-600 text-[10px] uppercase tracking-tighter">
+                  Criado em {new Date(s.created_at).toLocaleDateString('pt-BR')}
+                </span>
               </div>
             </div>
-            <button onClick={() => handleDeleteSelection(s.id)} className="text-zinc-700 hover:text-red-600 transition-colors">
-              <Trash2 size={20} />
-            </button>
+            <div className="flex items-center gap-3 self-end md:self-center">
+               <a 
+                 href={`/s/${s.slug}`} 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white border border-zinc-800 px-4 py-2 hover:bg-zinc-900 transition-all"
+               >
+                 Testar Link
+               </a>
+               <button 
+                onClick={() => handleDeleteSelection(s.id)} 
+                className="p-2 text-zinc-700 hover:text-red-600 hover:bg-red-600/10 rounded transition-all"
+                title="Deletar Playlist Permanente"
+               >
+                <Trash2 size={20} />
+              </button>
+            </div>
           </div>
         ))}
       </div>
