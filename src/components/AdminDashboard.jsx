@@ -64,6 +64,51 @@ function ProjectForm({ project, onSave, onCancel }) {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-8 space-y-8">
+            {/* Real-time Preview Area */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pb-8 border-b border-zinc-900">
+              <div className="lg:col-span-8 space-y-4">
+                <span className="text-red-600 font-bold text-[10px] uppercase tracking-[0.3em]">Live Preview (Home Page Style)</span>
+                <div className="relative aspect-video w-full bg-zinc-900 overflow-hidden border border-zinc-800">
+                  {/* BG Image Preview */}
+                  {formData.bg_image && (
+                    <div 
+                      className="absolute inset-0 bg-cover bg-center opacity-30 grayscale transition-all duration-700" 
+                      style={{ backgroundImage: `url(${formData.bg_image})` }}
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
+                  
+                  {/* Content Preview */}
+                  <div className="relative z-10 h-full flex flex-col justify-center p-8">
+                    <span className="text-red-600 text-[8px] font-bold uppercase tracking-[0.2em] mb-2">{formData.category || 'CATEGORIA'}</span>
+                    <h2 className="text-2xl font-black text-white uppercase leading-tight mb-2 truncate">{formData.title || 'TÍTULO DO PROJETO'}</h2>
+                    <p className="text-zinc-500 text-[10px] max-w-[250px] line-clamp-2 mb-4 italic">{formData.description || 'Sua descrição curta aparecerá aqui...'}</p>
+                    <div className="w-24 h-8 bg-white/10 border border-white/20 flex items-center justify-center">
+                      <span className="text-[8px] font-black uppercase text-white tracking-widest">VER AGORA</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Monolith Preview */}
+              <div className="lg:col-span-4 space-y-4">
+                <span className="text-zinc-500 font-bold text-[10px] uppercase tracking-[0.3em]">Monolito</span>
+                <div className="relative aspect-[1/2] w-full max-w-[150px] mx-auto bg-zinc-900 border border-zinc-800 overflow-hidden shadow-2xl">
+                  {formData.monolith_image ? (
+                    <div 
+                      className="absolute inset-0 bg-cover bg-center transition-all duration-700" 
+                      style={{ backgroundImage: `url(${formData.monolith_image})` }}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-zinc-800 text-[10px] uppercase tracking-tighter text-center px-4">
+                      Sem Imagem Vertical
+                    </div>
+                  )}
+                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-white/5 via-transparent to-transparent pointer-events-none" />
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Título */}
               <div className="md:col-span-2">
