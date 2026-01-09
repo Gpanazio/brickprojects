@@ -43,6 +43,12 @@ router.post('/login', [
       });
     }
 
+    // Verifica se o JWT_SECRET existe
+    if (!process.env.JWT_SECRET) {
+      console.error('❌ ERRO: JWT_SECRET não configurado no servidor!');
+      return res.status(500).json({ error: 'Erro de configuração no servidor' });
+    }
+
     // Gera o token JWT
     const token = jwt.sign(
       { 
@@ -66,8 +72,12 @@ router.post('/login', [
     });
 
   } catch (err) {
-    console.error('Erro no login:', err);
-    res.status(500).json({ error: 'Erro no servidor' });
+    console.error('❌ Erro detalhado no login:', err);
+    res.status(500).json({ 
+      error: 'Erro interno do servidor',
+      message: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
   }
 });
 
