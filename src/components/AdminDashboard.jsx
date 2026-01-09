@@ -376,6 +376,185 @@ function ProjectForm({ project, onSave, onCancel }) {
   );
 }
 
+// Componente de Gerenciamento de Seleções
+function SelectionsManager({ projects }) {
+  const [selections, setSelections] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    name: '',
+    slug: '',
+    description: '',
+    projectIds: []
+  });
+
+  const token = localStorage.getItem('adminToken');
+
+  const fetchSelections = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/selections`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setSelections(data);
+    } catch (err) {
+      console.error('Erro ao buscar seleções:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSelections();
+  }, []);
+
+  const handleCreateSelection = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`${API_URL}/api/selections`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (!response.ok) throw new Error('Erro ao criar seleção');
+
+      await fetchSelections();
+      setShowForm(false);
+      setFormData({ name: '', slug: '', description: '', projectIds: [] });
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleDeleteSelection = async (id) => {
+    if (!confirm('Deletar esta seleção?')) return;
+    try {
+      await fetch(`${API_URL}/api/selections/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      await fetchSelections();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const toggleProject = (id) => {
+    setFormData(prev => ({
+      ...prev,
+      projectIds: prev.projectIds.includes(id)
+        ? prev.projectIds.filter(pid => pid !== id)
+        : [...prev.projectIds, id]
+    }));
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-black uppercase tracking-tighter mb-1">Links de Seleção (Homes Únicas)</h2>
+          <p className="text-zinc-500 text-sm">Crie URLs personalizadas com projetos específicos.</p>
+        </div>
+        {!showForm && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-white text-black font-black text-sm uppercase tracking-widest"
+          >
+            <Plus size={18} /> Nova Seleção
+          </button>
+        )}
+      </div>
+
+      {showForm && (
+        <div className="bg-zinc-950 border border-zinc-800 p-8 animate-in fade-in slide-in-from-top duration-300">
+          <form onSubmit={handleCreateSelection} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-zinc-400 text-[10px] uppercase font-bold mb-2">Nome da Seleção</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Projetos para Netflix"
+                  className="w-full bg-black border border-zinc-800 text-white px-4 py-3 focus:border-red-600 outline-none"
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-zinc-400 text-[10px] uppercase font-bold mb-2">Slug (URL do link)</label>
+                <div className="flex items-center gap-2 bg-black border border-zinc-800 px-4">
+                  <span className="text-zinc-600 text-sm">/s/</span>
+                  <input
+                    type="text"
+                    placeholder="netflix"
+                    className="flex-1 bg-transparent text-white py-3 focus:outline-none"
+                    value={formData.slug}
+                    onChange={e => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') })}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-zinc-400 text-[10px] uppercase font-bold mb-4 text-center border-b border-zinc-900 pb-2">Selecione os Projetos para incluir neste link:</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {projects.map(project => (
+                  <div 
+                    key={project.id}
+                    onClick={() => toggleProject(project.id)}
+                    className={`cursor-pointer p-4 border transition-all ${formData.projectIds.includes(project.id) ? 'bg-red-600/10 border-red-600' : 'bg-black border-zinc-800 hover:border-zinc-700'}`}
+                  >
+                    <div className="flex justify-between items-start gap-2">
+                      <span className="text-sm font-bold text-white uppercase truncate">{project.title}</span>
+                      {formData.projectIds.includes(project.id) && <CheckCircle size={14} className="text-red-600 flex-shrink-0" />}
+                    </div>
+                    <span className="text-[9px] text-zinc-500 uppercase">{project.category}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-4 pt-4">
+              <button type="submit" className="flex-1 bg-white text-black font-black py-4 uppercase tracking-widest">Gerar Link Único</button>
+              <button type="button" onClick={() => setShowForm(false)} className="px-8 bg-zinc-900 text-white font-black py-4 uppercase tracking-widest">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="grid gap-4">
+        {loading ? <p className="text-zinc-500">Carregando seleções...</p> : selections.length === 0 ? <p className="text-zinc-500 italic">Nenhuma seleção criada.</p> : selections.map(s => (
+          <div key={s.id} className="bg-zinc-950 border border-zinc-800 p-6 flex justify-between items-center group">
+            <div>
+              <h3 className="font-black text-white uppercase tracking-tighter text-lg">{s.name}</h3>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-red-600 text-xs font-mono">originais.brick.mov/s/{s.slug}</span>
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(`https://originais.brick.mov/s/${s.slug}`);
+                    alert('Link copiado!');
+                  }}
+                  className="text-zinc-600 hover:text-white transition-colors"
+                >
+                  <Eye size={14} />
+                </button>
+              </div>
+            </div>
+            <button onClick={() => handleDeleteSelection(s.id)} className="text-zinc-700 hover:text-red-600 transition-colors">
+              <Trash2 size={20} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // Componente Principal do Dashboard
 export default function AdminDashboard({ user, onLogout }) {
   const [projects, setProjects] = useState([]);
@@ -383,6 +562,7 @@ export default function AdminDashboard({ user, onLogout }) {
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [activeTab, setActiveTab] = useState('projects'); // 'projects' ou 'selections'
 
   const token = localStorage.getItem('adminToken');
 
@@ -502,10 +682,28 @@ export default function AdminDashboard({ user, onLogout }) {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
+        {/* Tabs */}
+        <div className="flex gap-8 border-b border-zinc-900 mb-12">
+          <button 
+            onClick={() => setActiveTab('projects')}
+            className={`pb-4 text-xs font-black uppercase tracking-[0.2em] transition-all border-b-2 ${activeTab === 'projects' ? 'text-white border-red-600' : 'text-zinc-600 border-transparent hover:text-zinc-400'}`}
+          >
+            Projetos Gerais
+          </button>
+          <button 
+            onClick={() => setActiveTab('selections')}
+            className={`pb-4 text-xs font-black uppercase tracking-[0.2em] transition-all border-b-2 ${activeTab === 'selections' ? 'text-white border-red-600' : 'text-zinc-600 border-transparent hover:text-zinc-400'}`}
+          >
+            Links de Seleção
+          </button>
+        </div>
+
+        {activeTab === 'projects' ? (
+          <>
         {/* Action Bar */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-xl font-black uppercase tracking-tighter mb-1">Projetos</h2>
+            <h2 className="text-xl font-black uppercase tracking-tighter mb-1">Todos os Projetos</h2>
             <p className="text-zinc-500 text-sm">{projects.length} projeto(s) cadastrado(s)</p>
           </div>
           <button
@@ -573,6 +771,10 @@ export default function AdminDashboard({ user, onLogout }) {
               </div>
             ))}
           </div>
+        )}
+          </>
+        ) : (
+          <SelectionsManager projects={projects} />
         )}
       </main>
 

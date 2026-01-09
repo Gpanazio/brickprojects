@@ -311,7 +311,7 @@ const Slide = ({ project, isActive, onPlay }) => {
 
 // --- COMPONENTE PRINCIPAL (App) ---
 
-export default function BrickScrollytelling() {
+export default function BrickScrollytelling({ selectionSlug }) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [selectedProject, setSelectedProject] = useState(null);
   const [projectsData, setProjectsData] = useState([]);
@@ -321,9 +321,16 @@ export default function BrickScrollytelling() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/projects`);
-        if (!response.ok) throw new Error('Falha ao buscar do banco');
-        const data = await response.json();
+        // Se houver um slug de seleção, busca projetos da seleção, senão busca todos
+        const url = selectionSlug 
+          ? `${API_URL}/api/selections/slug/${selectionSlug}`
+          : `${API_URL}/api/projects`;
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Falha ao buscar dados');
+        
+        const result = await response.json();
+        const data = selectionSlug ? result.projects : result;
         
         if (data && data.length > 0) {
           // Mapeia os nomes das colunas do banco para os nomes usados no componente (camelCase)
@@ -347,14 +354,14 @@ export default function BrickScrollytelling() {
           setProjectsData(mappedData);
         }
       } catch (err) {
-        console.error('Erro ao buscar projetos do banco:', err);
+        console.error('Erro ao buscar projetos:', err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProjects();
-  }, []);
+  }, [selectionSlug]);
 
   useEffect(() => {
     if (projectsData.length === 0) return;

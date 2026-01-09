@@ -81,6 +81,38 @@ export async function initDatabase() {
       FOR EACH ROW
       EXECUTE FUNCTION update_updated_at_column();
     `);
+
+    // Tabela de seleções (Curas/Playlists)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS originais_selections (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        slug VARCHAR(100) UNIQUE NOT NULL,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Tabela de itens da seleção (relacionamento muitos-para-muitos)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS originais_selection_items (
+        id SERIAL PRIMARY KEY,
+        selection_id INTEGER REFERENCES originais_selections(id) ON DELETE CASCADE,
+        project_id INTEGER REFERENCES originais_projects(id) ON DELETE CASCADE,
+        display_order INTEGER DEFAULT 0,
+        UNIQUE(selection_id, project_id)
+      );
+    `);
+
+    // Trigger para selections
+    await client.query(`
+      DROP TRIGGER IF EXISTS update_originais_selections_updated_at ON originais_selections;
+      CREATE TRIGGER update_originais_selections_updated_at
+      BEFORE UPDATE ON originais_selections
+      FOR EACH ROW
+      EXECUTE FUNCTION update_updated_at_column();
+    `);
     
     await client.query('COMMIT');
     console.log('✅ Tabelas inicializadas com sucesso');
