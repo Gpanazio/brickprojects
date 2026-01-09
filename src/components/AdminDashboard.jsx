@@ -67,7 +67,9 @@ function ProjectForm({ project, onSave, onCancel }) {
             {/* Real-time Preview Area */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pb-8 border-b border-zinc-900">
               <div className="lg:col-span-8 space-y-4">
-                <span className="text-red-600 font-bold text-[10px] uppercase tracking-[0.3em]">Live Preview (Home Page Style)</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-red-600 font-bold text-[10px] uppercase tracking-[0.3em]">Preview: Imagem de Fundo (Background)</span>
+                </div>
                 <div className="relative aspect-video w-full bg-zinc-900 overflow-hidden border border-zinc-800">
                   {/* BG Image Preview */}
                   {formData.bg_image && (
@@ -92,8 +94,10 @@ function ProjectForm({ project, onSave, onCancel }) {
 
               {/* Monolith Preview */}
               <div className="lg:col-span-4 space-y-4">
-                <span className="text-zinc-500 font-bold text-[10px] uppercase tracking-[0.3em]">Monolito</span>
-                <div className="relative aspect-[1/2] w-full max-w-[150px] mx-auto bg-zinc-900 border border-zinc-800 overflow-hidden shadow-2xl">
+                <div className="flex justify-center">
+                  <span className="text-zinc-500 font-bold text-[10px] uppercase tracking-[0.3em]">Preview: Monolito (Thumbnail)</span>
+                </div>
+                <div className="relative aspect-[1/2] w-full max-w-[150px] mx-auto bg-zinc-900 border-2 border-red-600/30 overflow-hidden shadow-2xl shadow-red-600/5">
                   {formData.monolith_image ? (
                     <div 
                       className="absolute inset-0 bg-cover bg-center transition-all duration-700" 
