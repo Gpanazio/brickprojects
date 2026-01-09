@@ -48,20 +48,23 @@ function ProjectForm({ project, onSave, onCancel }) {
   return (
     <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 overflow-y-auto">
       <div className="min-h-screen flex items-start justify-center p-4 py-12">
-        <div className="bg-zinc-950 border border-zinc-800 w-full max-w-4xl">
+        <div className="bg-black border border-zinc-800 w-full max-w-4xl shadow-2xl">
           {/* Header */}
-          <div className="border-b border-zinc-800 p-6 flex justify-between items-center sticky top-0 bg-zinc-950 z-10">
-            <h2 className="text-2xl font-black text-white uppercase tracking-tighter">
-              {project ? 'Editar Projeto' : 'Novo Projeto'}
-            </h2>
+          <div className="border-b border-zinc-800 p-8 flex justify-between items-center sticky top-0 bg-black z-10">
+            <div className="flex flex-col">
+              <span className="text-red-600 font-bold text-[10px] uppercase tracking-[0.3em] mb-1">Criação</span>
+              <h2 className="text-3xl font-black text-white uppercase tracking-tighter">
+                {project ? 'Editar Projeto' : 'Novo Projeto'}
+              </h2>
+            </div>
             <button onClick={onCancel} className="text-zinc-500 hover:text-white transition-colors">
               <X size={24} />
             </button>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form onSubmit={handleSubmit} className="p-8 space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Título */}
               <div className="md:col-span-2">
                 <label className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
@@ -298,15 +301,15 @@ function ProjectForm({ project, onSave, onCancel }) {
               </div>
             )}
 
-            {/* Actions */}
-            <div className="flex gap-4 pt-4 border-t border-zinc-800">
+              {/* Actions */}
+            <div className="flex gap-4 pt-8 border-t border-zinc-900">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-white hover:bg-gray-200 disabled:bg-zinc-800 disabled:text-zinc-600 text-black font-black text-sm uppercase tracking-widest py-4 transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 bg-white hover:bg-red-600 hover:text-white disabled:bg-zinc-800 disabled:text-zinc-600 text-black font-black text-sm uppercase tracking-[0.2em] py-5 transition-all disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg"
               >
                 <Save size={18} />
-                {loading ? 'Salvando...' : 'Salvar Projeto'}
+                {loading ? 'SALVANDO...' : 'SALVAR PROJETO'}
               </button>
               <button
                 type="button"

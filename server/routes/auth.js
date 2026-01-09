@@ -71,55 +71,6 @@ router.post('/login', [
   }
 });
 
-// Rota para registrar novo usuário (protegida - apenas para admins)
-router.post('/register', [
-  body('username').trim().isLength({ min: 3 }).withMessage('Username deve ter no mínimo 3 caracteres'),
-  body('email').isEmail().withMessage('Email inválido'),
-  body('password').isLength({ min: 6 }).withMessage('Senha deve ter no mínimo 6 caracteres'),
-  body('password_path').optional().isString()
-], async (req, res) => {
-  try {
-    // Valida os dados de entrada
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { username, email, password, password_path, role = 'admin' } = req.body;
-
-    // Verifica se o usuário já existe
-    const existingUser = await pool.query(
-      'SELECT * FROM master_users WHERE email = $1 OR username = $2',
-      [email, username]
-    );
-
-    if (existingUser.rows.length > 0) {
-      return res.status(409).json({ 
-        error: 'Email ou username já cadastrado' 
-      });
-    }
-
-    // Hash da senha
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // Insere o novo usuário
-    const result = await pool.query(
-      'INSERT INTO master_users (username, email, password_hash, password_path, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, username, email, role, password_path, created_at',
-      [username, email, passwordHash, password_path, role]
-    );
-
-    const newUser = result.rows[0];
-
-    res.status(201).json({
-      message: 'Usuário criado com sucesso',
-      user: newUser
-    });
-
-  } catch (err) {
-    console.error('Erro ao registrar usuário:', err);
-    res.status(500).json({ error: 'Erro no servidor' });
-  }
-});
 
 // Rota para verificar token (útil para validar sessão)
 router.get('/verify', async (req, res) => {

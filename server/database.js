@@ -33,10 +33,9 @@ export async function initDatabase() {
   try {
     await client.query('BEGIN');
     
-    
     // Tabela de projetos
     await client.query(`
-      CREATE TABLE IF NOT EXISTS projects (
+      CREATE TABLE IF NOT EXISTS originais_projects (
         id SERIAL PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
         category VARCHAR(100) NOT NULL,
@@ -60,7 +59,7 @@ export async function initDatabase() {
     
     // Índice para ordenação
     await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_projects_order ON projects(display_order);
+      CREATE INDEX IF NOT EXISTS idx_originais_projects_order ON originais_projects(display_order);
     `);
     
     // Função para atualizar updated_at automaticamente
@@ -76,18 +75,9 @@ export async function initDatabase() {
     
     // Trigger para projects
     await client.query(`
-      DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
-      CREATE TRIGGER update_projects_updated_at
-      BEFORE UPDATE ON projects
-      FOR EACH ROW
-      EXECUTE FUNCTION update_updated_at_column();
-    `);
-    
-    // Trigger para master_users
-    await client.query(`
-      DROP TRIGGER IF EXISTS update_master_users_updated_at ON master_users;
-      CREATE TRIGGER update_master_users_updated_at
-      BEFORE UPDATE ON master_users
+      DROP TRIGGER IF EXISTS update_originais_projects_updated_at ON originais_projects;
+      CREATE TRIGGER update_originais_projects_updated_at
+      BEFORE UPDATE ON originais_projects
       FOR EACH ROW
       EXECUTE FUNCTION update_updated_at_column();
     `);

@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT * FROM projects ORDER BY display_order ASC, id ASC'
+      'SELECT * FROM originais_projects ORDER BY display_order ASC, id ASC'
     );
     res.json(result.rows);
   } catch (err) {
@@ -23,7 +23,7 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query(
-      'SELECT * FROM projects WHERE id = $1',
+      'SELECT * FROM originais_projects WHERE id = $1',
       [id]
     );
     
@@ -73,7 +73,7 @@ router.post('/', authenticateToken, [
     } = req.body;
 
     const result = await pool.query(
-      `INSERT INTO projects 
+      `INSERT INTO originais_projects 
         (title, category, genre, format, status, description, long_description, 
          video_label, bg_image, monolith_image, vimeo_id, vimeo_hash, pdf_url, host, display_order)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
@@ -117,7 +117,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
 
     // Verifica se o projeto existe
     const checkProject = await pool.query(
-      'SELECT * FROM projects WHERE id = $1',
+      'SELECT * FROM originais_projects WHERE id = $1',
       [id]
     );
 
@@ -126,7 +126,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
     }
 
     const result = await pool.query(
-      `UPDATE projects 
+      `UPDATE originais_projects 
        SET title = $1, category = $2, genre = $3, format = $4, status = $5,
            description = $6, long_description = $7, video_label = $8,
            bg_image = $9, monolith_image = $10, vimeo_id = $11, vimeo_hash = $12,
@@ -155,7 +155,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
 
     const result = await pool.query(
-      'DELETE FROM projects WHERE id = $1 RETURNING *',
+      'DELETE FROM originais_projects WHERE id = $1 RETURNING *',
       [id]
     );
 
@@ -190,7 +190,7 @@ router.patch('/reorder', authenticateToken, async (req, res) => {
 
       for (const project of projects) {
         await client.query(
-          'UPDATE projects SET display_order = $1 WHERE id = $2',
+          'UPDATE originais_projects SET display_order = $1 WHERE id = $2',
           [project.display_order, project.id]
         );
       }

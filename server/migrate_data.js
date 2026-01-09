@@ -12,11 +12,7 @@ const connectionString = process.env.DATABASE_URL;
 const url = new URL(connectionString);
 
 const pool = new Pool({
-  user: url.username,
-  host: url.hostname,
-  database: url.pathname.substring(1),
-  password: url.password,
-  port: url.port,
+  connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? {
     rejectUnauthorized: false
   } : false
@@ -144,14 +140,14 @@ const projectsData = [
   }
 ];
 
-async function migrate() {
+export async function migrateInternal() {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     
     for (const project of projectsData) {
       await client.query(`
-        INSERT INTO projects (
+        INSERT INTO originais_projects (
           id, title, category, genre, format, status, description, 
           long_description, video_label, bg_image, monolith_image, 
           vimeo_id, vimeo_hash, pdf_url, host, display_order
@@ -181,7 +177,7 @@ async function migrate() {
       ]);
     }
     
-    await client.query("SELECT setval('projects_id_seq', (SELECT MAX(id) FROM projects))");
+    await client.query("SELECT setval('originais_projects_id_seq', (SELECT MAX(id) FROM originais_projects))");
 
     await client.query('COMMIT');
     console.log('✅ Migração concluída com sucesso');
@@ -190,8 +186,6 @@ async function migrate() {
     console.error('❌ Erro na migração:', err);
   } finally {
     client.release();
-    await pool.end();
   }
 }
 
-migrate();

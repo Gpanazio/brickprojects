@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { testConnection, initDatabase } from './database.js';
 import authRoutes from './routes/auth.js';
 import projectsRoutes from './routes/projects.js';
@@ -8,8 +11,11 @@ import projectsRoutes from './routes/projects.js';
 // Carrega variáveis de ambiente
 dotenv.config();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080;
 
 // Middleware
 app.use(cors({
@@ -27,7 +33,27 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// Rotas
+// Servir arquivos estáticos do React (Frontend)
+const buildPath = path.join(__dirname, '../dist');
+app.use(express.static(buildPath));
+
+// Servir arquivos públicos (assets, PDFs)
+const publicPath = path.join(__dirname, '../public');
+app.use('/assets', express.static(path.join(publicPath, 'assets')));
+app.use('/projetos', express.static(path.join(publicPath, 'projetos')));
+
+// Servir Volume do Railway (/downloads)
+const downloadsPath = '/downloads';
+if (!fs.existsSync(downloadsPath)) {
+  try {
+    fs.mkdirSync(downloadsPath, { recursive: true });
+  } catch (err) {
+    console.warn('⚠️ Não foi possível criar /downloads (provavelmente erro de permissão fora do container):', err.message);
+  }
+}
+app.use('/downloads', express.static(downloadsPath));
+
+// Rotas da API
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectsRoutes);
 
@@ -40,22 +66,14 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Rota raiz
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Brick Projects API',
-    version: '1.0.0',
-    endpoints: {
-      auth: '/api/auth',
-      projects: '/api/projects',
-      health: '/health'
-    }
-  });
-});
-
-// Middleware de erro 404
-app.use((req, res) => {
-  res.status(404).json({ error: 'Rota não encontrada' });
+// Qualquer outra rota serve o Frontend (React)
+app.get('*', (req, res) => {
+  // Se for uma rota de API que não existe, retorna 404
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'Rota de API não encontrada' });
+  }
+  // Caso contrário, serve o index.html do React
+  res.sendFile(path.join(buildPath, 'index.html'));
 });
 
 // Middleware de erro global
@@ -82,11 +100,23 @@ async function startServer() {
     await initDatabase();
 
     // Inicia o servidor
-    app.listen(PORT, () => {
+    app.listen(PORT, async () => {
       console.log(`\n🚀 Servidor rodando na porta ${PORT}`);
       console.log(`📍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔗 API: http://localhost:${PORT}`);
       console.log(`💚 Health Check: http://localhost:${PORT}/health\n`);
+
+      // Executa migração automática se estiver em produção ou se o banco estiver vazio
+      if (process.env.AUTO_MIGRATE === 'true' || process.env.NODE_ENV === 'production') {
+        try {
+          console.log('🔄 Iniciando migração automática de dados...');
+          const { migrateInternal } = await import('./migrate_data.js');
+          await migrateInternal();
+          console.log('✅ Migração automática concluída.');
+        } catch (migErr) {
+          console.error('⚠️ Erro na migração automática:', migErr.message);
+        }
+      }
     });
 
   } catch (err) {
