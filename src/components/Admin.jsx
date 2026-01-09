@@ -16,7 +16,8 @@ export default function Admin() {
       if (token && storedUser) {
         try {
           // Verifica se o token ainda é válido
-          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/verify`, {
+          const apiUrl = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:3001');
+          const response = await fetch(`${apiUrl}/api/auth/verify`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
