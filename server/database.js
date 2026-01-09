@@ -34,9 +34,9 @@ export async function initDatabase() {
     await client.query('BEGIN');
     
     // Verifica se a tabela de usuários já existe (reaproveita do banco existente)
-    // Se não existir, cria uma tabela básica
+    // Se não existir, cria uma tabela básica (usando master_users conforme solicitado)
     await client.query(`
-      CREATE TABLE IF NOT EXISTS users (
+      CREATE TABLE IF NOT EXISTS master_users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(100) UNIQUE NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
@@ -96,11 +96,11 @@ export async function initDatabase() {
       EXECUTE FUNCTION update_updated_at_column();
     `);
     
-    // Trigger para users
+    // Trigger para master_users
     await client.query(`
-      DROP TRIGGER IF EXISTS update_users_updated_at ON users;
-      CREATE TRIGGER update_users_updated_at
-      BEFORE UPDATE ON users
+      DROP TRIGGER IF EXISTS update_master_users_updated_at ON master_users;
+      CREATE TRIGGER update_master_users_updated_at
+      BEFORE UPDATE ON master_users
       FOR EACH ROW
       EXECUTE FUNCTION update_updated_at_column();
     `);

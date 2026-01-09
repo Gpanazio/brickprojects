@@ -22,7 +22,7 @@ router.post('/login', [
 
     // Busca o usuário no banco
     const result = await pool.query(
-      'SELECT * FROM users WHERE email = $1',
+      'SELECT * FROM master_users WHERE email = $1',
       [email]
     );
 
@@ -88,7 +88,7 @@ router.post('/register', [
 
     // Verifica se o usuário já existe
     const existingUser = await pool.query(
-      'SELECT * FROM users WHERE email = $1 OR username = $2',
+      'SELECT * FROM master_users WHERE email = $1 OR username = $2',
       [email, username]
     );
 
@@ -103,7 +103,7 @@ router.post('/register', [
 
     // Insere o novo usuário
     const result = await pool.query(
-      'INSERT INTO users (username, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, username, email, role, created_at',
+      'INSERT INTO master_users (username, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, username, email, role, created_at',
       [username, email, passwordHash, role]
     );
 
