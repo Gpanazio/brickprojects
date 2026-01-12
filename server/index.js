@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { testConnection, initDatabase } from './database.js';
+import pool, { testConnection, initDatabase } from './database.js';
 import authRoutes from './routes/auth.js';
 import projectsRoutes from './routes/projects.js';
 import selectionsRoutes from './routes/selections.js';
@@ -147,3 +147,23 @@ async function startServer() {
 }
 
 startServer();
+
+// Gerenciamento de encerramento gracioso (Graceful Shutdown)
+async function gracefulShutdown(signal) {
+  console.log(`\n\n👋 Recebido ${signal}. Encerrando servidor graciosamente...`);
+  
+  // Aqui você pode adicionar lógica para fechar conexões abertas, pools, etc.
+  try {
+    await pool.end();
+    console.log('✅ Pool de conexões com o banco de dados encerrado.');
+  } catch (err) {
+    console.error('❌ Erro ao encerrar o pool:', err.message);
+  }
+  
+  console.log('🚀 Bye bye!');
+  process.exit(0);
+}
+
+// Escuta sinais de encerramento do sistema (SIGTERM no Railway, SIGINT no Ctrl+C)
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));

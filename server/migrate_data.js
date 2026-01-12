@@ -1,22 +1,7 @@
-import pg from 'pg';
 import dotenv from 'dotenv';
-import fs from 'fs';
-import path from 'path';
+import pool from './database.js';
 
 dotenv.config();
-
-const { Pool } = pg;
-
-// Extrair os dados da string de conexão (URL) para evitar o erro SASL
-const connectionString = process.env.DATABASE_URL;
-const url = new URL(connectionString);
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: false
-  } : false
-});
 
 const projectsData = [
   {
@@ -188,4 +173,3 @@ export async function migrateInternal() {
     client.release();
   }
 }
-
