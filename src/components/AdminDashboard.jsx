@@ -6,6 +6,30 @@ const API_URL = import.meta.env.VITE_API_URL || '';
 
 const AdminDashboard = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('projects'); // 'projects' ou 'selections'
+
+  // Configuração Global do Axios para incluir o Token
+  useEffect(() => {
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      onLogout(); // Se não houver token, desloga por segurança
+    }
+
+    // Atalho ESC para fechar modais
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setEditingProject(null);
+        setEditingSelection(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      delete axios.defaults.headers.common['Authorization'];
+    };
+  }, [onLogout]);
   const [projects, setProjects] = useState([]);
   const [selections, setSelections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -133,8 +157,9 @@ const AdminDashboard = ({ onLogout }) => {
     if (!file) return;
 
     const formData = new FormData();
-    formData.append('file', file);
+    // IMPORTANTE: Adicionar folder ANTES do file para o Multer processar corretamente
     formData.append('folder', folder);
+    formData.append('file', file);
 
     try {
       const response = await axios.post(`${API_URL}/api/uploads`, formData, {
@@ -443,8 +468,8 @@ const AdminDashboard = ({ onLogout }) => {
 
       {/* Modal de Edição de Playlist (Selection) */}
       {editingSelection && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-sm">
-          <div className="bg-[#1a1a1a] p-8 rounded-2xl max-w-5xl w-full border border-[#333] relative my-8 shadow-2xl animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-[100] backdrop-blur-sm">
+          <div className="bg-[#1a1a1a] p-8 rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto border border-[#333] relative shadow-2xl animate-in fade-in zoom-in duration-200">
             <button 
               onClick={() => setEditingSelection(null)}
               className="absolute top-4 right-4 text-gray-400 hover:text-white bg-[#333] p-2 rounded-full transition-colors"
@@ -611,8 +636,8 @@ const AdminDashboard = ({ onLogout }) => {
 
       {/* Modal de Edição de Projeto */}
       {editingProject && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-sm">
-          <div className="bg-[#1a1a1a] p-8 rounded-2xl max-w-4xl w-full border border-[#333] relative my-8 shadow-2xl animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-[100] backdrop-blur-sm">
+          <div className="bg-[#1a1a1a] p-8 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[#333] relative shadow-2xl animate-in fade-in zoom-in duration-200">
             <button 
               onClick={() => setEditingProject(null)}
               className="absolute top-4 right-4 text-gray-400 hover:text-white bg-[#333] p-2 rounded-full transition-colors"
