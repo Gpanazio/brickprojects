@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit, Save, X, Upload, LogOut, Search, GripVertical, Check, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, Edit, Save, X, Upload, LogOut, Search, GripVertical, Check, Image as ImageIcon, Link as LinkIcon, FileText, Video } from 'lucide-react';
 import axios from 'axios';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const AdminDashboard = ({ onLogout }) => {
   const [projects, setProjects] = useState([]);
@@ -11,9 +10,6 @@ const AdminDashboard = ({ onLogout }) => {
   const [editingProject, setEditingProject] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Estado para controlar o modal específico de gerenciamento de imagens
-  const [showImageManager, setShowImageManager] = useState(false);
-
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -21,7 +17,9 @@ const AdminDashboard = ({ onLogout }) => {
   const fetchProjects = async () => {
     try {
       const response = await axios.get(`${API_URL}/api/projects`);
-      setProjects(response.data);
+      // O PostgreSQL retorna os dados em um array diretamente ou em response.data
+      const data = Array.isArray(response.data) ? response.data : [];
+      setProjects(data);
       setLoading(false);
     } catch (error) {
       console.error('Erro ao carregar projetos:', error);
@@ -32,16 +30,21 @@ const AdminDashboard = ({ onLogout }) => {
   const handleCreateProject = () => {
     setEditingProject({
       title: '',
-      description: '',
-      client: '',
-      year: new Date().getFullYear().toString(),
       category: '',
-      images: [],
-      tags: [],
-      featured: false
+      genre: '',
+      format: '',
+      status: '',
+      description: '',
+      long_description: '',
+      video_label: '',
+      bg_image: '',
+      monolith_image: '',
+      vimeo_id: '',
+      vimeo_hash: '',
+      pdf_url: '',
+      host: '',
+      display_order: 0
     });
-    // Não abrimos o image manager automaticamente para não assustar, 
-    // o usuário clica no botão quando quiser por fotos.
   };
 
   const handleEditProject = (project) => {
@@ -55,6 +58,7 @@ const AdminDashboard = ({ onLogout }) => {
         fetchProjects();
       } catch (error) {
         console.error('Erro ao excluir projeto:', error);
+        alert('Erro ao excluir projeto');
       }
     }
   };
@@ -62,59 +66,45 @@ const AdminDashboard = ({ onLogout }) => {
   const handleSaveProject = async (e) => {
     e.preventDefault();
     try {
-      if (editingProject._id) {
-        await axios.put(`${axios.defaults.baseURL || API_URL}/api/projects/${editingProject._id}`, editingProject);
+      // Remover campos que não devem ser enviados na criação/atualização se necessário
+      const projectData = { ...editingProject };
+      
+      if (projectData.id) {
+        await axios.put(`${API_URL}/api/projects/${projectData.id}`, projectData);
       } else {
-        await axios.post(`${axios.defaults.baseURL || API_URL}/api/projects`, editingProject);
+        await axios.post(`${API_URL}/api/projects`, projectData);
       }
       setEditingProject(null);
-      setShowImageManager(false); // Garante que fecha o modal de imagens também
       fetchProjects();
     } catch (error) {
       console.error('Erro ao salvar projeto:', error);
-      alert('Erro ao salvar projeto');
+      alert('Erro ao salvar projeto: ' + (error.response?.data?.error || error.message));
     }
   };
 
-  const handleImageUpload = async (e) => {
-    const files = Array.from(e.target.files);
+  const handleFileUpload = async (e, field, folder = 'assets') => {
+    const file = e.target.files[0];
+    if (!file) return;
+
     const formData = new FormData();
-    files.forEach(file => {
-      formData.append('images', file);
-    });
+    formData.append('file', file);
+    formData.append('folder', folder);
 
     try {
-      const response = await axios.post(`${axios.defaults.baseURL || API_URL}/api/upload`, formData, {
+      const response = await axios.post(`${API_URL}/api/uploads`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
-      // Adiciona as novas URLs ao array existente
-      const newImages = [...(editingProject.images || []), ...response.data.urls];
-      setEditingProject({ ...editingProject, images: newImages });
+      setEditingProject({ ...editingProject, [field]: response.data.url });
     } catch (error) {
       console.error('Erro ao fazer upload:', error);
-      alert('Erro ao fazer upload das imagens');
+      alert('Erro ao fazer upload do arquivo');
     }
   };
 
-  const handleRemoveImage = (index) => {
-    const newImages = editingProject.images.filter((_, i) => i !== index);
-    setEditingProject({ ...editingProject, images: newImages });
-  };
-
-  const handleDragEnd = (result) => {
-    if (!result.destination) return;
-
-    const items = Array.from(editingProject.images);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    setEditingProject({ ...editingProject, images: items });
-  };
-
   const filteredProjects = projects.filter(p => 
-    p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.client?.toLowerCase().includes(searchTerm.toLowerCase())
+    p.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -123,15 +113,15 @@ const AdminDashboard = ({ onLogout }) => {
       <div className="flex justify-between items-center mb-8 bg-[#1a1a1a] p-4 rounded-xl border border-[#333]">
         <div className="flex items-center gap-4">
           <img src="/assets/brick_logo_rgb-1.png" alt="Brick Logo" className="h-8" />
-          <h1 className="text-xl font-bold border-l border-gray-600 pl-4">Dashboard</h1>
+          <h1 className="text-xl font-bold border-l border-gray-600 pl-4">Dashboard Admin</h1>
         </div>
         <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-400">Admin</span>
+            <span className="text-sm text-gray-400">Logado como Admin</span>
             <button 
                 onClick={onLogout}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors bg-[#333] px-3 py-1.5 rounded-lg"
             >
-                <LogOut size={18} />
+                <LogOut size={16} />
                 Sair
             </button>
         </div>
@@ -143,15 +133,15 @@ const AdminDashboard = ({ onLogout }) => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
             <input 
                 type="text"
-                placeholder="Buscar projetos..."
+                placeholder="Buscar por título ou categoria..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-[#E63946]"
+                className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-[#E63946] transition-colors"
             />
         </div>
         <button 
             onClick={handleCreateProject}
-            className="flex items-center gap-2 bg-[#E63946] hover:bg-[#c1303b] text-white px-4 py-2 rounded-lg transition-colors w-full md:w-auto justify-center"
+            className="flex items-center gap-2 bg-[#E63946] hover:bg-[#c1303b] text-white px-6 py-2.5 rounded-lg transition-all transform hover:scale-105 font-bold w-full md:w-auto justify-center shadow-lg"
         >
             <Plus size={20} />
             Novo Projeto
@@ -160,316 +150,307 @@ const AdminDashboard = ({ onLogout }) => {
 
       {/* Projects Grid */}
       {loading ? (
-        <div className="flex justify-center items-center h-64">
+        <div className="flex flex-col justify-center items-center h-64 gap-4">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#E63946]"></div>
+            <p className="text-gray-400 animate-pulse">Carregando projetos...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map(project => (
-                <div key={project._id} className="bg-[#1a1a1a] rounded-xl border border-[#333] overflow-hidden group hover:border-[#E63946] transition-colors">
+                <div key={project.id} className="bg-[#1a1a1a] rounded-xl border border-[#333] overflow-hidden group hover:border-[#E63946] transition-all duration-300 shadow-xl">
                     <div className="relative aspect-video">
                         <img 
-                            src={project.images?.[0] || '/api/placeholder/400/300'} 
+                            src={project.bg_image || '/api/placeholder/400/300'} 
                             alt={project.title}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 backdrop-blur-sm">
                             <button 
                                 onClick={() => handleEditProject(project)}
-                                className="bg-white text-black p-2 rounded-full hover:bg-gray-200"
+                                className="bg-white text-black p-3 rounded-full hover:bg-[#E63946] hover:text-white transition-all transform hover:scale-110 shadow-lg"
                                 title="Editar"
                             >
                                 <Edit size={20} />
                             </button>
                             <button 
-                                onClick={() => handleDeleteProject(project._id)}
-                                className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
+                                onClick={() => handleDeleteProject(project.id)}
+                                className="bg-red-500 text-white p-3 rounded-full hover:bg-red-600 transition-all transform hover:scale-110 shadow-lg"
                                 title="Excluir"
                             >
                                 <Trash2 size={20} />
                             </button>
                         </div>
-                        {project.featured && (
-                            <div className="absolute top-2 right-2 bg-[#E63946] text-xs px-2 py-1 rounded text-white font-bold">
-                                DESTAQUE
-                            </div>
-                        )}
+                        <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-md text-[10px] px-2 py-1 rounded text-white font-bold border border-white/10">
+                            ORDEM: {project.display_order}
+                        </div>
                     </div>
-                    <div className="p-4">
-                        <h3 className="font-bold text-lg mb-1 truncate">{project.title}</h3>
-                        <p className="text-gray-400 text-sm mb-2">{project.client}</p>
+                    <div className="p-5">
+                        <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-bold text-lg truncate flex-1">{project.title}</h3>
+                            <span className="text-[10px] bg-[#E63946]/10 text-[#E63946] px-2 py-0.5 rounded border border-[#E63946]/20 uppercase font-bold">
+                                {project.status}
+                            </span>
+                        </div>
+                        <p className="text-gray-400 text-sm mb-4 line-clamp-2 h-10">{project.description}</p>
                         <div className="flex flex-wrap gap-2">
-                            {project.tags?.slice(0,3).map((tag, i) => (
-                                <span key={i} className="text-xs bg-[#333] px-2 py-1 rounded text-gray-300">
-                                    {tag}
-                                </span>
-                            ))}
+                            <span className="text-[11px] bg-[#333] px-2.5 py-1 rounded-full text-gray-300 border border-white/5">
+                                {project.category}
+                            </span>
+                            <span className="text-[11px] bg-[#333] px-2.5 py-1 rounded-full text-gray-300 border border-white/5">
+                                {project.genre}
+                            </span>
                         </div>
                     </div>
                 </div>
             ))}
+            
+            {filteredProjects.length === 0 && (
+                <div className="col-span-full py-20 text-center bg-[#1a1a1a] rounded-xl border border-dashed border-[#333]">
+                    <div className="bg-[#333] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-500">
+                        <Search size={32} />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-400">Nenhum projeto encontrado</h3>
+                    <p className="text-gray-500 mt-2">Tente ajustar sua busca ou crie um novo projeto.</p>
+                </div>
+            )}
         </div>
       )}
 
-      {/* Modal Dedicado de Gerenciamento de Fotos (Z-Index maior que o modal de edição) */}
-      {showImageManager && editingProject && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-[60]">
-             <div className="bg-[#1a1a1a] p-6 rounded-xl max-w-5xl w-full border border-[#333] flex flex-col h-[85vh] shadow-2xl">
-                <div className="flex justify-between items-center mb-6 pb-4 border-b border-[#333]">
-                    <div>
-                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                            <ImageIcon size={24} className="text-[#E63946]" />
-                            Gerenciar Galeria
-                        </h3>
-                        <p className="text-sm text-gray-400 mt-1">
-                            Arraste para reordenar. A primeira imagem será a capa do projeto.
-                        </p>
-                    </div>
-                    <button 
-                        onClick={() => setShowImageManager(false)} 
-                        className="text-gray-400 hover:text-white bg-[#333] p-2 rounded-full hover:bg-[#444] transition-colors"
-                    >
-                        <X size={24} />
-                    </button>
-                </div>
-                
-                <div className="flex-1 overflow-y-auto min-h-0 bg-[#121212] rounded-lg p-4 border border-[#333]">
-                    <DragDropContext onDragEnd={handleDragEnd}>
-                        <Droppable droppableId="images" direction="horizontal">
-                            {(provided) => (
-                                <div 
-                                    {...provided.droppableProps}
-                                    ref={provided.innerRef}
-                                    className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
-                                >
-                                    {editingProject.images?.map((img, index) => (
-                                        <Draggable key={`${img}-${index}`} draggableId={`${img}-${index}`} index={index}>
-                                            {(provided, snapshot) => (
-                                                <div
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    className={`relative group aspect-square bg-[#222] rounded-lg overflow-hidden border ${snapshot.isDragging ? 'border-[#E63946] shadow-lg scale-105 z-50' : 'border-[#333]'}`}
-                                                >
-                                                    {/* Drag Handle */}
-                                                    <div 
-                                                        {...provided.dragHandleProps}
-                                                        className="absolute top-2 left-2 bg-black/60 p-1.5 rounded-md cursor-grab active:cursor-grabbing text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                                                    >
-                                                        <GripVertical size={14} />
-                                                    </div>
-                                                    
-                                                    {/* Tag de Capa */}
-                                                    {index === 0 && (
-                                                        <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-[#E63946] text-[10px] font-bold px-2 py-0.5 rounded text-white z-10 shadow-sm">
-                                                            CAPA
-                                                        </div>
-                                                    )}
-
-                                                    <img 
-                                                        src={img} 
-                                                        alt={`Project ${index}`} 
-                                                        className="w-full h-full object-cover pointer-events-none"
-                                                    />
-                                                    
-                                                    {/* Botão Remover */}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleRemoveImage(index)}
-                                                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                                                        title="Remover imagem"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
-
-                                                    {/* Overlay de número */}
-                                                    <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        #{index + 1}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </Draggable>
-                                    ))}
-                                    {provided.placeholder}
-                                    
-                                    {/* Card de Upload Fixo na Grid */}
-                                    <label className="flex flex-col items-center justify-center aspect-square bg-[#222] border-2 border-dashed border-[#444] rounded-lg cursor-pointer hover:border-[#E63946] hover:bg-[#2a2a2a] transition-all group">
-                                        <div className="flex flex-col items-center text-gray-500 group-hover:text-[#E63946]">
-                                            <div className="bg-[#333] p-3 rounded-full mb-2 group-hover:bg-[#E63946]/10 transition-colors">
-                                                <Upload size={24} />
-                                            </div>
-                                            <span className="text-sm font-medium">Adicionar Foto</span>
-                                            <span className="text-xs text-gray-600 mt-1">JPG, PNG, WEBP</span>
-                                        </div>
-                                        <input 
-                                            type="file" 
-                                            multiple 
-                                            accept="image/*"
-                                            onChange={handleImageUpload}
-                                            className="hidden" 
-                                        />
-                                    </label>
-                                </div>
-                            )}
-                        </Droppable>
-                    </DragDropContext>
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-[#333] flex justify-between items-center">
-                    <div className="text-sm text-gray-400">
-                        Total: {editingProject.images?.length || 0} imagens
-                    </div>
-                    <button 
-                        onClick={() => setShowImageManager(false)}
-                        className="bg-[#E63946] hover:bg-[#c1303b] text-white px-8 py-3 rounded-lg font-bold flex items-center gap-2 transition-all hover:scale-105"
-                    >
-                        <Check size={20} />
-                        Concluir Edição de Fotos
-                    </button>
-                </div>
-             </div>
-        </div>
-      )}
-
-      {/* Modal de Edição de Projeto Principal */}
+      {/* Modal de Edição de Projeto */}
       {editingProject && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-[#1a1a1a] p-8 rounded-xl max-w-4xl w-full border border-[#333] relative">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-sm">
+          <div className="bg-[#1a1a1a] p-8 rounded-2xl max-w-4xl w-full border border-[#333] relative my-8 shadow-2xl animate-in fade-in zoom-in duration-200">
             <button 
-              onClick={() => {
-                setEditingProject(null);
-                setShowImageManager(false);
-              }}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+              onClick={() => setEditingProject(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white bg-[#333] p-2 rounded-full transition-colors"
             >
-              <X size={24} />
+              <X size={20} />
             </button>
 
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                {editingProject._id ? 'Editar Projeto' : 'Novo Projeto'}
-                {editingProject._id && <span className="text-xs font-normal text-gray-500 bg-[#333] px-2 py-0.5 rounded">ID: {editingProject._id}</span>}
+            <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                <div className="bg-[#E63946] p-2 rounded-lg">
+                    {editingProject.id ? <Edit size={20} /> : <Plus size={20} />}
+                </div>
+                {editingProject.id ? 'Editar Projeto' : 'Novo Projeto'}
+                {editingProject.id && <span className="text-xs font-normal text-gray-500 bg-[#121212] px-3 py-1 rounded-full border border-[#333]">ID: {editingProject.id}</span>}
             </h2>
             
-            <form onSubmit={handleSaveProject} className="space-y-6">
+            <form onSubmit={handleSaveProject} className="space-y-8">
                 
-              {/* === NOVA ÁREA DE PREVIEW E BOTÃO DE EDIÇÃO DE FOTOS === */}
-              <div className="bg-[#121212] p-6 rounded-xl border border-[#333] relative overflow-hidden group">
-                  <div className="flex justify-between items-end mb-4 relative z-10">
-                      <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-1">Galeria do Projeto</label>
-                          <p className="text-xs text-gray-500">
-                              Gerencie as fotos, a capa e a ordem de exibição.
-                          </p>
+              {/* Seção de Imagens */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                      <label className="block text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
+                        <ImageIcon size={16} className="text-[#E63946]" />
+                        Imagem de Fundo (Horizontal)
+                      </label>
+                      <div className="relative group aspect-video bg-[#121212] rounded-xl overflow-hidden border-2 border-dashed border-[#333] hover:border-[#E63946] transition-all">
+                          {editingProject.bg_image ? (
+                              <>
+                                  <img src={editingProject.bg_image} className="w-full h-full object-cover" alt="Preview" />
+                                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                      <label className="cursor-pointer bg-white text-black px-4 py-2 rounded-lg font-bold text-sm hover:scale-105 transition-transform">
+                                          Trocar Imagem
+                                          <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'bg_image', 'assets')} />
+                                      </label>
+                                  </div>
+                              </>
+                          ) : (
+                              <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer hover:bg-[#1a1a1a] transition-colors">
+                                  <Upload size={32} className="text-gray-600 mb-2" />
+                                  <span className="text-sm text-gray-500">Upload Imagem Horizontal</span>
+                                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'bg_image', 'assets')} />
+                              </label>
+                          )}
                       </div>
-                      <button 
-                        type="button"
-                        onClick={() => setShowImageManager(true)}
-                        className="bg-[#E63946] hover:bg-[#c1303b] text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-transform hover:scale-105 shadow-lg"
-                      >
-                          <Edit size={16} />
-                          Editar/Adicionar Fotos
-                      </button>
+                      <input 
+                        type="text" 
+                        value={editingProject.bg_image} 
+                        onChange={(e) => setEditingProject({...editingProject, bg_image: e.target.value})}
+                        placeholder="URL da imagem..."
+                        className="w-full bg-[#121212] border border-[#333] rounded-lg px-3 py-2 text-xs text-gray-400"
+                      />
                   </div>
 
-                  {/* Preview Visual Strip */}
-                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-track-[#1a1a1a] scrollbar-thumb-[#333] min-h-[100px] relative z-10">
-                       {editingProject.images && editingProject.images.length > 0 ? (
-                           editingProject.images.map((img, idx) => (
-                               <div key={idx} className="relative flex-shrink-0 h-24 aspect-square rounded-lg overflow-hidden border border-[#333]">
-                                   <img src={img} className="w-full h-full object-cover" alt="" />
-                                   {idx === 0 && <div className="absolute bottom-0 inset-x-0 bg-[#E63946] text-white text-[9px] text-center font-bold py-0.5">CAPA</div>}
-                               </div>
-                           ))
-                       ) : (
-                           <div className="w-full h-24 border-2 border-dashed border-[#333] rounded-lg flex items-center justify-center text-gray-600 gap-2 cursor-pointer hover:bg-[#1a1a1a] transition-colors" onClick={() => setShowImageManager(true)}>
-                               <ImageIcon size={20} />
-                               <span className="text-sm">Nenhuma imagem. Clique em editar para adicionar.</span>
-                           </div>
-                       )}
+                  <div className="space-y-3">
+                      <label className="block text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
+                        <ImageIcon size={16} className="text-[#E63946]" />
+                        Imagem Monólito (Vertical)
+                      </label>
+                      <div className="relative group aspect-[3/4] max-h-[180px] mx-auto bg-[#121212] rounded-xl overflow-hidden border-2 border-dashed border-[#333] hover:border-[#E63946] transition-all">
+                          {editingProject.monolith_image ? (
+                              <>
+                                  <img src={editingProject.monolith_image} className="w-full h-full object-cover" alt="Preview" />
+                                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                      <label className="cursor-pointer bg-white text-black px-4 py-2 rounded-lg font-bold text-sm hover:scale-105 transition-transform">
+                                          Trocar
+                                          <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'monolith_image', 'assets')} />
+                                      </label>
+                                  </div>
+                              </>
+                          ) : (
+                              <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer hover:bg-[#1a1a1a] transition-colors">
+                                  <Upload size={32} className="text-gray-600 mb-2" />
+                                  <span className="text-sm text-gray-500">Upload Imagem Vertical</span>
+                                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'monolith_image', 'assets')} />
+                              </label>
+                          )}
+                      </div>
+                      <input 
+                        type="text" 
+                        value={editingProject.monolith_image} 
+                        onChange={(e) => setEditingProject({...editingProject, monolith_image: e.target.value})}
+                        placeholder="URL da imagem..."
+                        className="w-full bg-[#121212] border border-[#333] rounded-lg px-3 py-2 text-xs text-gray-400"
+                      />
                   </div>
               </div>
-              {/* ======================================================= */}
 
+              {/* Campos de Texto */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Título do Projeto</label>
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase">Título do Projeto</label>
                   <input 
                     type="text" 
                     value={editingProject.title}
                     onChange={(e) => setEditingProject({...editingProject, title: e.target.value})}
-                    className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:border-[#E63946] focus:outline-none"
+                    className="w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white focus:border-[#E63946] focus:outline-none transition-all"
                     required
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Cliente</label>
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase">Categoria</label>
                   <input 
                     type="text" 
-                    value={editingProject.client}
-                    onChange={(e) => setEditingProject({...editingProject, client: e.target.value})}
-                    className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:border-[#E63946] focus:outline-none"
+                    value={editingProject.category}
+                    onChange={(e) => setEditingProject({...editingProject, category: e.target.value})}
+                    placeholder="Ex: Documentário, Reality, Factual"
+                    className="w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white focus:border-[#E63946] focus:outline-none transition-all"
+                    required
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Ano</label>
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase">Gênero</label>
                   <input 
                     type="text" 
-                    value={editingProject.year}
-                    onChange={(e) => setEditingProject({...editingProject, year: e.target.value})}
-                    className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:border-[#E63946] focus:outline-none"
+                    value={editingProject.genre}
+                    onChange={(e) => setEditingProject({...editingProject, genre: e.target.value})}
+                    className="w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white focus:border-[#E63946] focus:outline-none"
+                    required
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Categoria</label>
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase">Formato</label>
                   <input 
                     type="text" 
-                    value={editingProject.category}
-                    onChange={(e) => setEditingProject({...editingProject, category: e.target.value})}
-                    className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:border-[#E63946] focus:outline-none"
+                    value={editingProject.format}
+                    onChange={(e) => setEditingProject({...editingProject, format: e.target.value})}
+                    className="w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white focus:border-[#E63946] focus:outline-none"
+                    required
                   />
                 </div>
-                <div className="flex items-center pt-8">
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                        <div className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${editingProject.featured ? 'bg-[#E63946] border-[#E63946]' : 'border-gray-500 group-hover:border-gray-300'}`}>
-                            {editingProject.featured && <Check size={14} className="text-white" />}
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase">Status</label>
+                  <select 
+                    value={editingProject.status}
+                    onChange={(e) => setEditingProject({...editingProject, status: e.target.value})}
+                    className="w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white focus:border-[#E63946] focus:outline-none"
+                    required
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="Em Desenvolvimento">Em Desenvolvimento</option>
+                    <option value="Em Captação">Em Captação</option>
+                    <option value="Em Produção">Em Produção</option>
+                    <option value="Finalizado">Finalizado</option>
+                    <option value="Exibido">Exibido</option>
+                    <option value="Formato Pronto">Formato Pronto</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase">Descrição Curta (Home)</label>
+                  <textarea 
+                    value={editingProject.description}
+                    onChange={(e) => setEditingProject({...editingProject, description: e.target.value})}
+                    className="w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white h-24 focus:border-[#E63946] focus:outline-none resize-none"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase">Descrição Longa (Interna)</label>
+                  <textarea 
+                    value={editingProject.long_description}
+                    onChange={(e) => setEditingProject({...editingProject, long_description: e.target.value})}
+                    className="w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white h-24 focus:border-[#E63946] focus:outline-none resize-none"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-[#121212] rounded-2xl border border-[#333]">
+                <div className="space-y-4">
+                    <h3 className="text-sm font-bold flex items-center gap-2 text-[#E63946]">
+                        <Video size={16} /> Vídeo e Mídia
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <label className="block text-[10px] font-bold text-gray-500 uppercase">Vimeo ID</label>
+                            <input type="text" value={editingProject.vimeo_id || ''} onChange={(e) => setEditingProject({...editingProject, vimeo_id: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none" />
                         </div>
-                        <input 
-                            type="checkbox" 
-                            checked={editingProject.featured}
-                            onChange={(e) => setEditingProject({...editingProject, featured: e.target.checked})}
-                            className="hidden"
-                        />
-                        <span className="text-gray-300 group-hover:text-white transition-colors">Destaque na Home</span>
-                    </label>
+                        <div className="space-y-1">
+                            <label className="block text-[10px] font-bold text-gray-500 uppercase">Vimeo Hash</label>
+                            <input type="text" value={editingProject.vimeo_hash || ''} onChange={(e) => setEditingProject({...editingProject, vimeo_hash: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none" />
+                        </div>
+                    </div>
+                    <div className="space-y-1">
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase">Label do Botão Vídeo</label>
+                        <input type="text" value={editingProject.video_label || ''} onChange={(e) => setEditingProject({...editingProject, video_label: e.target.value})} placeholder="Ex: Ver Promo, Ver Teaser" className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none" />
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <h3 className="text-sm font-bold flex items-center gap-2 text-[#E63946]">
+                        <FileText size={16} /> Arquivos e Info
+                    </h3>
+                    <div className="space-y-1">
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase">URL do Pitch Deck (PDF)</label>
+                        <div className="flex gap-2">
+                            <input type="text" value={editingProject.pdf_url || ''} onChange={(e) => setEditingProject({...editingProject, pdf_url: e.target.value})} className="flex-1 bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none" />
+                            <label className="cursor-pointer bg-[#333] hover:bg-[#444] p-2 rounded-lg transition-colors" title="Upload PDF">
+                                <Upload size={18} />
+                                <input type="file" className="hidden" accept=".pdf" onChange={(e) => handleFileUpload(e, 'pdf_url', 'projetos')} />
+                            </label>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <label className="block text-[10px] font-bold text-gray-500 uppercase">Apresentador/Host</label>
+                            <input type="text" value={editingProject.host || ''} onChange={(e) => setEditingProject({...editingProject, host: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="block text-[10px] font-bold text-gray-500 uppercase">Ordem de Exibição</label>
+                            <input type="number" value={editingProject.display_order || 0} onChange={(e) => setEditingProject({...editingProject, display_order: parseInt(e.target.value)})} className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none" />
+                        </div>
+                    </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Descrição</label>
-                <textarea 
-                  value={editingProject.description}
-                  onChange={(e) => setEditingProject({...editingProject, description: e.target.value})}
-                  className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white h-32 focus:border-[#E63946] focus:outline-none resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Tags (separadas por vírgula)</label>
-                <input 
-                  type="text" 
-                  value={editingProject.tags?.join(', ')}
-                  onChange={(e) => setEditingProject({...editingProject, tags: e.target.value.split(',').map(t => t.trim())})}
-                  className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-white focus:border-[#E63946] focus:outline-none"
-                  placeholder="Ex: Comercial, Residencial, Interiores"
-                />
-              </div>
-
-              <div className="flex justify-end pt-6 border-t border-[#333]">
+              <div className="flex justify-end pt-6 border-t border-[#333] gap-4">
+                <button 
+                  type="button"
+                  onClick={() => setEditingProject(null)}
+                  className="px-8 py-3 rounded-xl font-bold text-gray-400 hover:text-white hover:bg-[#333] transition-all"
+                >
+                  Cancelar
+                </button>
                 <button 
                   type="submit"
-                  className="bg-[#E63946] hover:bg-[#c1303b] text-white px-8 py-3 rounded-lg font-bold flex items-center gap-2 transition-all hover:scale-105"
+                  className="bg-[#E63946] hover:bg-[#c1303b] text-white px-12 py-3 rounded-xl font-bold flex items-center gap-2 transition-all transform hover:scale-105 shadow-lg shadow-[#E63946]/20"
                 >
                   <Save size={20} />
                   Salvar Projeto
