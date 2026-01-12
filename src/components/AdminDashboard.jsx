@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, LogOut, Save, X, Eye, GripVertical, AlertCircle, CheckCircle } from 'lucide-react';
+import ImageControl from './ImageControl.jsx';
+import { buildImageStyle } from '../utils/styleUtils.js';
 
 const API_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:3001');
-
-// Componente de Formulário de Projeto
-const buildImageStyle = (url, zoom = 0, offsetX = 0, offsetY = 0) => ({
-  backgroundImage: `url(${url})`,
-  backgroundSize: `${100 + Number(zoom || 0)}%`,
-  backgroundPosition: `${50 + Number(offsetX || 0)}% ${50 + Number(offsetY || 0)}%`
-});
 
 function ProjectForm({ project, onSave, onCancel }) {
   const normalizedProject = project
@@ -327,168 +322,56 @@ function ProjectForm({ project, onSave, onCancel }) {
               </div>
 
               {/* Imagem de Fundo */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
-                    Imagem de Fundo (Upload)
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      handleFileUpload({
-                        file: e.target.files?.[0],
-                        folder: 'assets',
-                        targetField: 'bg_image',
-                        uploadingKey: 'background'
-                      })
-                    }
-                    className="w-full bg-black border border-zinc-800 text-zinc-400 px-4 py-3 focus:outline-none focus:border-red-600 transition-colors file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-zinc-900 file:text-zinc-300 file:uppercase file:text-[10px] file:tracking-widest"
-                  />
-                  {uploading.background && (
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-2">Enviando imagem...</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
-                    Imagem de Fundo (URL)
-                  </label>
-                  <input
-                    type="text"
-                    name="bg_image"
-                    value={formData.bg_image}
-                    onChange={handleChange}
-                    placeholder="/assets/imagem.webp"
-                    className="w-full bg-black border border-zinc-800 text-white px-4 py-3 focus:outline-none focus:border-red-600 transition-colors"
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
-                      Zoom Fundo
-                    </label>
-                    <input
-                      type="range"
-                      name="bg_image_zoom"
-                      min="-50"
-                      max="50"
-                      value={formData.bg_image_zoom}
-                      onChange={handleChange}
-                      className="w-full accent-red-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
-                      Crop Horizontal
-                    </label>
-                    <input
-                      type="range"
-                      name="bg_image_offset_x"
-                      min="-50"
-                      max="50"
-                      value={formData.bg_image_offset_x}
-                      onChange={handleChange}
-                      className="w-full accent-red-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
-                      Crop Vertical
-                    </label>
-                    <input
-                      type="range"
-                      name="bg_image_offset_y"
-                      min="-50"
-                      max="50"
-                      value={formData.bg_image_offset_y}
-                      onChange={handleChange}
-                      className="w-full accent-red-600"
-                    />
-                  </div>
-                </div>
-              </div>
+              <ImageControl
+                uploadLabel="Imagem de Fundo (Upload)"
+                urlLabel="Imagem de Fundo (URL)"
+                zoomLabel="Zoom Fundo"
+                urlField="bg_image"
+                zoomField="bg_image_zoom"
+                offsetXField="bg_image_offset_x"
+                offsetYField="bg_image_offset_y"
+                urlValue={formData.bg_image}
+                zoomValue={formData.bg_image_zoom}
+                offsetXValue={formData.bg_image_offset_x}
+                offsetYValue={formData.bg_image_offset_y}
+                placeholder="/assets/imagem.webp"
+                uploading={uploading.background}
+                onFieldChange={handleChange}
+                onFileUpload={(file) =>
+                  handleFileUpload({
+                    file,
+                    folder: 'assets',
+                    targetField: 'bg_image',
+                    uploadingKey: 'background'
+                  })
+                }
+              />
 
               {/* Imagem Monolito */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
-                    Imagem Monolito (Upload)
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      handleFileUpload({
-                        file: e.target.files?.[0],
-                        folder: 'assets',
-                        targetField: 'monolith_image',
-                        uploadingKey: 'monolith'
-                      })
-                    }
-                    className="w-full bg-black border border-zinc-800 text-zinc-400 px-4 py-3 focus:outline-none focus:border-red-600 transition-colors file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-zinc-900 file:text-zinc-300 file:uppercase file:text-[10px] file:tracking-widest"
-                  />
-                  {uploading.monolith && (
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-2">Enviando imagem...</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
-                    Imagem Monolito (URL)
-                  </label>
-                  <input
-                    type="text"
-                    name="monolith_image"
-                    value={formData.monolith_image}
-                    onChange={handleChange}
-                    placeholder="/assets/imagem-vertical.webp"
-                    className="w-full bg-black border border-zinc-800 text-white px-4 py-3 focus:outline-none focus:border-red-600 transition-colors"
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
-                      Zoom Monolito
-                    </label>
-                    <input
-                      type="range"
-                      name="monolith_image_zoom"
-                      min="-50"
-                      max="50"
-                      value={formData.monolith_image_zoom}
-                      onChange={handleChange}
-                      className="w-full accent-red-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
-                      Crop Horizontal
-                    </label>
-                    <input
-                      type="range"
-                      name="monolith_image_offset_x"
-                      min="-50"
-                      max="50"
-                      value={formData.monolith_image_offset_x}
-                      onChange={handleChange}
-                      className="w-full accent-red-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
-                      Crop Vertical
-                    </label>
-                    <input
-                      type="range"
-                      name="monolith_image_offset_y"
-                      min="-50"
-                      max="50"
-                      value={formData.monolith_image_offset_y}
-                      onChange={handleChange}
-                      className="w-full accent-red-600"
-                    />
-                  </div>
-                </div>
-              </div>
+              <ImageControl
+                uploadLabel="Imagem Monolito (Upload)"
+                urlLabel="Imagem Monolito (URL)"
+                zoomLabel="Zoom Monolito"
+                urlField="monolith_image"
+                zoomField="monolith_image_zoom"
+                offsetXField="monolith_image_offset_x"
+                offsetYField="monolith_image_offset_y"
+                urlValue={formData.monolith_image}
+                zoomValue={formData.monolith_image_zoom}
+                offsetXValue={formData.monolith_image_offset_x}
+                offsetYValue={formData.monolith_image_offset_y}
+                placeholder="/assets/imagem-vertical.webp"
+                uploading={uploading.monolith}
+                onFieldChange={handleChange}
+                onFileUpload={(file) =>
+                  handleFileUpload({
+                    file,
+                    folder: 'assets',
+                    targetField: 'monolith_image',
+                    uploadingKey: 'monolith'
+                  })
+                }
+              />
 
               {/* Vimeo ID */}
               <div>
