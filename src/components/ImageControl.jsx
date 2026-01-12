@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { Edit, Image as ImageIcon, X } from 'lucide-react';
 import { buildImageStyle } from '../utils/styleUtils.js';
 
 function ImagePreview({
@@ -11,8 +12,10 @@ function ImagePreview({
   return (
     <div className={`relative w-full bg-zinc-900 border border-zinc-800 overflow-hidden ${previewClassName}`}>
       {urlValue ? (
-        <div
-          className="absolute inset-0 bg-cover transition-all duration-700"
+        <img
+          src={urlValue}
+          alt="Preview"
+          className="absolute inset-0 w-full h-full"
           style={buildImageStyle(urlValue, zoomValue, offsetXValue, offsetYValue)}
         />
       ) : (
@@ -214,8 +217,9 @@ function ImageControl({
         <button
           type="button"
           onClick={() => setIsEditing(true)}
-          className="text-[10px] uppercase tracking-widest text-zinc-400 hover:text-white transition-colors"
+          className="flex items-center gap-2 bg-[#E63946] hover:bg-[#c1303b] text-white px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-widest font-bold transition-all transform hover:scale-105 shadow-lg shadow-[#E63946]/20"
         >
+          <Edit size={14} />
           Editar imagem
         </button>
       </div>
