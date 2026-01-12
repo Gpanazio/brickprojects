@@ -98,9 +98,11 @@ const VideoModal = ({ project, projects, onClose, onNext, onPrev }) => {
                      ></iframe>
                    ) : (
                      // Fallback para projetos sem vídeo
-                     <div className="absolute inset-0 w-full h-full">
-                        <div 
-                          className="absolute inset-0 bg-cover transition-transform duration-[10s] hover:scale-105"
+                     <div className="absolute inset-0 w-full h-full overflow-hidden">
+                        <img 
+                          src={project.bgImage}
+                          alt=""
+                          className="absolute inset-0 w-full h-full"
                           style={buildImageStyle(
                             project.bgImage,
                             project.bgImageZoom,
@@ -235,9 +237,11 @@ const Slide = ({ project, isActive, onPlay }) => {
       <ModularGridBackground />
 
       {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-         <div 
-           className="absolute inset-0 bg-cover transition-transform duration-[2000ms] ease-out opacity-20 grayscale"
+      <div className="absolute inset-0 z-0 overflow-hidden">
+         <img 
+           src={project.bgImage}
+           alt=""
+           className="absolute inset-0 w-full h-full transition-transform duration-[2000ms] ease-out opacity-20 grayscale"
            style={{ 
              ...buildImageStyle(
                project.bgImage,
@@ -245,7 +249,8 @@ const Slide = ({ project, isActive, onPlay }) => {
                project.bgImageOffsetX,
                project.bgImageOffsetY
              ),
-             transform: isActive ? 'scale(1.0)' : 'scale(1.1)' 
+             // Combina o zoom do editor com a animação do slide
+             transform: `${isActive ? 'scale(1.0)' : 'scale(1.1)'} ${buildImageStyle(null, project.bgImageZoom).transform}`
            }} 
          />
          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/90 to-transparent" />
@@ -293,8 +298,10 @@ const Slide = ({ project, isActive, onPlay }) => {
              onClick={() => onPlay(project)}
            >
               {/* Imagem Colorida no Monolito */}
-              <div 
-                className="absolute inset-0 bg-cover transition-all duration-700 opacity-100" 
+              <img 
+                src={project.monolithImage}
+                alt=""
+                className="absolute inset-0 w-full h-full opacity-100" 
                 style={buildImageStyle(
                   project.monolithImage,
                   project.monolithImageZoom,
