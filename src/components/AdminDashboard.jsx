@@ -323,6 +323,7 @@ function ProjectForm({ project, onSave, onCancel }) {
 
               {/* Imagem de Fundo */}
               <ImageControl
+                title="Imagem de Fundo"
                 uploadLabel="Imagem de Fundo (Upload)"
                 urlLabel="Imagem de Fundo (URL)"
                 zoomLabel="Zoom Fundo"
@@ -336,6 +337,7 @@ function ProjectForm({ project, onSave, onCancel }) {
                 offsetYValue={formData.bg_image_offset_y}
                 placeholder="/assets/imagem.webp"
                 uploading={uploading.background}
+                previewClassName="aspect-video"
                 onFieldChange={handleChange}
                 onFileUpload={(file) =>
                   handleFileUpload({
@@ -349,6 +351,7 @@ function ProjectForm({ project, onSave, onCancel }) {
 
               {/* Imagem Monolito */}
               <ImageControl
+                title="Imagem Monolito"
                 uploadLabel="Imagem Monolito (Upload)"
                 urlLabel="Imagem Monolito (URL)"
                 zoomLabel="Zoom Monolito"
@@ -362,6 +365,7 @@ function ProjectForm({ project, onSave, onCancel }) {
                 offsetYValue={formData.monolith_image_offset_y}
                 placeholder="/assets/imagem-vertical.webp"
                 uploading={uploading.monolith}
+                previewClassName="aspect-[1/2]"
                 onFieldChange={handleChange}
                 onFileUpload={(file) =>
                   handleFileUpload({
