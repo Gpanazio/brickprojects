@@ -46,7 +46,13 @@ export async function initDatabase() {
         long_description TEXT NOT NULL,
         video_label VARCHAR(255),
         bg_image VARCHAR(500),
+        bg_image_zoom INTEGER DEFAULT 0,
+        bg_image_offset_x INTEGER DEFAULT 0,
+        bg_image_offset_y INTEGER DEFAULT 0,
         monolith_image VARCHAR(500),
+        monolith_image_zoom INTEGER DEFAULT 0,
+        monolith_image_offset_x INTEGER DEFAULT 0,
+        monolith_image_offset_y INTEGER DEFAULT 0,
         vimeo_id VARCHAR(255),
         vimeo_hash VARCHAR(255),
         pdf_url VARCHAR(500),
@@ -60,6 +66,16 @@ export async function initDatabase() {
     // Índice para ordenação
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_originais_projects_order ON originais_projects(display_order);
+    `);
+
+    await client.query(`
+      ALTER TABLE originais_projects
+        ADD COLUMN IF NOT EXISTS bg_image_zoom INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS bg_image_offset_x INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS bg_image_offset_y INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS monolith_image_zoom INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS monolith_image_offset_x INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS monolith_image_offset_y INTEGER DEFAULT 0;
     `);
     
     // Função para atualizar updated_at automaticamente

@@ -4,7 +4,25 @@ import { Plus, Edit, Trash2, LogOut, Save, X, Eye, GripVertical, AlertCircle, Ch
 const API_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:3001');
 
 // Componente de Formulário de Projeto
+const buildImageStyle = (url, zoom = 0, offsetX = 0, offsetY = 0) => ({
+  backgroundImage: `url(${url})`,
+  backgroundSize: `${100 + Number(zoom || 0)}%`,
+  backgroundPosition: `${50 + Number(offsetX || 0)}% ${50 + Number(offsetY || 0)}%`
+});
+
 function ProjectForm({ project, onSave, onCancel }) {
+  const normalizedProject = project
+    ? {
+        ...project,
+        bg_image_zoom: project.bg_image_zoom ?? 0,
+        bg_image_offset_x: project.bg_image_offset_x ?? 0,
+        bg_image_offset_y: project.bg_image_offset_y ?? 0,
+        monolith_image_zoom: project.monolith_image_zoom ?? 0,
+        monolith_image_offset_x: project.monolith_image_offset_x ?? 0,
+        monolith_image_offset_y: project.monolith_image_offset_y ?? 0
+      }
+    : {};
+
   const [formData, setFormData] = useState({
     title: '',
     category: '',
@@ -15,16 +33,29 @@ function ProjectForm({ project, onSave, onCancel }) {
     long_description: '',
     video_label: '',
     bg_image: '',
+    bg_image_zoom: 0,
+    bg_image_offset_x: 0,
+    bg_image_offset_y: 0,
     monolith_image: '',
+    monolith_image_zoom: 0,
+    monolith_image_offset_x: 0,
+    monolith_image_offset_y: 0,
     vimeo_id: '',
     vimeo_hash: '',
     pdf_url: '',
     host: '',
     display_order: 0,
-    ...project
+    ...normalizedProject
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [uploading, setUploading] = useState({
+    background: false,
+    monolith: false,
+    pdf: false
+  });
+
+  const token = localStorage.getItem('adminToken');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,8 +72,41 @@ function ProjectForm({ project, onSave, onCancel }) {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    const parsedValue = type === 'number' || type === 'range' ? Number(value) : value;
+    setFormData(prev => ({ ...prev, [name]: parsedValue }));
+  };
+
+  const handleFileUpload = async ({ file, folder, targetField, uploadingKey }) => {
+    if (!file) return;
+    setUploading(prev => ({ ...prev, [uploadingKey]: true }));
+    setError('');
+
+    try {
+      const payload = new FormData();
+      payload.append('folder', folder);
+      payload.append('file', file);
+
+      const response = await fetch(`${API_URL}/api/uploads`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: payload
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Erro ao enviar arquivo.');
+      }
+
+      const data = await response.json();
+      setFormData(prev => ({ ...prev, [targetField]: data.url }));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploading(prev => ({ ...prev, [uploadingKey]: false }));
+    }
   };
 
   return (
@@ -74,8 +138,13 @@ function ProjectForm({ project, onSave, onCancel }) {
                   {/* BG Image Preview */}
                   {formData.bg_image && (
                     <div 
-                      className="absolute inset-0 bg-cover bg-center opacity-30 grayscale transition-all duration-700" 
-                      style={{ backgroundImage: `url(${formData.bg_image})` }}
+                      className="absolute inset-0 bg-cover opacity-30 grayscale transition-all duration-700" 
+                      style={buildImageStyle(
+                        formData.bg_image,
+                        formData.bg_image_zoom,
+                        formData.bg_image_offset_x,
+                        formData.bg_image_offset_y
+                      )}
                     />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
@@ -100,8 +169,13 @@ function ProjectForm({ project, onSave, onCancel }) {
                 <div className="relative aspect-[1/2] w-full max-w-[150px] mx-auto bg-zinc-900 border-2 border-red-600/30 overflow-hidden shadow-2xl shadow-red-600/5">
                   {formData.monolith_image ? (
                     <div 
-                      className="absolute inset-0 bg-cover bg-center transition-all duration-700" 
-                      style={{ backgroundImage: `url(${formData.monolith_image})` }}
+                      className="absolute inset-0 bg-cover transition-all duration-700" 
+                      style={buildImageStyle(
+                        formData.monolith_image,
+                        formData.monolith_image_zoom,
+                        formData.monolith_image_offset_x,
+                        formData.monolith_image_offset_y
+                      )}
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-zinc-800 text-[10px] uppercase tracking-tighter text-center px-4">
@@ -253,33 +327,167 @@ function ProjectForm({ project, onSave, onCancel }) {
               </div>
 
               {/* Imagem de Fundo */}
-              <div>
-                <label className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
-                  Imagem de Fundo (URL)
-                </label>
-                <input
-                  type="text"
-                  name="bg_image"
-                  value={formData.bg_image}
-                  onChange={handleChange}
-                  placeholder="/assets/imagem.webp"
-                  className="w-full bg-black border border-zinc-800 text-white px-4 py-3 focus:outline-none focus:border-red-600 transition-colors"
-                />
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
+                    Imagem de Fundo (Upload)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      handleFileUpload({
+                        file: e.target.files?.[0],
+                        folder: 'assets',
+                        targetField: 'bg_image',
+                        uploadingKey: 'background'
+                      })
+                    }
+                    className="w-full bg-black border border-zinc-800 text-zinc-400 px-4 py-3 focus:outline-none focus:border-red-600 transition-colors file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-zinc-900 file:text-zinc-300 file:uppercase file:text-[10px] file:tracking-widest"
+                  />
+                  {uploading.background && (
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-2">Enviando imagem...</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
+                    Imagem de Fundo (URL)
+                  </label>
+                  <input
+                    type="text"
+                    name="bg_image"
+                    value={formData.bg_image}
+                    onChange={handleChange}
+                    placeholder="/assets/imagem.webp"
+                    className="w-full bg-black border border-zinc-800 text-white px-4 py-3 focus:outline-none focus:border-red-600 transition-colors"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
+                      Zoom Fundo
+                    </label>
+                    <input
+                      type="range"
+                      name="bg_image_zoom"
+                      min="-50"
+                      max="50"
+                      value={formData.bg_image_zoom}
+                      onChange={handleChange}
+                      className="w-full accent-red-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
+                      Crop Horizontal
+                    </label>
+                    <input
+                      type="range"
+                      name="bg_image_offset_x"
+                      min="-50"
+                      max="50"
+                      value={formData.bg_image_offset_x}
+                      onChange={handleChange}
+                      className="w-full accent-red-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
+                      Crop Vertical
+                    </label>
+                    <input
+                      type="range"
+                      name="bg_image_offset_y"
+                      min="-50"
+                      max="50"
+                      value={formData.bg_image_offset_y}
+                      onChange={handleChange}
+                      className="w-full accent-red-600"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Imagem Monolito */}
-              <div>
-                <label className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
-                  Imagem Monolito (URL)
-                </label>
-                <input
-                  type="text"
-                  name="monolith_image"
-                  value={formData.monolith_image}
-                  onChange={handleChange}
-                  placeholder="/assets/imagem-vertical.webp"
-                  className="w-full bg-black border border-zinc-800 text-white px-4 py-3 focus:outline-none focus:border-red-600 transition-colors"
-                />
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
+                    Imagem Monolito (Upload)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      handleFileUpload({
+                        file: e.target.files?.[0],
+                        folder: 'assets',
+                        targetField: 'monolith_image',
+                        uploadingKey: 'monolith'
+                      })
+                    }
+                    className="w-full bg-black border border-zinc-800 text-zinc-400 px-4 py-3 focus:outline-none focus:border-red-600 transition-colors file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-zinc-900 file:text-zinc-300 file:uppercase file:text-[10px] file:tracking-widest"
+                  />
+                  {uploading.monolith && (
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-2">Enviando imagem...</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
+                    Imagem Monolito (URL)
+                  </label>
+                  <input
+                    type="text"
+                    name="monolith_image"
+                    value={formData.monolith_image}
+                    onChange={handleChange}
+                    placeholder="/assets/imagem-vertical.webp"
+                    className="w-full bg-black border border-zinc-800 text-white px-4 py-3 focus:outline-none focus:border-red-600 transition-colors"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
+                      Zoom Monolito
+                    </label>
+                    <input
+                      type="range"
+                      name="monolith_image_zoom"
+                      min="-50"
+                      max="50"
+                      value={formData.monolith_image_zoom}
+                      onChange={handleChange}
+                      className="w-full accent-red-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
+                      Crop Horizontal
+                    </label>
+                    <input
+                      type="range"
+                      name="monolith_image_offset_x"
+                      min="-50"
+                      max="50"
+                      value={formData.monolith_image_offset_x}
+                      onChange={handleChange}
+                      className="w-full accent-red-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
+                      Crop Vertical
+                    </label>
+                    <input
+                      type="range"
+                      name="monolith_image_offset_y"
+                      min="-50"
+                      max="50"
+                      value={formData.monolith_image_offset_y}
+                      onChange={handleChange}
+                      className="w-full accent-red-600"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Vimeo ID */}
@@ -312,19 +520,42 @@ function ProjectForm({ project, onSave, onCancel }) {
                 />
               </div>
 
-              {/* PDF URL */}
-              <div>
-                <label className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
-                  PDF URL
-                </label>
-                <input
-                  type="text"
-                  name="pdf_url"
-                  value={formData.pdf_url}
-                  onChange={handleChange}
-                  placeholder="/projetos/pitch.pdf"
-                  className="w-full bg-black border border-zinc-800 text-white px-4 py-3 focus:outline-none focus:border-red-600 transition-colors"
-                />
+              {/* PDF */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
+                    PDF do Projeto (Upload)
+                  </label>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={(e) =>
+                      handleFileUpload({
+                        file: e.target.files?.[0],
+                        folder: 'projetos',
+                        targetField: 'pdf_url',
+                        uploadingKey: 'pdf'
+                      })
+                    }
+                    className="w-full bg-black border border-zinc-800 text-zinc-400 px-4 py-3 focus:outline-none focus:border-red-600 transition-colors file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-zinc-900 file:text-zinc-300 file:uppercase file:text-[10px] file:tracking-widest"
+                  />
+                  {uploading.pdf && (
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-2">Enviando PDF...</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-zinc-400 text-xs uppercase tracking-widest mb-2 font-bold">
+                    PDF URL
+                  </label>
+                  <input
+                    type="text"
+                    name="pdf_url"
+                    value={formData.pdf_url}
+                    onChange={handleChange}
+                    placeholder="/projetos/pitch.pdf"
+                    className="w-full bg-black border border-zinc-800 text-white px-4 py-3 focus:outline-none focus:border-red-600 transition-colors"
+                  />
+                </div>
               </div>
 
               {/* Ordem de Exibição */}

@@ -8,6 +8,7 @@ import { testConnection, initDatabase } from './database.js';
 import authRoutes from './routes/auth.js';
 import projectsRoutes from './routes/projects.js';
 import selectionsRoutes from './routes/selections.js';
+import uploadsRoutes from './routes/uploads.js';
 
 // Carrega variáveis de ambiente
 dotenv.config();
@@ -38,6 +39,7 @@ if (process.env.NODE_ENV !== 'production') {
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectsRoutes);
 app.use('/api/selections', selectionsRoutes);
+app.use('/api/uploads', uploadsRoutes);
 
 // Servir arquivos estáticos do React (Frontend)
 const buildPath = path.join(__dirname, '../dist');
