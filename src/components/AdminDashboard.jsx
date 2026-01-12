@@ -784,7 +784,7 @@ const AdminDashboard = ({ onLogout }) => {
                     placeholder="URL da imagem..."
                     onFileUpload={(file) => handleImageUpload(file, 'monolith_image', 'assets')}
                     onFieldChange={handleFieldChange}
-                    previewClassName="w-full max-w-[180px] mx-auto aspect-[3/4] rounded-xl"
+                    previewClassName="w-full max-w-[240px] mx-auto aspect-[1/2] rounded-xl"
                   />
               </div>
 
