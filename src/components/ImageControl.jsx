@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { buildImageStyle } from '../utils/styleUtils.js';
 
 function ImagePreview({
@@ -203,6 +203,7 @@ function ImageControl({
   previewClassName = 'aspect-video'
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  const handleClose = useCallback(() => setIsEditing(false), []);
 
   return (
     <div className="space-y-4">
@@ -245,7 +246,7 @@ function ImageControl({
           uploading={uploading}
           onFileUpload={onFileUpload}
           onFieldChange={onFieldChange}
-          onClose={() => setIsEditing(false)}
+          onClose={handleClose}
         />
       )}
     </div>
