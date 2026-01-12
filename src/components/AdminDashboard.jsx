@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit, Save, X, Upload, LogOut, Search, GripVertical, Check, Image as ImageIcon, Link as LinkIcon, FileText, Video } from 'lucide-react';
+import { Plus, Trash2, Edit, Save, X, Upload, LogOut, Search, GripVertical, Check, Image as ImageIcon, Link as LinkIcon, FileText, Video, List, Layers, ArrowRight, ChevronRight, Copy } from 'lucide-react';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
 const AdminDashboard = ({ onLogout }) => {
+  const [activeTab, setActiveTab] = useState('projects'); // 'projects' ou 'selections'
   const [projects, setProjects] = useState([]);
+  const [selections, setSelections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingProject, setEditingProject] = useState(null);
+  const [editingSelection, setEditingSelection] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   
   // Função para parsear a URL do Vimeo e extrair ID e Hash
@@ -41,19 +44,32 @@ const AdminDashboard = ({ onLogout }) => {
   };
 
   useEffect(() => {
-    fetchProjects();
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    await Promise.all([fetchProjects(), fetchSelections()]);
+    setLoading(false);
+  };
 
   const fetchProjects = async () => {
     try {
       const response = await axios.get(`${API_URL}/api/projects`);
-      // O PostgreSQL retorna os dados em um array diretamente ou em response.data
       const data = Array.isArray(response.data) ? response.data : [];
       setProjects(data);
-      setLoading(false);
     } catch (error) {
       console.error('Erro ao carregar projetos:', error);
-      setLoading(false);
+    }
+  };
+
+  const fetchSelections = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/selections`);
+      const data = Array.isArray(response.data) ? response.data : [];
+      setSelections(data);
+    } catch (error) {
+      console.error('Erro ao carregar seleções:', error);
     }
   };
 
@@ -137,6 +153,96 @@ const AdminDashboard = ({ onLogout }) => {
     p.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const filteredSelections = selections.filter(s => 
+    s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.slug?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Funções para Seleções (Playlists)
+  const handleCreateSelection = () => {
+    setEditingSelection({
+      name: '',
+      slug: '',
+      description: '',
+      projectIds: []
+    });
+  };
+
+  const handleEditSelection = async (selection) => {
+    try {
+      // Busca os detalhes completos incluindo os IDs dos projetos
+      const response = await axios.get(`${API_URL}/api/selections/slug/${selection.slug}`);
+      const fullSelection = response.data;
+      setEditingSelection({
+        ...fullSelection,
+        projectIds: fullSelection.projects.map(p => p.id)
+      });
+    } catch (error) {
+      console.error('Erro ao carregar detalhes da seleção:', error);
+      alert('Erro ao carregar detalhes da seleção');
+    }
+  };
+
+  const handleDeleteSelection = async (id) => {
+    if (window.confirm('Tem certeza que deseja excluir esta playlist?')) {
+      try {
+        await axios.delete(`${API_URL}/api/selections/${id}`);
+        fetchSelections();
+      } catch (error) {
+        console.error('Erro ao excluir playlist:', error);
+        alert('Erro ao excluir playlist');
+      }
+    }
+  };
+
+  const handleSaveSelection = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingSelection.id) {
+        await axios.put(`${API_URL}/api/selections/${editingSelection.id}`, editingSelection);
+      } else {
+        await axios.post(`${API_URL}/api/selections`, editingSelection);
+      }
+      setEditingSelection(null);
+      fetchSelections();
+    } catch (error) {
+      console.error('Erro ao salvar playlist:', error);
+      alert('Erro ao salvar playlist: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
+  const toggleProjectInSelection = (projectId) => {
+    const currentIds = [...editingSelection.projectIds];
+    const index = currentIds.indexOf(projectId);
+    
+    if (index > -1) {
+      currentIds.splice(index, 1);
+    } else {
+      currentIds.push(projectId);
+    }
+    
+    setEditingSelection({ ...editingSelection, projectIds: currentIds });
+  };
+
+  const moveProjectInSelection = (index, direction) => {
+    const newIds = [...editingSelection.projectIds];
+    const newIndex = index + direction;
+    
+    if (newIndex >= 0 && newIndex < newIds.length) {
+      [newIds[index], newIds[newIndex]] = [newIds[newIndex], newIds[index]];
+      setEditingSelection({ ...editingSelection, projectIds: newIds });
+    }
+  };
+
+  const generateSlug = (name) => {
+    return name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+  };
+
   return (
     <div className="min-h-screen bg-[#121212] text-white p-6">
       {/* Header */}
@@ -157,92 +263,349 @@ const AdminDashboard = ({ onLogout }) => {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-2 mb-8 bg-[#1a1a1a] p-1 rounded-xl border border-[#333] w-fit">
+          <button 
+            onClick={() => setActiveTab('projects')}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all ${activeTab === 'projects' ? 'bg-[#E63946] text-white shadow-lg' : 'text-gray-500 hover:text-white hover:bg-[#333]'}`}
+          >
+              <Layers size={18} />
+              Projetos
+          </button>
+          <button 
+            onClick={() => setActiveTab('selections')}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all ${activeTab === 'selections' ? 'bg-[#E63946] text-white shadow-lg' : 'text-gray-500 hover:text-white hover:bg-[#333]'}`}
+          >
+              <List size={18} />
+              Playlists
+          </button>
+      </div>
+
       {/* Controls */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div className="relative w-full md:w-96">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
             <input 
                 type="text"
-                placeholder="Buscar por título ou categoria..."
+                placeholder={activeTab === 'projects' ? "Buscar projetos..." : "Buscar playlists..."}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-[#E63946] transition-colors"
             />
         </div>
         <button 
-            onClick={handleCreateProject}
+            onClick={activeTab === 'projects' ? handleCreateProject : handleCreateSelection}
             className="flex items-center gap-2 bg-[#E63946] hover:bg-[#c1303b] text-white px-6 py-2.5 rounded-lg transition-all transform hover:scale-105 font-bold w-full md:w-auto justify-center shadow-lg"
         >
             <Plus size={20} />
-            Novo Projeto
+            {activeTab === 'projects' ? 'Novo Projeto' : 'Nova Playlist'}
         </button>
       </div>
 
-      {/* Projects Grid */}
+      {/* Content */}
       {loading ? (
         <div className="flex flex-col justify-center items-center h-64 gap-4">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#E63946]"></div>
-            <p className="text-gray-400 animate-pulse">Carregando projetos...</p>
+            <p className="text-gray-400 animate-pulse">Carregando dados...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProjects.map(project => (
-                <div key={project.id} className="bg-[#1a1a1a] rounded-xl border border-[#333] overflow-hidden group hover:border-[#E63946] transition-all duration-300 shadow-xl">
-                    <div className="relative aspect-video">
-                        <img 
-                            src={project.bg_image || '/api/placeholder/400/300'} 
-                            alt={project.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 backdrop-blur-sm">
-                            <button 
-                                onClick={() => handleEditProject(project)}
-                                className="bg-white text-black p-3 rounded-full hover:bg-[#E63946] hover:text-white transition-all transform hover:scale-110 shadow-lg"
-                                title="Editar"
-                            >
-                                <Edit size={20} />
-                            </button>
-                            <button 
-                                onClick={() => handleDeleteProject(project.id)}
-                                className="bg-red-500 text-white p-3 rounded-full hover:bg-red-600 transition-all transform hover:scale-110 shadow-lg"
-                                title="Excluir"
-                            >
-                                <Trash2 size={20} />
-                            </button>
+        <>
+            {activeTab === 'projects' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredProjects.map(project => (
+                        <div key={project.id} className="bg-[#1a1a1a] rounded-xl border border-[#333] overflow-hidden group hover:border-[#E63946] transition-all duration-300 shadow-xl">
+                            <div className="relative aspect-video">
+                                <img 
+                                    src={project.bg_image || '/api/placeholder/400/300'} 
+                                    alt={project.title}
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 backdrop-blur-sm">
+                                    <button 
+                                        onClick={() => handleEditProject(project)}
+                                        className="bg-white text-black p-3 rounded-full hover:bg-[#E63946] hover:text-white transition-all transform hover:scale-110 shadow-lg"
+                                        title="Editar"
+                                    >
+                                        <Edit size={20} />
+                                    </button>
+                                    <button 
+                                        onClick={() => handleDeleteProject(project.id)}
+                                        className="bg-red-500 text-white p-3 rounded-full hover:bg-red-600 transition-all transform hover:scale-110 shadow-lg"
+                                        title="Excluir"
+                                    >
+                                        <Trash2 size={20} />
+                                    </button>
+                                </div>
+                                <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-md text-[10px] px-2 py-1 rounded text-white font-bold border border-white/10">
+                                    ORDEM: {project.display_order}
+                                </div>
+                            </div>
+                            <div className="p-5">
+                                <div className="flex justify-between items-start mb-2">
+                                    <h3 className="font-bold text-lg truncate flex-1">{project.title}</h3>
+                                    <span className="text-[10px] bg-[#E63946]/10 text-[#E63946] px-2 py-0.5 rounded border border-[#E63946]/20 uppercase font-bold">
+                                        {project.status}
+                                    </span>
+                                </div>
+                                <p className="text-gray-400 text-sm mb-4 line-clamp-2 h-10">{project.description}</p>
+                                <div className="flex flex-wrap gap-2">
+                                    <span className="text-[11px] bg-[#333] px-2.5 py-1 rounded-full text-gray-300 border border-white/5">
+                                        {project.category}
+                                    </span>
+                                    <span className="text-[11px] bg-[#333] px-2.5 py-1 rounded-full text-gray-300 border border-white/5">
+                                        {project.genre}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-md text-[10px] px-2 py-1 rounded text-white font-bold border border-white/10">
-                            ORDEM: {project.display_order}
+                    ))}
+                    
+                    {filteredProjects.length === 0 && (
+                        <div className="col-span-full py-20 text-center bg-[#1a1a1a] rounded-xl border border-dashed border-[#333]">
+                            <div className="bg-[#333] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-500">
+                                <Search size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-400">Nenhum projeto encontrado</h3>
+                            <p className="text-gray-500 mt-2">Tente ajustar sua busca ou crie um novo projeto.</p>
                         </div>
-                    </div>
-                    <div className="p-5">
-                        <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-bold text-lg truncate flex-1">{project.title}</h3>
-                            <span className="text-[10px] bg-[#E63946]/10 text-[#E63946] px-2 py-0.5 rounded border border-[#E63946]/20 uppercase font-bold">
-                                {project.status}
-                            </span>
-                        </div>
-                        <p className="text-gray-400 text-sm mb-4 line-clamp-2 h-10">{project.description}</p>
-                        <div className="flex flex-wrap gap-2">
-                            <span className="text-[11px] bg-[#333] px-2.5 py-1 rounded-full text-gray-300 border border-white/5">
-                                {project.category}
-                            </span>
-                            <span className="text-[11px] bg-[#333] px-2.5 py-1 rounded-full text-gray-300 border border-white/5">
-                                {project.genre}
-                            </span>
-                        </div>
-                    </div>
+                    )}
                 </div>
-            ))}
-            
-            {filteredProjects.length === 0 && (
-                <div className="col-span-full py-20 text-center bg-[#1a1a1a] rounded-xl border border-dashed border-[#333]">
-                    <div className="bg-[#333] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-500">
-                        <Search size={32} />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-400">Nenhum projeto encontrado</h3>
-                    <p className="text-gray-500 mt-2">Tente ajustar sua busca ou crie um novo projeto.</p>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredSelections.map(selection => (
+                        <div key={selection.id} className="bg-[#1a1a1a] rounded-xl border border-[#333] p-6 group hover:border-[#E63946] transition-all duration-300 shadow-xl relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <List size={80} />
+                            </div>
+                            
+                            <div className="relative z-10">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h3 className="font-bold text-xl mb-1">{selection.name}</h3>
+                                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                                            <LinkIcon size={12} />
+                                            <span>/{selection.slug}</span>
+                                        </div>
+                                    </div>
+                                    <div className="bg-[#E63946]/10 text-[#E63946] px-3 py-1 rounded-full text-xs font-bold border border-[#E63946]/20">
+                                        {selection.project_count} Projetos
+                                    </div>
+                                </div>
+                                
+                                <p className="text-gray-400 text-sm mb-6 line-clamp-2 h-10 italic">
+                                    {selection.description || 'Sem descrição.'}
+                                </p>
+                                
+                                <div className="flex items-center gap-3 pt-4 border-t border-[#333]">
+                                    <button 
+                                        onClick={() => handleEditSelection(selection)}
+                                        className="flex-1 flex items-center justify-center gap-2 bg-[#333] hover:bg-white hover:text-black text-white px-4 py-2 rounded-lg text-sm font-bold transition-all"
+                                    >
+                                        <Edit size={16} />
+                                        Editar
+                                    </button>
+                                    <button 
+                                        onClick={() => handleDeleteSelection(selection.id)}
+                                        className="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white p-2 rounded-lg transition-all border border-red-500/20"
+                                        title="Excluir"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            const url = `${window.location.origin}/selection/${selection.slug}`;
+                                            navigator.clipboard.writeText(url);
+                                            alert('Link copiado!');
+                                        }}
+                                        className="bg-[#333] text-gray-400 hover:text-white p-2 rounded-lg transition-all border border-white/5"
+                                        title="Copiar Link"
+                                    >
+                                        <Copy size={18} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                    
+                    {filteredSelections.length === 0 && (
+                        <div className="col-span-full py-20 text-center bg-[#1a1a1a] rounded-xl border border-dashed border-[#333]">
+                            <div className="bg-[#333] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-500">
+                                <List size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-400">Nenhuma playlist encontrada</h3>
+                            <p className="text-gray-500 mt-2">Crie sua primeira seleção personalizada de projetos.</p>
+                        </div>
+                    )}
                 </div>
             )}
+        </>
+      )}
+
+      {/* Modal de Edição de Playlist (Selection) */}
+      {editingSelection && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-sm">
+          <div className="bg-[#1a1a1a] p-8 rounded-2xl max-w-5xl w-full border border-[#333] relative my-8 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <button 
+              onClick={() => setEditingSelection(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white bg-[#333] p-2 rounded-full transition-colors"
+            >
+              <X size={20} />
+            </button>
+
+            <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                <div className="bg-[#E63946] p-2 rounded-lg">
+                    {editingSelection.id ? <Edit size={20} /> : <Plus size={20} />}
+                </div>
+                {editingSelection.id ? 'Editar Playlist' : 'Nova Playlist'}
+            </h2>
+            
+            <form onSubmit={handleSaveSelection} className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Lado Esquerdo: Info */}
+                <div className="space-y-6">
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">Nome da Playlist</label>
+                        <input 
+                            type="text" 
+                            value={editingSelection.name}
+                            onChange={(e) => {
+                                const name = e.target.value;
+                                setEditingSelection({
+                                    ...editingSelection, 
+                                    name,
+                                    slug: editingSelection.id ? editingSelection.slug : generateSlug(name)
+                                });
+                            }}
+                            placeholder="Ex: Documentários Premiados"
+                            className="w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white focus:border-[#E63946] focus:outline-none transition-all"
+                            required
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">Slug (URL)</label>
+                        <div className="flex items-center gap-2 bg-[#121212] border border-[#333] rounded-xl px-4 py-3">
+                            <span className="text-gray-600 text-sm">/selection/</span>
+                            <input 
+                                type="text" 
+                                value={editingSelection.slug}
+                                onChange={(e) => setEditingSelection({...editingSelection, slug: generateSlug(e.target.value)})}
+                                className="flex-1 bg-transparent text-white focus:outline-none text-sm"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">Descrição (Opcional)</label>
+                        <textarea 
+                            value={editingSelection.description || ''}
+                            onChange={(e) => setEditingSelection({...editingSelection, description: e.target.value})}
+                            className="w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white h-32 focus:border-[#E63946] focus:outline-none resize-none"
+                            placeholder="Uma breve descrição sobre esta seleção de projetos..."
+                        />
+                    </div>
+                </div>
+
+                {/* Lado Direito: Seleção de Projetos */}
+                <div className="space-y-4">
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest flex justify-between items-center">
+                        <span>Projetos na Playlist ({editingSelection.projectIds.length})</span>
+                        <span className="text-[10px] normal-case font-normal text-gray-600">Arraste ou use as setas para ordenar</span>
+                    </label>
+                    
+                    <div className="bg-[#121212] border border-[#333] rounded-2xl overflow-hidden flex flex-col h-[400px]">
+                        {/* Lista de Selecionados */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                            {editingSelection.projectIds.map((id, index) => {
+                                const project = projects.find(p => p.id === id);
+                                if (!project) return null;
+                                return (
+                                    <div key={id} className="flex items-center gap-3 bg-[#1a1a1a] p-3 rounded-xl border border-[#333] group">
+                                        <div className="flex flex-col gap-1">
+                                            <button 
+                                                type="button"
+                                                onClick={() => moveProjectInSelection(index, -1)}
+                                                className="text-gray-600 hover:text-white transition-colors disabled:opacity-0"
+                                                disabled={index === 0}
+                                            >
+                                                <GripVertical size={14} className="rotate-90" />
+                                            </button>
+                                            <button 
+                                                type="button"
+                                                onClick={() => moveProjectInSelection(index, 1)}
+                                                className="text-gray-600 hover:text-white transition-colors disabled:opacity-0"
+                                                disabled={index === editingSelection.projectIds.length - 1}
+                                            >
+                                                <GripVertical size={14} className="rotate-90" />
+                                            </button>
+                                        </div>
+                                        <div className="w-12 h-8 rounded bg-gray-800 overflow-hidden flex-shrink-0">
+                                            <img src={project.bg_image} className="w-full h-full object-cover" alt="" />
+                                        </div>
+                                        <span className="flex-1 text-sm font-medium truncate">{project.title}</span>
+                                        <button 
+                                            type="button"
+                                            onClick={() => toggleProjectInSelection(id)}
+                                            className="text-gray-500 hover:text-red-500 p-1"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                            {editingSelection.projectIds.length === 0 && (
+                                <div className="h-full flex flex-col items-center justify-center text-gray-600 text-center p-8">
+                                    <Plus size={24} className="mb-2 opacity-20" />
+                                    <p className="text-sm">Nenhum projeto selecionado.<br/>Adicione projetos da lista abaixo.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Busca e Adição */}
+                        <div className="p-4 bg-[#1a1a1a] border-t border-[#333]">
+                            <p className="text-[10px] font-bold text-gray-500 uppercase mb-3 tracking-widest">Adicionar Projetos</p>
+                            <div className="max-h-40 overflow-y-auto space-y-1 pr-2">
+                                {projects
+                                    .filter(p => !editingSelection.projectIds.includes(p.id))
+                                    .map(project => (
+                                        <button
+                                            key={project.id}
+                                            type="button"
+                                            onClick={() => toggleProjectInSelection(project.id)}
+                                            className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-[#333] transition-colors text-left group"
+                                        >
+                                            <div className="w-8 h-6 rounded bg-gray-900 overflow-hidden opacity-50 group-hover:opacity-100 transition-opacity">
+                                                <img src={project.bg_image} className="w-full h-full object-cover" alt="" />
+                                            </div>
+                                            <span className="flex-1 text-xs truncate">{project.title}</span>
+                                            <Plus size={14} className="text-gray-500 group-hover:text-[#E63946]" />
+                                        </button>
+                                    ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-6 border-t border-[#333] gap-4">
+                <button 
+                  type="button"
+                  onClick={() => setEditingSelection(null)}
+                  className="px-8 py-3 rounded-xl font-bold text-gray-400 hover:text-white hover:bg-[#333] transition-all"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit"
+                  className="bg-[#E63946] hover:bg-[#c1303b] text-white px-12 py-3 rounded-xl font-bold flex items-center gap-2 transition-all transform hover:scale-105 shadow-lg shadow-[#E63946]/20"
+                >
+                  <Save size={20} />
+                  Salvar Playlist
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

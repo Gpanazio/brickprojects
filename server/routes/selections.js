@@ -98,6 +98,55 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
+// PUT: Atualizar seleção (protegido)
+router.put('/:id', authenticateToken, async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { id } = req.params;
+    const { name, slug, description, projectIds } = req.body;
+
+    if (!name || !slug || !Array.isArray(projectIds)) {
+      return res.status(400).json({ error: 'Dados inválidos' });
+    }
+
+    await client.query('BEGIN');
+
+    // Atualiza os dados da seleção
+    const selectionResult = await client.query(
+      `UPDATE originais_selections 
+       SET name = $1, slug = $2, description = $3, updated_at = CURRENT_TIMESTAMP 
+       WHERE id = $4 RETURNING *`,
+      [name, slug, description, id]
+    );
+
+    if (selectionResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Seleção não encontrada' });
+    }
+
+    // Remove as associações atuais
+    await client.query('DELETE FROM originais_selection_items WHERE selection_id = $1', [id]);
+
+    // Re-associa os projetos na nova ordem
+    for (let i = 0; i < projectIds.length; i++) {
+      await client.query(
+        'INSERT INTO originais_selection_items (selection_id, project_id, display_order) VALUES ($1, $2, $3)',
+        [id, projectIds[i], i]
+      );
+    }
+
+    await client.query('COMMIT');
+    res.json(selectionResult.rows[0]);
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Erro ao atualizar seleção:', err);
+    res.status(500).json({ error: 'Erro ao atualizar seleção' });
+  } finally {
+    client.release();
+  }
+});
+
 // DELETE: Deletar seleção (protegido)
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
