@@ -4,8 +4,6 @@ function ImageControl({
   uploadLabel,
   urlLabel,
   zoomLabel,
-  cropXLabel = 'Crop Horizontal',
-  cropYLabel = 'Crop Vertical',
   urlField,
   zoomField,
   offsetXField,
@@ -65,7 +63,7 @@ function ImageControl({
         </div>
         <div>
           <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
-            {cropXLabel}
+            Crop Horizontal
           </label>
           <input
             type="range"
@@ -79,7 +77,7 @@ function ImageControl({
         </div>
         <div>
           <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
-            {cropYLabel}
+            Crop Vertical
           </label>
           <input
             type="range"
