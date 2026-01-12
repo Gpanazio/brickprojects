@@ -118,14 +118,17 @@ async function startServer() {
     await initDatabase();
 
     // Inicia o servidor
-    app.listen(PORT, async () => {
+    app.listen(PORT, () => {
       console.log(`\n🚀 Servidor rodando na porta ${PORT}`);
       console.log(`📍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔗 API: http://localhost:${PORT}`);
       console.log(`💚 Health Check: http://localhost:${PORT}/health\n`);
+    });
 
-      // Executa migração automática se estiver em produção ou se o banco estiver vazio
-      if (process.env.AUTO_MIGRATE === 'true' || process.env.NODE_ENV === 'production') {
+    // Executa migração automática FORA do callback do listen para não bloquear a prontidão do servidor
+    if (process.env.AUTO_MIGRATE === 'true' || process.env.NODE_ENV === 'production') {
+      // Pequeno delay para garantir que o processo principal está saudável antes de iniciar a carga de dados
+      setTimeout(async () => {
         try {
           console.log('🔄 Iniciando migração automática de dados...');
           const { migrateInternal } = await import('./migrate_data.js');
@@ -134,8 +137,8 @@ async function startServer() {
         } catch (migErr) {
           console.error('⚠️ Erro na migração automática:', migErr.message);
         }
-      }
-    });
+      }, 1000);
+    }
 
   } catch (err) {
     console.error('❌ Erro ao iniciar servidor:', err);
