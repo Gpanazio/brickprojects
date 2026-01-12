@@ -1,14 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, X, ChevronDown, MousePointer2, Mail, Instagram, Youtube, ArrowRight, Grid, Plus, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { buildImageStyle } from '../utils/styleUtils.js';
 
 const API_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:3001');
-
-const buildImageStyle = (url, zoom = 0, offsetX = 0, offsetY = 0) => ({
-  backgroundImage: `url(${url})`,
-  backgroundSize: `${100 + Number(zoom || 0)}%`,
-  backgroundPosition: `${50 + Number(offsetX || 0)}% ${50 + Number(offsetY || 0)}%`
-});
-
 
 // --- COMPONENTES AUXILIARES ---
 
