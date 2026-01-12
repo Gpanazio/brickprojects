@@ -43,6 +43,9 @@ const AdminDashboard = ({ onLogout }) => {
   const [editingProject, setEditingProject] = useState(null);
   const [editingSelection, setEditingSelection] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [draggingProjectId, setDraggingProjectId] = useState(null);
+  const [dragOverProjectId, setDragOverProjectId] = useState(null);
+  const [isReordering, setIsReordering] = useState(false);
   
   // Função para parsear a URL do Vimeo e extrair ID e Hash
   const parseVimeoUrl = (url) => {
@@ -222,7 +225,13 @@ const AdminDashboard = ({ onLogout }) => {
     }
   };
 
-  const filteredProjects = projects.filter(p => 
+  const orderedProjects = [...projects].sort((a, b) => {
+    const orderA = a.display_order ?? 0;
+    const orderB = b.display_order ?? 0;
+    return orderA - orderB || a.id - b.id;
+  });
+
+  const filteredProjects = orderedProjects.filter(p => 
     p.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -324,6 +333,85 @@ const AdminDashboard = ({ onLogout }) => {
       .replace(/(^-|-$)+/g, '');
   };
 
+  const canReorderProjects = activeTab === 'projects' && searchTerm.trim() === '';
+
+  const handleProjectDragStart = (event, projectId) => {
+    if (!canReorderProjects) return;
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', String(projectId));
+    setDraggingProjectId(projectId);
+  };
+
+  const handleProjectDragOver = (event, projectId) => {
+    if (!canReorderProjects) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    if (dragOverProjectId !== projectId) {
+      setDragOverProjectId(projectId);
+    }
+  };
+
+  const handleProjectDragLeave = (projectId) => {
+    if (dragOverProjectId === projectId) {
+      setDragOverProjectId(null);
+    }
+  };
+
+  const handleProjectDragEnd = () => {
+    setDraggingProjectId(null);
+    setDragOverProjectId(null);
+  };
+
+  const handleProjectDrop = async (event, targetProjectId) => {
+    if (!canReorderProjects || isReordering) return;
+    event.preventDefault();
+    const draggedId = Number(event.dataTransfer.getData('text/plain'));
+    if (!draggedId || draggedId === targetProjectId) {
+      handleProjectDragEnd();
+      return;
+    }
+
+    const currentOrder = [...projects].sort((a, b) => {
+      const orderA = a.display_order ?? 0;
+      const orderB = b.display_order ?? 0;
+      return orderA - orderB || a.id - b.id;
+    });
+    const fromIndex = currentOrder.findIndex((project) => project.id === draggedId);
+    const toIndex = currentOrder.findIndex((project) => project.id === targetProjectId);
+
+    if (fromIndex === -1 || toIndex === -1) {
+      handleProjectDragEnd();
+      return;
+    }
+
+    const nextOrder = [...currentOrder];
+    const [movedProject] = nextOrder.splice(fromIndex, 1);
+    nextOrder.splice(toIndex, 0, movedProject);
+
+    const updatedProjects = nextOrder.map((project, index) => ({
+      ...project,
+      display_order: index + 1
+    }));
+
+    setProjects(updatedProjects);
+    setIsReordering(true);
+    setDraggingProjectId(null);
+    setDragOverProjectId(null);
+
+    try {
+      await axios.patch(`${API_URL}/api/projects/reorder`, {
+        projects: updatedProjects.map(({ id, display_order }) => ({ id, display_order }))
+      });
+      showNotification('Ordem dos projetos atualizada!');
+    } catch (error) {
+      console.error('Erro ao salvar ordem dos projetos:', error);
+      setProjects(currentOrder);
+      showNotification('Erro ao salvar ordem dos projetos', 'error');
+    } finally {
+      setIsReordering(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#121212] text-white p-6">
       {/* Toast Notification */}
@@ -398,6 +486,17 @@ const AdminDashboard = ({ onLogout }) => {
         </button>
       </div>
 
+      {activeTab === 'projects' && (
+        <div className="mb-6 flex flex-wrap items-center gap-2 text-xs text-gray-400">
+          <Info size={14} className="text-[#E63946]" />
+          <span>
+            {canReorderProjects
+              ? 'Arraste os cards para reorganizar a ordem de exibição.'
+              : 'Limpe a busca para reorganizar a ordem dos projetos por drag and drop.'}
+          </span>
+        </div>
+      )}
+
       {/* Content */}
       {loading ? (
         <div className="flex flex-col justify-center items-center h-64 gap-4">
@@ -409,13 +508,31 @@ const AdminDashboard = ({ onLogout }) => {
             {activeTab === 'projects' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredProjects.map(project => (
-                        <div key={project.id} className="bg-[#1a1a1a] rounded-xl border border-[#333] overflow-hidden group hover:border-[#E63946] transition-all duration-300 shadow-xl">
+                        <div
+                            key={project.id}
+                            draggable={canReorderProjects}
+                            onDragStart={(event) => handleProjectDragStart(event, project.id)}
+                            onDragOver={(event) => handleProjectDragOver(event, project.id)}
+                            onDragLeave={() => handleProjectDragLeave(project.id)}
+                            onDrop={(event) => handleProjectDrop(event, project.id)}
+                            onDragEnd={handleProjectDragEnd}
+                            className={`bg-[#1a1a1a] rounded-xl border overflow-hidden group transition-all duration-300 shadow-xl ${
+                              draggingProjectId === project.id ? 'opacity-40 border-[#E63946]' : 'border-[#333]'
+                            } ${
+                              dragOverProjectId === project.id ? 'ring-2 ring-[#E63946] ring-offset-2 ring-offset-[#121212]' : ''
+                            } ${canReorderProjects ? 'cursor-grab hover:border-[#E63946]' : 'hover:border-[#E63946]'}`}
+                        >
                             <div className="relative aspect-video overflow-hidden">
                                 <img 
                                     src={project.bg_image || '/api/placeholder/400/300'} 
                                     alt={project.title}
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                 />
+                                {canReorderProjects && (
+                                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-white p-2 rounded-full border border-white/10 flex items-center gap-1 text-[10px] uppercase tracking-widest">
+                                        <GripVertical size={14} />
+                                    </div>
+                                )}
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 backdrop-blur-sm">
                                     <button 
                                         onClick={() => handleEditProject(project)}
@@ -918,15 +1035,9 @@ const AdminDashboard = ({ onLogout }) => {
                             </label>
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                            <label className="block text-[10px] font-bold text-gray-500 uppercase">Apresentador/Host</label>
-                            <input type="text" value={editingProject.host || ''} onChange={(e) => setEditingProject({...editingProject, host: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="block text-[10px] font-bold text-gray-500 uppercase">Ordem de Exibição</label>
-                            <input type="number" value={editingProject.display_order || 0} onChange={(e) => setEditingProject({...editingProject, display_order: parseInt(e.target.value)})} className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none" />
-                        </div>
+                    <div className="space-y-1">
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase">Apresentador/Host</label>
+                        <input type="text" value={editingProject.host || ''} onChange={(e) => setEditingProject({...editingProject, host: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none" />
                     </div>
                 </div>
               </div>
