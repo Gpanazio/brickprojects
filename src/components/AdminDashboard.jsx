@@ -10,6 +10,36 @@ const AdminDashboard = ({ onLogout }) => {
   const [editingProject, setEditingProject] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   
+  // Função para parsear a URL do Vimeo e extrair ID e Hash
+  const parseVimeoUrl = (url) => {
+    if (!url) return { id: '', hash: '' };
+    
+    // Regex para capturar ID e opcionalmente o Hash
+    // Formatos suportados: 
+    // https://vimeo.com/123456789
+    // https://vimeo.com/123456789/abcdef123
+    // vimeo.com/123456789/abcdef123
+    const regex = /(?:vimeo\.com\/)(\d+)(?:\/)?([a-z0-9]+)?/;
+    const match = url.match(regex);
+    
+    if (match) {
+      return {
+        id: match[1] || '',
+        hash: match[2] || ''
+      };
+    }
+    
+    return { id: url, hash: '' }; // Se não der match, assume que o que foi colado pode ser o ID
+  };
+
+  // Função para reconstruir a URL do Vimeo para exibição no input
+  const getVimeoDisplayUrl = (project) => {
+    if (!project.vimeo_id) return '';
+    let url = `https://vimeo.com/${project.vimeo_id}`;
+    if (project.vimeo_hash) url += `/${project.vimeo_hash}`;
+    return url;
+  };
+
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -397,15 +427,22 @@ const AdminDashboard = ({ onLogout }) => {
                     <h3 className="text-sm font-bold flex items-center gap-2 text-[#E63946]">
                         <Video size={16} /> Vídeo e Mídia
                     </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                            <label className="block text-[10px] font-bold text-gray-500 uppercase">Vimeo ID</label>
-                            <input type="text" value={editingProject.vimeo_id || ''} onChange={(e) => setEditingProject({...editingProject, vimeo_id: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="block text-[10px] font-bold text-gray-500 uppercase">Vimeo Hash</label>
-                            <input type="text" value={editingProject.vimeo_hash || ''} onChange={(e) => setEditingProject({...editingProject, vimeo_hash: e.target.value})} className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none" />
-                        </div>
+                    <div className="space-y-1">
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase">Link do Vimeo</label>
+                        <input 
+                            type="text" 
+                            value={getVimeoDisplayUrl(editingProject)} 
+                            onChange={(e) => {
+                                const { id, hash } = parseVimeoUrl(e.target.value);
+                                setEditingProject({
+                                    ...editingProject, 
+                                    vimeo_id: id,
+                                    vimeo_hash: hash
+                                });
+                            }} 
+                            placeholder="Cole o link do vídeo (ex: vimeo.com/123456789/hash)"
+                            className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none" 
+                        />
                     </div>
                     <div className="space-y-1">
                         <label className="block text-[10px] font-bold text-gray-500 uppercase">Label do Botão Vídeo</label>
