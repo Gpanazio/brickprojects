@@ -45,6 +45,23 @@ function ImageEditModal({
   onFieldChange,
   onClose
 }) {
+  React.useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    const originalOverflow = document.body.style.overflow;
+    document.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [onClose]);
+
   return (
     <div
       className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 overflow-y-auto"
