@@ -105,9 +105,21 @@ export async function initDatabase() {
         name VARCHAR(255) NOT NULL,
         slug VARCHAR(100) UNIQUE NOT NULL,
         description TEXT,
+        cover_image VARCHAR(500),
+        cover_image_zoom INTEGER DEFAULT 0,
+        cover_image_offset_x INTEGER DEFAULT 0,
+        cover_image_offset_y INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+    `);
+
+    await client.query(`
+      ALTER TABLE originais_selections
+        ADD COLUMN IF NOT EXISTS cover_image VARCHAR(500),
+        ADD COLUMN IF NOT EXISTS cover_image_zoom INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS cover_image_offset_x INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS cover_image_offset_y INTEGER DEFAULT 0;
     `);
 
     // Tabela de itens da seleção (relacionamento muitos-para-muitos)

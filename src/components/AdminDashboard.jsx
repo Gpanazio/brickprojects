@@ -196,7 +196,30 @@ const AdminDashboard = ({ onLogout }) => {
     const { name, value } = e.target;
     // Tenta converter para número se parecer um número de zoom/offset
     const finalValue = (name.includes('zoom') || name.includes('offset')) ? parseInt(value) || 0 : value;
-    setEditingProject(prev => ({ ...prev, [name]: finalValue }));
+    
+    if (editingProject) {
+        setEditingProject(prev => ({ ...prev, [name]: finalValue }));
+    } else if (editingSelection) {
+        setEditingSelection(prev => ({ ...prev, [name]: finalValue }));
+    }
+  };
+
+  const handleSelectionImageUpload = async (file, field) => {
+    const formData = new FormData();
+    formData.append('folder', 'assets');
+    formData.append('file', file);
+
+    try {
+      const response = await axios.post(`${API_URL}/api/uploads`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      setEditingSelection(prev => ({ ...prev, [field]: response.data.url }));
+      showNotification('Capa enviada!');
+    } catch (error) {
+      console.error('Erro ao fazer upload:', error);
+      showNotification('Erro ao enviar imagem de capa', 'error');
+    }
   };
 
   const filteredProjects = projects.filter(p => 
@@ -215,6 +238,10 @@ const AdminDashboard = ({ onLogout }) => {
       name: '',
       slug: '',
       description: '',
+      cover_image: '',
+      cover_image_zoom: 0,
+      cover_image_offset_x: 0,
+      cover_image_offset_y: 0,
       projectIds: []
     });
   };
@@ -249,11 +276,12 @@ const AdminDashboard = ({ onLogout }) => {
   const handleSaveSelection = async (e) => {
     e.preventDefault();
     try {
-      if (editingSelection.id) {
-        await axios.put(`${API_URL}/api/selections/${editingSelection.id}`, editingSelection);
+      const selectionData = { ...editingSelection };
+      if (selectionData.id) {
+        await axios.put(`${API_URL}/api/selections/${selectionData.id}`, selectionData);
         showNotification('Playlist atualizada!');
       } else {
-        await axios.post(`${API_URL}/api/selections`, editingSelection);
+        await axios.post(`${API_URL}/api/selections`, selectionData);
         showNotification('Playlist criada!');
       }
       setEditingSelection(null);
@@ -531,8 +559,28 @@ const AdminDashboard = ({ onLogout }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Lado Esquerdo: Info */}
                 <div className="space-y-6">
-                    <div className="space-y-2">
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">Nome da Playlist</label>
+                    <ImageControl
+                        title="Imagem de Capa (Folder)"
+                        uploadLabel="Upload Capa"
+                        urlLabel="URL da Capa"
+                        zoomLabel="Zoom"
+                        urlField="cover_image"
+                        zoomField="cover_image_zoom"
+                        offsetXField="cover_image_offset_x"
+                        offsetYField="cover_image_offset_y"
+                        urlValue={editingSelection.cover_image}
+                        zoomValue={editingSelection.cover_image_zoom || 0}
+                        offsetXValue={editingSelection.cover_image_offset_x || 0}
+                        offsetYValue={editingSelection.cover_image_offset_y || 0}
+                        placeholder="URL da imagem de capa..."
+                        onFileUpload={(file) => handleSelectionImageUpload(file, 'cover_image')}
+                        onFieldChange={handleFieldChange}
+                        previewClassName="w-full aspect-video rounded-xl"
+                    />
+
+                    <div className="space-y-2 pt-4">
+                        <div className="space-y-2">
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">Nome da Playlist</label>
                         <input 
                             type="text" 
                             value={editingSelection.name}
@@ -566,12 +614,13 @@ const AdminDashboard = ({ onLogout }) => {
 
                     <div className="space-y-2">
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">Descrição (Opcional)</label>
-                        <textarea 
-                            value={editingSelection.description || ''}
-                            onChange={(e) => setEditingSelection({...editingSelection, description: e.target.value})}
-                            className="w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white h-32 focus:border-[#E63946] focus:outline-none resize-none"
-                            placeholder="Uma breve descrição sobre esta seleção de projetos..."
-                        />
+                            <textarea 
+                                value={editingSelection.description || ''}
+                                onChange={(e) => setEditingSelection({...editingSelection, description: e.target.value})}
+                                className="w-full bg-[#121212] border border-[#333] rounded-xl px-4 py-3 text-white h-32 focus:border-[#E63946] focus:outline-none resize-none"
+                                placeholder="Uma breve descrição sobre esta seleção de projetos..."
+                            />
+                        </div>
                     </div>
                 </div>
 

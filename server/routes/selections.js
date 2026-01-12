@@ -62,7 +62,7 @@ router.get('/slug/:slug', async (req, res) => {
 router.post('/', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   try {
-    const { name, slug, description, projectIds } = req.body;
+    const { name, slug, description, projectIds, cover_image, cover_image_zoom, cover_image_offset_x, cover_image_offset_y } = req.body;
 
     if (!name || !slug || !Array.isArray(projectIds)) {
       return res.status(400).json({ error: 'Dados inválidos' });
@@ -72,8 +72,10 @@ router.post('/', authenticateToken, async (req, res) => {
 
     // Cria a seleção
     const selectionResult = await client.query(
-      'INSERT INTO originais_selections (name, slug, description) VALUES ($1, $2, $3) RETURNING *',
-      [name, slug, description]
+      `INSERT INTO originais_selections 
+       (name, slug, description, cover_image, cover_image_zoom, cover_image_offset_x, cover_image_offset_y) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [name, slug, description, cover_image, cover_image_zoom || 0, cover_image_offset_x || 0, cover_image_offset_y || 0]
     );
 
     const selection = selectionResult.rows[0];
@@ -103,7 +105,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
   const client = await pool.connect();
   try {
     const { id } = req.params;
-    const { name, slug, description, projectIds } = req.body;
+    const { name, slug, description, projectIds, cover_image, cover_image_zoom, cover_image_offset_x, cover_image_offset_y } = req.body;
 
     if (!name || !slug || !Array.isArray(projectIds)) {
       return res.status(400).json({ error: 'Dados inválidos' });
@@ -114,9 +116,12 @@ router.put('/:id', authenticateToken, async (req, res) => {
     // Atualiza os dados da seleção
     const selectionResult = await client.query(
       `UPDATE originais_selections 
-       SET name = $1, slug = $2, description = $3, updated_at = CURRENT_TIMESTAMP 
-       WHERE id = $4 RETURNING *`,
-      [name, slug, description, id]
+       SET name = $1, slug = $2, description = $3, 
+           cover_image = $4, cover_image_zoom = $5, 
+           cover_image_offset_x = $6, cover_image_offset_y = $7,
+           updated_at = CURRENT_TIMESTAMP 
+       WHERE id = $8 RETURNING *`,
+      [name, slug, description, cover_image, cover_image_zoom || 0, cover_image_offset_x || 0, cover_image_offset_y || 0, id]
     );
 
     if (selectionResult.rows.length === 0) {
