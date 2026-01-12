@@ -1,4 +1,4 @@
-import express from 'express';
+gimport express from 'express';
 import { body, validationResult } from 'express-validator';
 import pool from '../database.js';
 import { authenticateToken } from '../middleware/auth.js';
