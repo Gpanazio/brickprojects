@@ -593,7 +593,7 @@ const AdminDashboard = ({ onLogout }) => {
                                         <h3 className="font-bold text-xl mb-1">{selection.name}</h3>
                                         <div className="flex items-center gap-2 text-xs text-gray-500">
                                             <LinkIcon size={12} />
-                                            <span>/{selection.slug}</span>
+                                            <span>/s/{selection.slug}</span>
                                         </div>
                                     </div>
                                     <div className="bg-[#E63946]/10 text-[#E63946] px-3 py-1 rounded-full text-xs font-bold border border-[#E63946]/20">
@@ -622,7 +622,7 @@ const AdminDashboard = ({ onLogout }) => {
                                     </button>
                                     <button 
                                         onClick={() => {
-                                            const url = `${window.location.origin}/selection/${selection.slug}`;
+                                            const url = `${window.location.origin}/s/${selection.slug}`;
                                             navigator.clipboard.writeText(url);
                                             showNotification('Link copiado para a área de transferência!');
                                         }}
@@ -672,24 +672,30 @@ const AdminDashboard = ({ onLogout }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Lado Esquerdo: Info */}
                 <div className="space-y-6">
-                    <ImageControl
-                        title="Imagem de Capa (Folder)"
-                        uploadLabel="Upload Capa"
-                        urlLabel="URL da Capa"
-                        zoomLabel="Zoom"
-                        urlField="cover_image"
-                        zoomField="cover_image_zoom"
-                        offsetXField="cover_image_offset_x"
-                        offsetYField="cover_image_offset_y"
-                        urlValue={editingSelection.cover_image}
-                        zoomValue={editingSelection.cover_image_zoom || 0}
-                        offsetXValue={editingSelection.cover_image_offset_x || 0}
-                        offsetYValue={editingSelection.cover_image_offset_y || 0}
-                        placeholder="URL da imagem de capa..."
-                        onFileUpload={(file) => handleSelectionImageUpload(file, 'cover_image')}
-                        onFieldChange={handleFieldChange}
-                        previewClassName="w-full aspect-video rounded-xl"
-                    />
+                    {editingSelection.id ? (
+                        <ImageControl
+                            title="Imagem de Capa (Folder)"
+                            uploadLabel="Upload Capa"
+                            urlLabel="URL da Capa"
+                            zoomLabel="Zoom"
+                            urlField="cover_image"
+                            zoomField="cover_image_zoom"
+                            offsetXField="cover_image_offset_x"
+                            offsetYField="cover_image_offset_y"
+                            urlValue={editingSelection.cover_image}
+                            zoomValue={editingSelection.cover_image_zoom || 0}
+                            offsetXValue={editingSelection.cover_image_offset_x || 0}
+                            offsetYValue={editingSelection.cover_image_offset_y || 0}
+                            placeholder="URL da imagem de capa..."
+                            onFileUpload={(file) => handleSelectionImageUpload(file, 'cover_image')}
+                            onFieldChange={handleFieldChange}
+                            previewClassName="w-full aspect-video rounded-xl"
+                        />
+                    ) : (
+                        <div className="rounded-2xl border border-dashed border-[#333] p-6 text-center text-sm text-gray-500">
+                            A imagem de capa pode ser adicionada após criar a playlist.
+                        </div>
+                    )}
 
                     <div className="space-y-2 pt-4">
                         <div className="space-y-2">
@@ -714,7 +720,7 @@ const AdminDashboard = ({ onLogout }) => {
                     <div className="space-y-2">
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">Slug (URL)</label>
                         <div className="flex items-center gap-2 bg-[#121212] border border-[#333] rounded-xl px-4 py-3">
-                            <span className="text-gray-600 text-sm">/selection/</span>
+                            <span className="text-gray-600 text-sm">/s/</span>
                             <input 
                                 type="text" 
                                 value={editingSelection.slug}
