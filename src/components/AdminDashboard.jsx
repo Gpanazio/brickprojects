@@ -371,11 +371,7 @@ const AdminDashboard = ({ onLogout }) => {
       return;
     }
 
-    const currentOrder = [...projects].sort((a, b) => {
-      const orderA = a.display_order ?? 0;
-      const orderB = b.display_order ?? 0;
-      return orderA - orderB || a.id - b.id;
-    });
+    const currentOrder = orderedProjects;
     const fromIndex = currentOrder.findIndex((project) => project.id === draggedId);
     const toIndex = currentOrder.findIndex((project) => project.id === targetProjectId);
 
