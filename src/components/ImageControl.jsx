@@ -10,7 +10,7 @@ function ImagePreview({
   previewClassName
 }) {
   return (
-    <div className={`relative w-full bg-zinc-900 border border-zinc-800 overflow-hidden ${previewClassName}`}>
+    <div className={`relative bg-zinc-900 border border-zinc-800 overflow-hidden ${previewClassName}`}>
       {urlValue ? (
         <img
           src={urlValue}
@@ -217,10 +217,10 @@ function ImageControl({
         <button
           type="button"
           onClick={() => setIsEditing(true)}
-          className="flex items-center gap-2 bg-[#E63946] hover:bg-[#c1303b] text-white px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-widest font-bold transition-all transform hover:scale-105 shadow-lg shadow-[#E63946]/20"
+          className="flex items-center justify-center bg-[#E63946] hover:bg-[#c1303b] text-white p-2 rounded-lg transition-all transform hover:scale-110 shadow-lg shadow-[#E63946]/20"
+          title="Editar imagem"
         >
-          <Edit size={14} />
-          Editar imagem
+          <Edit size={16} />
         </button>
       </div>
       <ImagePreview

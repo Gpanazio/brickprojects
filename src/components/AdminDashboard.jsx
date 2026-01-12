@@ -716,7 +716,7 @@ const AdminDashboard = ({ onLogout }) => {
                     placeholder="URL da imagem..."
                     onFileUpload={(file) => handleImageUpload(file, 'bg_image', 'assets')}
                     onFieldChange={handleFieldChange}
-                    previewClassName="aspect-video rounded-xl"
+                    previewClassName="w-full aspect-video rounded-xl"
                   />
 
                   <ImageControl
@@ -735,7 +735,7 @@ const AdminDashboard = ({ onLogout }) => {
                     placeholder="URL da imagem..."
                     onFileUpload={(file) => handleImageUpload(file, 'monolith_image', 'assets')}
                     onFieldChange={handleFieldChange}
-                    previewClassName="aspect-[3/4] max-h-[250px] mx-auto rounded-xl"
+                    previewClassName="w-full max-w-[180px] mx-auto aspect-[3/4] rounded-xl"
                   />
               </div>
 
@@ -799,6 +799,8 @@ const AdminDashboard = ({ onLogout }) => {
                     <option value="Em Produção">Em Produção</option>
                     <option value="Finalizado">Finalizado</option>
                     <option value="Exibido">Exibido</option>
+                    <option value="Exibido (History)">Exibido (History)</option>
+                    <option value="Piloto Disponível">Piloto Disponível</option>
                     <option value="Formato Pronto">Formato Pronto</option>
                   </select>
                 </div>
