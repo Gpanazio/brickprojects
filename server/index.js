@@ -51,12 +51,12 @@ app.use('/assets', express.static(path.join(publicPath, 'assets')));
 app.use('/projetos', express.static(path.join(publicPath, 'projetos')));
 
 // Servir Volume do Railway (/downloads)
-const downloadsPath = '/downloads';
+const downloadsPath = process.env.NODE_ENV === 'production' ? '/downloads' : path.join(__dirname, '../downloads');
 if (!fs.existsSync(downloadsPath)) {
   try {
     fs.mkdirSync(downloadsPath, { recursive: true });
   } catch (err) {
-    console.warn('⚠️ Não foi possível criar /downloads (provavelmente erro de permissão fora do container):', err.message);
+    console.warn(`⚠️ Não foi possível criar ${downloadsPath}:`, err.message);
   }
 }
 app.use('/downloads', express.static(downloadsPath));
@@ -92,12 +92,26 @@ app.use((err, req, res, next) => {
 // Inicializa o servidor
 async function startServer() {
   try {
+    // Se não houver DATABASE_URL, o servidor não deve tentar conectar ou falhar graciosamente
+    if (!process.env.DATABASE_URL) {
+      console.warn('⚠️ DATABASE_URL não configurada. O servidor funcionará de forma limitada.');
+      
+      // Inicia o servidor sem banco de dados (opcional, dependendo da necessidade)
+      app.listen(PORT, () => {
+        console.log(`\n🚀 Servidor rodando em modo limitado (sem DB) na porta ${PORT}`);
+      });
+      return;
+    }
+
     // Testa a conexão com o banco de dados
     const connected = await testConnection();
     
     if (!connected) {
       console.error('❌ Não foi possível conectar ao banco de dados');
-      process.exit(1);
+      // Em desenvolvimento, talvez não queiramos dar exit se estivermos apenas testando o frontend
+      if (process.env.NODE_ENV === 'production') {
+        process.exit(1);
+      }
     }
 
     // Inicializa as tabelas
