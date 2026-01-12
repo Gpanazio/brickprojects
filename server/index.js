@@ -118,7 +118,7 @@ async function startServer() {
     await initDatabase();
 
     // Inicia o servidor
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`\n🚀 Servidor rodando na porta ${PORT}`);
       console.log(`📍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔗 API: http://localhost:${PORT}`);
@@ -149,10 +149,17 @@ async function startServer() {
 startServer();
 
 // Gerenciamento de encerramento gracioso (Graceful Shutdown)
-async function gracefulShutdown(signal) {
+async function gracefulShutdown(signal, server) {
   console.log(`\n\n👋 Recebido ${signal}. Encerrando servidor graciosamente...`);
   
-  // Aqui você pode adicionar lógica para fechar conexões abertas, pools, etc.
+  // Primeiro, para de aceitar novas requisições
+  if (server) {
+    server.close(() => {
+      console.log('✅ Servidor HTTP encerrado.');
+    });
+  }
+
+  // Fecha o pool do banco de dados
   try {
     await pool.end();
     console.log('✅ Pool de conexões com o banco de dados encerrado.');
@@ -165,5 +172,5 @@ async function gracefulShutdown(signal) {
 }
 
 // Escuta sinais de encerramento do sistema (SIGTERM no Railway, SIGINT no Ctrl+C)
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM', server));
+process.on('SIGINT', () => gracefulShutdown('SIGINT', server));
