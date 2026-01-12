@@ -64,7 +64,13 @@ router.post('/', authenticateToken, [
       long_description,
       video_label,
       bg_image,
+      bg_image_zoom = 0,
+      bg_image_offset_x = 0,
+      bg_image_offset_y = 0,
       monolith_image,
+      monolith_image_zoom = 0,
+      monolith_image_offset_x = 0,
+      monolith_image_offset_y = 0,
       vimeo_id,
       vimeo_hash,
       pdf_url,
@@ -75,11 +81,15 @@ router.post('/', authenticateToken, [
     const result = await pool.query(
       `INSERT INTO originais_projects 
         (title, category, genre, format, status, description, long_description, 
-         video_label, bg_image, monolith_image, vimeo_id, vimeo_hash, pdf_url, host, display_order)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+         video_label, bg_image, bg_image_zoom, bg_image_offset_x, bg_image_offset_y,
+         monolith_image, monolith_image_zoom, monolith_image_offset_x, monolith_image_offset_y,
+         vimeo_id, vimeo_hash, pdf_url, host, display_order)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
        RETURNING *`,
       [title, category, genre, format, status, description, long_description,
-       video_label, bg_image, monolith_image, vimeo_id, vimeo_hash, pdf_url, host, display_order]
+       video_label, bg_image, bg_image_zoom, bg_image_offset_x, bg_image_offset_y,
+       monolith_image, monolith_image_zoom, monolith_image_offset_x, monolith_image_offset_y,
+       vimeo_id, vimeo_hash, pdf_url, host, display_order]
     );
 
     res.status(201).json({
@@ -107,7 +117,13 @@ router.put('/:id', authenticateToken, async (req, res) => {
       long_description,
       video_label,
       bg_image,
+      bg_image_zoom = 0,
+      bg_image_offset_x = 0,
+      bg_image_offset_y = 0,
       monolith_image,
+      monolith_image_zoom = 0,
+      monolith_image_offset_x = 0,
+      monolith_image_offset_y = 0,
       vimeo_id,
       vimeo_hash,
       pdf_url,
@@ -129,13 +145,15 @@ router.put('/:id', authenticateToken, async (req, res) => {
       `UPDATE originais_projects 
        SET title = $1, category = $2, genre = $3, format = $4, status = $5,
            description = $6, long_description = $7, video_label = $8,
-           bg_image = $9, monolith_image = $10, vimeo_id = $11, vimeo_hash = $12,
-           pdf_url = $13, host = $14, display_order = $15
-       WHERE id = $16
+           bg_image = $9, bg_image_zoom = $10, bg_image_offset_x = $11, bg_image_offset_y = $12,
+           monolith_image = $13, monolith_image_zoom = $14, monolith_image_offset_x = $15, monolith_image_offset_y = $16,
+           vimeo_id = $17, vimeo_hash = $18, pdf_url = $19, host = $20, display_order = $21
+       WHERE id = $22
        RETURNING *`,
       [title, category, genre, format, status, description, long_description,
-       video_label, bg_image, monolith_image, vimeo_id, vimeo_hash, pdf_url, 
-       host, display_order, id]
+       video_label, bg_image, bg_image_zoom, bg_image_offset_x, bg_image_offset_y,
+       monolith_image, monolith_image_zoom, monolith_image_offset_x, monolith_image_offset_y,
+       vimeo_id, vimeo_hash, pdf_url, host, display_order, id]
     );
 
     res.json({

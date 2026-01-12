@@ -63,9 +63,9 @@ const AdminDashboard = ({ onLogout }) => {
     e.preventDefault();
     try {
       if (editingProject._id) {
-        await axios.put(`${API_URL}/api/projects/${editingProject._id}`, editingProject);
+        await axios.put(`${axios.defaults.baseURL || API_URL}/api/projects/${editingProject._id}`, editingProject);
       } else {
-        await axios.post(`${API_URL}/api/projects`, editingProject);
+        await axios.post(`${axios.defaults.baseURL || API_URL}/api/projects`, editingProject);
       }
       setEditingProject(null);
       setShowImageManager(false); // Garante que fecha o modal de imagens também
@@ -84,7 +84,7 @@ const AdminDashboard = ({ onLogout }) => {
     });
 
     try {
-      const response = await axios.post(`${API_URL}/api/upload`, formData, {
+      const response = await axios.post(`${axios.defaults.baseURL || API_URL}/api/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
