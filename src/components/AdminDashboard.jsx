@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit, Save, X, Upload, LogOut, Search, GripVertical, Check, Image as ImageIcon, Link as LinkIcon, FileText, Video, List, Layers, ArrowRight, ChevronRight, Copy } from 'lucide-react';
+import { Plus, Trash2, Edit, Save, X, Upload, LogOut, Search, GripVertical, Check, Image as ImageIcon, Link as LinkIcon, FileText, Video, List, Layers, ArrowRight, ChevronRight, Copy, AlertCircle, Info } from 'lucide-react';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
 const AdminDashboard = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('projects'); // 'projects' ou 'selections'
+  const [notification, setNotification] = useState(null);
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 5000);
+  };
 
   // Configuração Global do Axios para incluir o Token
   useEffect(() => {
@@ -126,9 +132,10 @@ const AdminDashboard = ({ onLogout }) => {
       try {
         await axios.delete(`${API_URL}/api/projects/${id}`);
         fetchProjects();
+        showNotification('Projeto excluído com sucesso!');
       } catch (error) {
         console.error('Erro ao excluir projeto:', error);
-        alert('Erro ao excluir projeto');
+        showNotification('Erro ao excluir projeto', 'error');
       }
     }
   };
@@ -136,19 +143,20 @@ const AdminDashboard = ({ onLogout }) => {
   const handleSaveProject = async (e) => {
     e.preventDefault();
     try {
-      // Remover campos que não devem ser enviados na criação/atualização se necessário
       const projectData = { ...editingProject };
       
       if (projectData.id) {
         await axios.put(`${API_URL}/api/projects/${projectData.id}`, projectData);
+        showNotification('Projeto atualizado!');
       } else {
         await axios.post(`${API_URL}/api/projects`, projectData);
+        showNotification('Projeto criado com sucesso!');
       }
       setEditingProject(null);
       fetchProjects();
     } catch (error) {
       console.error('Erro ao salvar projeto:', error);
-      alert('Erro ao salvar projeto: ' + (error.response?.data?.error || error.message));
+      showNotification(error.response?.data?.error || error.message, 'error');
     }
   };
 
@@ -167,9 +175,10 @@ const AdminDashboard = ({ onLogout }) => {
       });
       
       setEditingProject({ ...editingProject, [field]: response.data.url });
+      showNotification('Upload concluído!');
     } catch (error) {
       console.error('Erro ao fazer upload:', error);
-      alert('Erro ao fazer upload do arquivo');
+      showNotification('Erro ao fazer upload do arquivo', 'error');
     }
   };
 
@@ -195,7 +204,6 @@ const AdminDashboard = ({ onLogout }) => {
 
   const handleEditSelection = async (selection) => {
     try {
-      // Busca os detalhes completos incluindo os IDs dos projetos
       const response = await axios.get(`${API_URL}/api/selections/slug/${selection.slug}`);
       const fullSelection = response.data;
       setEditingSelection({
@@ -204,7 +212,7 @@ const AdminDashboard = ({ onLogout }) => {
       });
     } catch (error) {
       console.error('Erro ao carregar detalhes da seleção:', error);
-      alert('Erro ao carregar detalhes da seleção');
+      showNotification('Erro ao carregar detalhes da playlist', 'error');
     }
   };
 
@@ -213,9 +221,10 @@ const AdminDashboard = ({ onLogout }) => {
       try {
         await axios.delete(`${API_URL}/api/selections/${id}`);
         fetchSelections();
+        showNotification('Playlist excluída!');
       } catch (error) {
         console.error('Erro ao excluir playlist:', error);
-        alert('Erro ao excluir playlist');
+        showNotification('Erro ao excluir playlist', 'error');
       }
     }
   };
@@ -225,14 +234,16 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       if (editingSelection.id) {
         await axios.put(`${API_URL}/api/selections/${editingSelection.id}`, editingSelection);
+        showNotification('Playlist atualizada!');
       } else {
         await axios.post(`${API_URL}/api/selections`, editingSelection);
+        showNotification('Playlist criada!');
       }
       setEditingSelection(null);
       fetchSelections();
     } catch (error) {
       console.error('Erro ao salvar playlist:', error);
-      alert('Erro ao salvar playlist: ' + (error.response?.data?.error || error.message));
+      showNotification(error.response?.data?.error || error.message, 'error');
     }
   };
 
@@ -270,6 +281,21 @@ const AdminDashboard = ({ onLogout }) => {
 
   return (
     <div className="min-h-screen bg-[#121212] text-white p-6">
+      {/* Toast Notification */}
+      {notification && (
+        <div className={`fixed top-6 right-6 z-[200] flex items-center gap-3 px-6 py-4 rounded-xl border shadow-2xl animate-in slide-in-from-right-full duration-300 ${
+          notification.type === 'error' 
+            ? 'bg-red-950/90 border-red-500 text-red-200' 
+            : 'bg-zinc-900/90 border-zinc-700 text-white'
+        }`}>
+          {notification.type === 'error' ? <AlertCircle size={20} className="text-red-500" /> : <Check size={20} className="text-[#E63946]" />}
+          <p className="font-bold text-sm tracking-tight">{notification.message}</p>
+          <button onClick={() => setNotification(null)} className="ml-4 opacity-50 hover:opacity-100">
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center mb-8 bg-[#1a1a1a] p-4 rounded-xl border border-[#333]">
         <div className="flex items-center gap-4">
@@ -440,7 +466,7 @@ const AdminDashboard = ({ onLogout }) => {
                                         onClick={() => {
                                             const url = `${window.location.origin}/selection/${selection.slug}`;
                                             navigator.clipboard.writeText(url);
-                                            alert('Link copiado!');
+                                            showNotification('Link copiado para a área de transferência!');
                                         }}
                                         className="bg-[#333] text-gray-400 hover:text-white p-2 rounded-lg transition-all border border-white/5"
                                         title="Copiar Link"
