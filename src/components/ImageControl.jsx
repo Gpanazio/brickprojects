@@ -131,7 +131,7 @@ function ImageControl({
                     </div>
                     <div>
                       <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">
-                        Crop Horizontal
+                        Recorte Horizontal
                       </label>
                       <input
                         type="range"
