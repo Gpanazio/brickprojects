@@ -51,13 +51,13 @@ function ImageControl({
       </div>
 
       {isEditing && (
-        <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 overflow-y-auto">
+<div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="image-editor-title">
           <div className="min-h-screen flex items-start justify-center p-4 py-12">
             <div className="bg-black border border-zinc-800 w-full max-w-3xl shadow-2xl">
               <div className="border-b border-zinc-800 p-6 flex justify-between items-center sticky top-0 bg-black z-10">
                 <div className="flex flex-col">
                   <span className="text-red-600 font-bold text-[10px] uppercase tracking-[0.3em] mb-1">Edição</span>
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
+                  <h3 id="image-editor-title" className="text-2xl font-black text-white uppercase tracking-tighter">
                     {title || uploadLabel}
                   </h3>
                 </div>
@@ -65,8 +65,9 @@ function ImageControl({
                   type="button"
                   onClick={() => setIsEditing(false)}
                   className="text-zinc-500 hover:text-white transition-colors"
+                  aria-label="Fechar"
                 >
-                  <span className="text-xl">×</span>
+                  <span className="text-xl" aria-hidden="true">×</span>
                 </button>
               </div>
 
