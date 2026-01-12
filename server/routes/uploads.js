@@ -27,9 +27,11 @@ const sanitizeFilename = (originalName) => {
   return `${timestamp}-${safeName}`;
 };
 
+const getUploadFolder = (req) => (req.body.folder === 'projetos' ? 'projetos' : 'assets');
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const folder = req.body.folder === 'projetos' ? 'projetos' : 'assets';
+    const folder = getUploadFolder(req);
     const targetDir = path.join(publicPath, folder);
     ensureDir(targetDir);
     cb(null, targetDir);
@@ -40,7 +42,7 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const folder = req.body.folder === 'projetos' ? 'projetos' : 'assets';
+  const folder = getUploadFolder(req);
   const isPdf = file.mimetype === 'application/pdf';
   const isImage = file.mimetype.startsWith('image/');
 
@@ -66,7 +68,7 @@ router.post('/', authenticateToken, upload.single('file'), (req, res) => {
     return res.status(400).json({ error: 'Arquivo não encontrado.' });
   }
 
-  const folder = req.body.folder === 'projetos' ? 'projetos' : 'assets';
+  const folder = getUploadFolder(req);
   return res.json({ url: `/${folder}/${req.file.filename}` });
 });
 
