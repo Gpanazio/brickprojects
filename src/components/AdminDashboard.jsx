@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit, Save, X, Upload, LogOut, Search, GripVertical, Check, Image as ImageIcon, Link as LinkIcon, FileText, Video, List, Layers, ArrowRight, ChevronRight, Copy, AlertCircle, Info } from 'lucide-react';
 import axios from 'axios';
+import ImageControl from './ImageControl';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -114,7 +115,13 @@ const AdminDashboard = ({ onLogout }) => {
       long_description: '',
       video_label: '',
       bg_image: '',
+      bg_image_zoom: 0,
+      bg_image_offset_x: 0,
+      bg_image_offset_y: 0,
       monolith_image: '',
+      monolith_image_zoom: 0,
+      monolith_image_offset_x: 0,
+      monolith_image_offset_y: 0,
       vimeo_id: '',
       vimeo_hash: '',
       pdf_url: '',
@@ -163,7 +170,10 @@ const AdminDashboard = ({ onLogout }) => {
   const handleFileUpload = async (e, field, folder = 'assets') => {
     const file = e.target.files[0];
     if (!file) return;
+    handleImageUpload(file, field, folder);
+  };
 
+  const handleImageUpload = async (file, field, folder = 'assets') => {
     const formData = new FormData();
     // IMPORTANTE: Adicionar folder ANTES do file para o Multer processar corretamente
     formData.append('folder', folder);
@@ -174,12 +184,19 @@ const AdminDashboard = ({ onLogout }) => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
-      setEditingProject({ ...editingProject, [field]: response.data.url });
+      setEditingProject(prev => ({ ...prev, [field]: response.data.url }));
       showNotification('Upload concluído!');
     } catch (error) {
       console.error('Erro ao fazer upload:', error);
       showNotification('Erro ao fazer upload do arquivo', 'error');
     }
+  };
+
+  const handleFieldChange = (e) => {
+    const { name, value } = e.target;
+    // Tenta converter para número se parecer um número de zoom/offset
+    const finalValue = (name.includes('zoom') || name.includes('offset')) ? parseInt(value) || 0 : value;
+    setEditingProject(prev => ({ ...prev, [name]: finalValue }));
   };
 
   const filteredProjects = projects.filter(p => 
@@ -365,7 +382,7 @@ const AdminDashboard = ({ onLogout }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredProjects.map(project => (
                         <div key={project.id} className="bg-[#1a1a1a] rounded-xl border border-[#333] overflow-hidden group hover:border-[#E63946] transition-all duration-300 shadow-xl">
-                            <div className="relative aspect-video">
+                            <div className="relative aspect-video overflow-hidden">
                                 <img 
                                     src={project.bg_image || '/api/placeholder/400/300'} 
                                     alt={project.title}
@@ -682,72 +699,44 @@ const AdminDashboard = ({ onLogout }) => {
             <form onSubmit={handleSaveProject} className="space-y-8">
                 
               {/* Seção de Imagens */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                      <label className="block text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
-                        <ImageIcon size={16} className="text-[#E63946]" />
-                        Imagem de Fundo (Horizontal)
-                      </label>
-                      <div className="relative group aspect-video bg-[#121212] rounded-xl overflow-hidden border-2 border-dashed border-[#333] hover:border-[#E63946] transition-all">
-                          {editingProject.bg_image ? (
-                              <>
-                                  <img src={editingProject.bg_image} className="w-full h-full object-cover" alt="Preview" />
-                                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                      <label className="cursor-pointer bg-white text-black px-4 py-2 rounded-lg font-bold text-sm hover:scale-105 transition-transform">
-                                          Trocar Imagem
-                                          <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'bg_image', 'assets')} />
-                                      </label>
-                                  </div>
-                              </>
-                          ) : (
-                              <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer hover:bg-[#1a1a1a] transition-colors">
-                                  <Upload size={32} className="text-gray-600 mb-2" />
-                                  <span className="text-sm text-gray-500">Upload Imagem Horizontal</span>
-                                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'bg_image', 'assets')} />
-                              </label>
-                          )}
-                      </div>
-                      <input 
-                        type="text" 
-                        value={editingProject.bg_image} 
-                        onChange={(e) => setEditingProject({...editingProject, bg_image: e.target.value})}
-                        placeholder="URL da imagem..."
-                        className="w-full bg-[#121212] border border-[#333] rounded-lg px-3 py-2 text-xs text-gray-400"
-                      />
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <ImageControl
+                    title="Imagem de Fundo (Horizontal)"
+                    uploadLabel="Upload Imagem Horizontal"
+                    urlLabel="URL da Imagem"
+                    zoomLabel="Zoom / Escala"
+                    urlField="bg_image"
+                    zoomField="bg_image_zoom"
+                    offsetXField="bg_image_offset_x"
+                    offsetYField="bg_image_offset_y"
+                    urlValue={editingProject.bg_image}
+                    zoomValue={editingProject.bg_image_zoom || 0}
+                    offsetXValue={editingProject.bg_image_offset_x || 0}
+                    offsetYValue={editingProject.bg_image_offset_y || 0}
+                    placeholder="URL da imagem..."
+                    onFileUpload={(file) => handleImageUpload(file, 'bg_image', 'assets')}
+                    onFieldChange={handleFieldChange}
+                    previewClassName="aspect-video rounded-xl"
+                  />
 
-                  <div className="space-y-3">
-                      <label className="block text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
-                        <ImageIcon size={16} className="text-[#E63946]" />
-                        Imagem Monólito (Vertical)
-                      </label>
-                      <div className="relative group aspect-[3/4] max-h-[180px] mx-auto bg-[#121212] rounded-xl overflow-hidden border-2 border-dashed border-[#333] hover:border-[#E63946] transition-all">
-                          {editingProject.monolith_image ? (
-                              <>
-                                  <img src={editingProject.monolith_image} className="w-full h-full object-cover" alt="Preview" />
-                                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                      <label className="cursor-pointer bg-white text-black px-4 py-2 rounded-lg font-bold text-sm hover:scale-105 transition-transform">
-                                          Trocar
-                                          <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'monolith_image', 'assets')} />
-                                      </label>
-                                  </div>
-                              </>
-                          ) : (
-                              <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer hover:bg-[#1a1a1a] transition-colors">
-                                  <Upload size={32} className="text-gray-600 mb-2" />
-                                  <span className="text-sm text-gray-500">Upload Imagem Vertical</span>
-                                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'monolith_image', 'assets')} />
-                              </label>
-                          )}
-                      </div>
-                      <input 
-                        type="text" 
-                        value={editingProject.monolith_image} 
-                        onChange={(e) => setEditingProject({...editingProject, monolith_image: e.target.value})}
-                        placeholder="URL da imagem..."
-                        className="w-full bg-[#121212] border border-[#333] rounded-lg px-3 py-2 text-xs text-gray-400"
-                      />
-                  </div>
+                  <ImageControl
+                    title="Imagem Monólito (Vertical)"
+                    uploadLabel="Upload Imagem Vertical"
+                    urlLabel="URL da Imagem"
+                    zoomLabel="Zoom / Escala"
+                    urlField="monolith_image"
+                    zoomField="monolith_image_zoom"
+                    offsetXField="monolith_image_offset_x"
+                    offsetYField="monolith_image_offset_y"
+                    urlValue={editingProject.monolith_image}
+                    zoomValue={editingProject.monolith_image_zoom || 0}
+                    offsetXValue={editingProject.monolith_image_offset_x || 0}
+                    offsetYValue={editingProject.monolith_image_offset_y || 0}
+                    placeholder="URL da imagem..."
+                    onFileUpload={(file) => handleImageUpload(file, 'monolith_image', 'assets')}
+                    onFieldChange={handleFieldChange}
+                    previewClassName="aspect-[3/4] max-h-[250px] mx-auto rounded-xl"
+                  />
               </div>
 
               {/* Campos de Texto */}
