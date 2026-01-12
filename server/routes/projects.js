@@ -1,9 +1,54 @@
 import express from 'express';
+import path from 'path';
+import fs from 'fs';
+import multer from 'multer';
 import { body, validationResult } from 'express-validator';
 import pool from '../database.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
+const assetsPath = path.join(process.cwd(), 'public', 'assets');
+const projetosPath = path.join(process.cwd(), 'public', 'projetos');
+
+const ensureDirectory = (dirPath) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+};
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const type = req.params.type;
+    const targetPath = type === 'pdf' ? projetosPath : assetsPath;
+    ensureDirectory(targetPath);
+    cb(null, targetPath);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const baseName = path
+      .basename(file.originalname, ext)
+      .trim()
+      .replace(/[^a-zA-Z0-9-_]+/g, '-')
+      .replace(/-+/g, '-')
+      .slice(0, 60);
+    const safeName = baseName || 'arquivo';
+    cb(null, `${safeName}-${Date.now()}${ext}`);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 25 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const type = req.params.type;
+    if (type === 'pdf') {
+      const isPdf = file.mimetype === 'application/pdf' || path.extname(file.originalname).toLowerCase() === '.pdf';
+      return cb(isPdf ? null : new Error('Apenas PDF é permitido'), isPdf);
+    }
+    const isImage = file.mimetype.startsWith('image/');
+    return cb(isImage ? null : new Error('Apenas imagens são permitidas'), isImage);
+  }
+});
 
 // GET: Listar todos os projetos (público)
 router.get('/', async (req, res) => {
@@ -38,6 +83,25 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// POST: Upload de arquivos (protegido)
+router.post('/upload/:type', authenticateToken, upload.single('file'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Arquivo não enviado' });
+    }
+
+    const type = req.params.type;
+    const fileUrl = type === 'pdf'
+      ? `/projetos/${req.file.filename}`
+      : `/assets/${req.file.filename}`;
+
+    res.json({ fileUrl });
+  } catch (err) {
+    console.error('Erro ao fazer upload:', err);
+    res.status(500).json({ error: 'Erro ao fazer upload' });
+  }
+});
+
 // POST: Criar novo projeto (protegido)
 router.post('/', authenticateToken, [
   body('title').trim().notEmpty().withMessage('Título é obrigatório'),
@@ -68,6 +132,12 @@ router.post('/', authenticateToken, [
       vimeo_id,
       vimeo_hash,
       pdf_url,
+      bg_position_x,
+      bg_position_y,
+      bg_zoom,
+      monolith_position_x,
+      monolith_position_y,
+      monolith_zoom,
       host,
       display_order = 0
     } = req.body;
@@ -75,11 +145,15 @@ router.post('/', authenticateToken, [
     const result = await pool.query(
       `INSERT INTO originais_projects 
         (title, category, genre, format, status, description, long_description, 
-         video_label, bg_image, monolith_image, vimeo_id, vimeo_hash, pdf_url, host, display_order)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+         video_label, bg_image, monolith_image, vimeo_id, vimeo_hash, pdf_url,
+         bg_position_x, bg_position_y, bg_zoom, monolith_position_x, monolith_position_y, monolith_zoom,
+         host, display_order)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
        RETURNING *`,
       [title, category, genre, format, status, description, long_description,
-       video_label, bg_image, monolith_image, vimeo_id, vimeo_hash, pdf_url, host, display_order]
+       video_label, bg_image, monolith_image, vimeo_id, vimeo_hash, pdf_url,
+       bg_position_x, bg_position_y, bg_zoom, monolith_position_x, monolith_position_y, monolith_zoom,
+       host, display_order]
     );
 
     res.status(201).json({
@@ -111,6 +185,12 @@ router.put('/:id', authenticateToken, async (req, res) => {
       vimeo_id,
       vimeo_hash,
       pdf_url,
+      bg_position_x,
+      bg_position_y,
+      bg_zoom,
+      monolith_position_x,
+      monolith_position_y,
+      monolith_zoom,
       host,
       display_order
     } = req.body;
@@ -130,11 +210,14 @@ router.put('/:id', authenticateToken, async (req, res) => {
        SET title = $1, category = $2, genre = $3, format = $4, status = $5,
            description = $6, long_description = $7, video_label = $8,
            bg_image = $9, monolith_image = $10, vimeo_id = $11, vimeo_hash = $12,
-           pdf_url = $13, host = $14, display_order = $15
-       WHERE id = $16
+           pdf_url = $13, bg_position_x = $14, bg_position_y = $15, bg_zoom = $16,
+           monolith_position_x = $17, monolith_position_y = $18, monolith_zoom = $19,
+           host = $20, display_order = $21
+       WHERE id = $22
        RETURNING *`,
       [title, category, genre, format, status, description, long_description,
-       video_label, bg_image, monolith_image, vimeo_id, vimeo_hash, pdf_url, 
+       video_label, bg_image, monolith_image, vimeo_id, vimeo_hash, pdf_url,
+       bg_position_x, bg_position_y, bg_zoom, monolith_position_x, monolith_position_y, monolith_zoom,
        host, display_order, id]
     );
 

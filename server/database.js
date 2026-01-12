@@ -56,6 +56,16 @@ export async function initDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
+    await client.query(`
+      ALTER TABLE originais_projects
+        ADD COLUMN IF NOT EXISTS bg_position_x INTEGER DEFAULT 50,
+        ADD COLUMN IF NOT EXISTS bg_position_y INTEGER DEFAULT 50,
+        ADD COLUMN IF NOT EXISTS bg_zoom INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS monolith_position_x INTEGER DEFAULT 50,
+        ADD COLUMN IF NOT EXISTS monolith_position_y INTEGER DEFAULT 50,
+        ADD COLUMN IF NOT EXISTS monolith_zoom INTEGER DEFAULT 0;
+    `);
     
     // Índice para ordenação
     await client.query(`

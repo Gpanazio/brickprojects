@@ -3,6 +3,11 @@ import { Play, X, ChevronDown, MousePointer2, Mail, Instagram, Youtube, ArrowRig
 
 const API_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:3001');
 
+const buildImageStyle = (imageUrl, positionX, positionY, zoom) => ({
+  backgroundImage: `url(${imageUrl})`,
+  backgroundPosition: `${positionX}% ${positionY}%`,
+  backgroundSize: `calc(100% + ${zoom}%)`
+});
 
 // --- COMPONENTES AUXILIARES ---
 
@@ -100,8 +105,8 @@ const VideoModal = ({ project, projects, onClose, onNext, onPrev }) => {
                      // Fallback para projetos sem vídeo
                      <div className="absolute inset-0 w-full h-full">
                         <div 
-                          className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] hover:scale-105"
-                          style={{ backgroundImage: `url(${project.bgImage})` }}
+                          className="absolute inset-0 bg-no-repeat transition-transform duration-[10s] hover:scale-105"
+                          style={buildImageStyle(project.bgImage, project.bgPositionX, project.bgPositionY, project.bgZoom)}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 via-transparent to-transparent" />
                         <div className="absolute bottom-6 left-6 right-6">
@@ -232,9 +237,9 @@ const Slide = ({ project, isActive, onPlay }) => {
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
          <div 
-           className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] ease-out opacity-20 grayscale"
+           className="absolute inset-0 bg-no-repeat transition-transform duration-[2000ms] ease-out opacity-20 grayscale"
            style={{ 
-             backgroundImage: `url(${project.bgImage})`,
+             ...buildImageStyle(project.bgImage, project.bgPositionX, project.bgPositionY, project.bgZoom),
              transform: isActive ? 'scale(1.0)' : 'scale(1.1)' 
            }} 
          />
@@ -284,12 +289,8 @@ const Slide = ({ project, isActive, onPlay }) => {
            >
               {/* Imagem Colorida no Monolito */}
               <div 
-                className="absolute inset-0 bg-cover bg-center transition-all duration-700 opacity-100" 
-                style={{ 
-                  backgroundImage: `url(${project.monolithImage})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
+                className="absolute inset-0 bg-no-repeat transition-all duration-700 opacity-100"
+                style={buildImageStyle(project.monolithImage, project.monolithPositionX, project.monolithPositionY, project.monolithZoom)}
               />
               
               <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-500 pointer-events-none"></div>
@@ -349,7 +350,13 @@ export default function BrickScrollytelling({ selectionSlug }) {
             vimeoId: p.vimeo_id,
             vimeoHash: p.vimeo_hash,
             pdfUrl: p.pdf_url,
-            host: p.host
+            host: p.host,
+            bgPositionX: p.bg_position_x ?? 50,
+            bgPositionY: p.bg_position_y ?? 50,
+            bgZoom: p.bg_zoom ?? 0,
+            monolithPositionX: p.monolith_position_x ?? 50,
+            monolithPositionY: p.monolith_position_y ?? 50,
+            monolithZoom: p.monolith_zoom ?? 0
           }));
           setProjectsData(mappedData);
         }

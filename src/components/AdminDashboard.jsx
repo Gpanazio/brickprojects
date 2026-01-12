@@ -16,6 +16,12 @@ function ProjectForm({ project, onSave, onCancel }) {
     video_label: '',
     bg_image: '',
     monolith_image: '',
+    bg_position_x: 50,
+    bg_position_y: 50,
+    bg_zoom: 0,
+    monolith_position_x: 50,
+    monolith_position_y: 50,
+    monolith_zoom: 0,
     vimeo_id: '',
     vimeo_hash: '',
     pdf_url: '',
@@ -25,6 +31,15 @@ function ProjectForm({ project, onSave, onCancel }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [uploadingField, setUploadingField] = useState(null);
+
+  const token = localStorage.getItem('adminToken');
+
+  const getImageStyle = (imageUrl, positionX, positionY, zoom) => ({
+    backgroundImage: `url(${imageUrl})`,
+    backgroundPosition: `${positionX}% ${positionY}%`,
+    backgroundSize: `calc(100% + ${zoom}%)`
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,6 +58,48 @@ function ProjectForm({ project, onSave, onCancel }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleRangeChange = (name) => (e) => {
+    const value = Number(e.target.value);
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileUpload = async (type, file) => {
+    if (!file) return;
+    setUploadingField(type);
+    setError('');
+
+    try {
+      const payload = new FormData();
+      payload.append('file', file);
+
+      const response = await fetch(`${API_URL}/api/projects/upload/${type}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: payload
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Erro ao fazer upload');
+      }
+
+      const data = await response.json();
+      const updates = {
+        bg: { bg_image: data.fileUrl },
+        monolith: { monolith_image: data.fileUrl },
+        pdf: { pdf_url: data.fileUrl }
+      };
+
+      setFormData(prev => ({ ...prev, ...updates[type] }));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploadingField(null);
+    }
   };
 
   return (
@@ -74,8 +131,8 @@ function ProjectForm({ project, onSave, onCancel }) {
                   {/* BG Image Preview */}
                   {formData.bg_image && (
                     <div 
-                      className="absolute inset-0 bg-cover bg-center opacity-30 grayscale transition-all duration-700" 
-                      style={{ backgroundImage: `url(${formData.bg_image})` }}
+                      className="absolute inset-0 bg-no-repeat opacity-30 grayscale transition-all duration-700"
+                      style={getImageStyle(formData.bg_image, formData.bg_position_x, formData.bg_position_y, formData.bg_zoom)}
                     />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
@@ -100,8 +157,8 @@ function ProjectForm({ project, onSave, onCancel }) {
                 <div className="relative aspect-[1/2] w-full max-w-[150px] mx-auto bg-zinc-900 border-2 border-red-600/30 overflow-hidden shadow-2xl shadow-red-600/5">
                   {formData.monolith_image ? (
                     <div 
-                      className="absolute inset-0 bg-cover bg-center transition-all duration-700" 
-                      style={{ backgroundImage: `url(${formData.monolith_image})` }}
+                      className="absolute inset-0 bg-no-repeat transition-all duration-700"
+                      style={getImageStyle(formData.monolith_image, formData.monolith_position_x, formData.monolith_position_y, formData.monolith_zoom)}
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-zinc-800 text-[10px] uppercase tracking-tighter text-center px-4">
@@ -265,6 +322,20 @@ function ProjectForm({ project, onSave, onCancel }) {
                   placeholder="/assets/imagem.webp"
                   className="w-full bg-black border border-zinc-800 text-white px-4 py-3 focus:outline-none focus:border-red-600 transition-colors"
                 />
+                <div className="mt-3">
+                  <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2 font-bold">
+                    Upload de Background
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload('bg', e.target.files?.[0])}
+                    className="w-full text-zinc-400 text-xs file:bg-zinc-900 file:text-zinc-200 file:border-0 file:px-3 file:py-2 file:uppercase file:tracking-widest file:font-bold file:mr-3"
+                  />
+                  {uploadingField === 'bg' && (
+                    <p className="text-[10px] text-zinc-500 mt-2 uppercase tracking-widest">Enviando imagem...</p>
+                  )}
+                </div>
               </div>
 
               {/* Imagem Monolito */}
@@ -280,6 +351,20 @@ function ProjectForm({ project, onSave, onCancel }) {
                   placeholder="/assets/imagem-vertical.webp"
                   className="w-full bg-black border border-zinc-800 text-white px-4 py-3 focus:outline-none focus:border-red-600 transition-colors"
                 />
+                <div className="mt-3">
+                  <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2 font-bold">
+                    Upload de Monolito
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload('monolith', e.target.files?.[0])}
+                    className="w-full text-zinc-400 text-xs file:bg-zinc-900 file:text-zinc-200 file:border-0 file:px-3 file:py-2 file:uppercase file:tracking-widest file:font-bold file:mr-3"
+                  />
+                  {uploadingField === 'monolith' && (
+                    <p className="text-[10px] text-zinc-500 mt-2 uppercase tracking-widest">Enviando imagem...</p>
+                  )}
+                </div>
               </div>
 
               {/* Vimeo ID */}
@@ -325,6 +410,98 @@ function ProjectForm({ project, onSave, onCancel }) {
                   placeholder="/projetos/pitch.pdf"
                   className="w-full bg-black border border-zinc-800 text-white px-4 py-3 focus:outline-none focus:border-red-600 transition-colors"
                 />
+                <div className="mt-3">
+                  <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2 font-bold">
+                    Upload de PDF
+                  </label>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={(e) => handleFileUpload('pdf', e.target.files?.[0])}
+                    className="w-full text-zinc-400 text-xs file:bg-zinc-900 file:text-zinc-200 file:border-0 file:px-3 file:py-2 file:uppercase file:tracking-widest file:font-bold file:mr-3"
+                  />
+                  {uploadingField === 'pdf' && (
+                    <p className="text-[10px] text-zinc-500 mt-2 uppercase tracking-widest">Enviando PDF...</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="md:col-span-2 border border-zinc-900 p-6 bg-zinc-950/60">
+                <h3 className="text-zinc-400 text-xs uppercase tracking-widest font-bold mb-4">Ajuste de Crop & Zoom</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">Background</h4>
+                    <div>
+                      <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">Posição X</label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={formData.bg_position_x}
+                        onChange={handleRangeChange('bg_position_x')}
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">Posição Y</label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={formData.bg_position_y}
+                        onChange={handleRangeChange('bg_position_y')}
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">Zoom (±)</label>
+                      <input
+                        type="range"
+                        min="-50"
+                        max="100"
+                        value={formData.bg_zoom}
+                        onChange={handleRangeChange('bg_zoom')}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">Monolito</h4>
+                    <div>
+                      <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">Posição X</label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={formData.monolith_position_x}
+                        onChange={handleRangeChange('monolith_position_x')}
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">Posição Y</label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={formData.monolith_position_y}
+                        onChange={handleRangeChange('monolith_position_y')}
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-zinc-500 text-[10px] uppercase tracking-widest mb-2">Zoom (±)</label>
+                      <input
+                        type="range"
+                        min="-50"
+                        max="100"
+                        value={formData.monolith_zoom}
+                        onChange={handleRangeChange('monolith_zoom')}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Ordem de Exibição */}
