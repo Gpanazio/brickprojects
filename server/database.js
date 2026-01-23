@@ -46,11 +46,30 @@ export async function testConnection() {
 // Função para inicializar as tabelas
 export async function initDatabase() {
   const client = await pool.connect();
-  const authClient = await authPool.connect();
-
   try {
     // --- BANCO DE CONTEÚDO ---
     await client.query('BEGIN');
+
+    // ... [existing content] ...
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('❌ Erro ao inicializar tabelas de CONTEÚDO:', err.message);
+    throw err;
+  } finally {
+    client.release();
+  }
+
+  // --- BANCO DE AUTH ---
+  // Apenas tenta inicializar se a URL estiver definida para evitar ECONNREFUSED no localhost
+  if (!process.env.DATABASE_PUBLIC_URL) {
+    console.warn('⚠️ DATABASE_PUBLIC_URL não definida. Pulando inicialização da tabela master_users.');
+    return;
+  }
+
+  const authClient = await authPool.connect();
+  try {
+    await authClient.query('BEGIN');
 
     // Tabela de projetos
     await client.query(`
