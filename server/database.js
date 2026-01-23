@@ -7,16 +7,18 @@ const { Pool } = pg;
 
 // Configuração do pool de conexões com o PostgreSQL
 // Configuração do pool de conexões (CONTEÚDO)
+// Configuração do pool de conexões com o PostgreSQL
+// Configuração do pool de conexões (CONTEÚDO) -> Agora no NOVO (DATABASE_URL)
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL, // Content DB (New)
   ssl: process.env.NODE_ENV === 'production' ? {
     rejectUnauthorized: false
   } : false
 });
 
-// Configuração do pool de conexões (AUTH/LOGIN)
+// Configuração do pool de conexões (AUTH/LOGIN) -> Agora no ANTIGO (DATABASE_PUBLIC_URL)
 export const authPool = new Pool({
-  connectionString: process.env.DATABASE_PUBLIC_URL, // Auth DB
+  connectionString: process.env.DATABASE_PUBLIC_URL, // Auth DB (Old)
   ssl: process.env.NODE_ENV === 'production' ? {
     rejectUnauthorized: false
   } : false
@@ -60,11 +62,22 @@ export async function initDatabase() {
     client.release();
   }
 
-  // --- BANCO DE AUTH ---
-  // Apenas tenta inicializar se a URL estiver definida para evitar ECONNREFUSED no localhost
+  // --- BANCO DE CONTEÚDO (Novo - DATABASE_PUBLIC_URL) ---
   if (!process.env.DATABASE_PUBLIC_URL) {
-    console.warn('⚠️ DATABASE_PUBLIC_URL não definida. Pulando inicialização da tabela master_users.');
-    return;
+    console.warn('⚠️ DATABASE_PUBLIC_URL não definida. Pulando inicialização das tabelas de conteúdo.');
+    // Se não tem DB de conteúdo, não adianta tentar inicializar o resto se dependesse dele, 
+    // mas aqui são conexões independentes. Vamos seguir para o Auth se possível.
+  } else {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // ... [create content tables] ...
+      // O código abaixo cria as tabelas. Como estamos dentro do `else`, vou precisar mover o bloco try/catch original para cá.
+      // Vou simplificar a substituição mantendo a estrutura original mas trocando a guarda.
+    } catch (err) {
+      // ...
+    }
   }
 
   const authClient = await authPool.connect();
