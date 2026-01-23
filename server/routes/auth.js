@@ -2,7 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { body, validationResult } from 'express-validator';
-import pool from '../database.js';
+import { authPool as pool } from '../database.js';
 
 const router = express.Router();
 
@@ -27,8 +27,8 @@ router.post('/login', [
     );
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ 
-        error: 'Credenciais inválidas' 
+      return res.status(401).json({
+        error: 'Credenciais inválidas'
       });
     }
 
@@ -36,10 +36,10 @@ router.post('/login', [
 
     // Verifica a senha
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
-    
+
     if (!isValidPassword) {
-      return res.status(401).json({ 
-        error: 'Credenciais inválidas' 
+      return res.status(401).json({
+        error: 'Credenciais inválidas'
       });
     }
 
@@ -51,11 +51,11 @@ router.post('/login', [
 
     // Gera o token JWT
     const token = jwt.sign(
-      { 
-        id: user.id, 
+      {
+        id: user.id,
         email: user.email,
         username: user.username,
-        role: user.role 
+        role: user.role
       },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
@@ -73,7 +73,7 @@ router.post('/login', [
 
   } catch (err) {
     console.error('❌ Erro detalhado no login:', err);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Erro interno do servidor',
       message: err.message,
       stack: process.env.NODE_ENV === 'development' ? err.stack : undefined

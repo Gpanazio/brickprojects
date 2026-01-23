@@ -6,8 +6,17 @@ dotenv.config();
 const { Pool } = pg;
 
 // Configuração do pool de conexões com o PostgreSQL
+// Configuração do pool de conexões (CONTEÚDO)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? {
+    rejectUnauthorized: false
+  } : false
+});
+
+// Configuração do pool de conexões (AUTH/LOGIN)
+export const authPool = new Pool({
+  connectionString: process.env.DATABASE_PUBLIC_URL, // Auth DB
   ssl: process.env.NODE_ENV === 'production' ? {
     rejectUnauthorized: false
   } : false
@@ -17,8 +26,16 @@ const pool = new Pool({
 export async function testConnection() {
   try {
     const client = await pool.connect();
-    console.log('✅ Conectado ao banco de dados PostgreSQL');
+    console.log('✅ Conectado ao banco de dados PostgreSQL (CONTEÚDO)');
     client.release();
+
+    // Testa também o banco de Auth se for diferente
+    if (process.env.DATABASE_PUBLIC_URL) {
+      const authClient = await authPool.connect();
+      console.log('✅ Conectado ao banco de dados PostgreSQL (AUTH)');
+      authClient.release();
+    }
+
     return true;
   } catch (err) {
     console.error('❌ Erro ao conectar ao banco de dados:', err.message);
@@ -29,10 +46,12 @@ export async function testConnection() {
 // Função para inicializar as tabelas
 export async function initDatabase() {
   const client = await pool.connect();
-  
+  const authClient = await authPool.connect();
+
   try {
+    // --- BANCO DE CONTEÚDO ---
     await client.query('BEGIN');
-    
+
     // Tabela de projetos
     await client.query(`
       CREATE TABLE IF NOT EXISTS originais_projects (
@@ -62,7 +81,7 @@ export async function initDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    
+
     // Índice para ordenação
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_originais_projects_order ON originais_projects(display_order);
@@ -77,7 +96,7 @@ export async function initDatabase() {
         ADD COLUMN IF NOT EXISTS monolith_image_offset_x INTEGER DEFAULT 0,
         ADD COLUMN IF NOT EXISTS monolith_image_offset_y INTEGER DEFAULT 0;
     `);
-    
+
     // Função para atualizar updated_at automaticamente
     await client.query(`
       CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -88,7 +107,7 @@ export async function initDatabase() {
       END;
       $$ LANGUAGE plpgsql;
     `);
-    
+
     // Trigger para projects
     await client.query(`
       DROP TRIGGER IF EXISTS update_originais_projects_updated_at ON originais_projects;
@@ -141,16 +160,38 @@ export async function initDatabase() {
       FOR EACH ROW
       EXECUTE FUNCTION update_updated_at_column();
     `);
-    
+
     await client.query('COMMIT');
-    console.log('✅ Tabelas inicializadas com sucesso');
-    
+    console.log('✅ Tabelas de CONTEÚDO inicializadas com sucesso');
+
+
+    // --- BANCO DE AUTH ---
+    await authClient.query('BEGIN');
+
+    // Tabela de usuários (master_users)
+    await authClient.query(`
+      CREATE TABLE IF NOT EXISTS master_users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        email VARCHAR(255),
+        role VARCHAR(50) DEFAULT 'admin',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await authClient.query('COMMIT');
+    console.log('✅ Tabelas de AUTH inicializadas com sucesso');
+
   } catch (err) {
     await client.query('ROLLBACK');
+    await authClient.query('ROLLBACK');
     console.error('❌ Erro ao inicializar tabelas:', err.message);
     throw err;
   } finally {
     client.release();
+    authClient.release();
   }
 }
 
