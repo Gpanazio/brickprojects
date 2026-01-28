@@ -84,7 +84,7 @@ router.post('/', authenticateToken, [
          video_label, bg_image, bg_image_zoom, bg_image_offset_x, bg_image_offset_y,
          monolith_image, monolith_image_zoom, monolith_image_offset_x, monolith_image_offset_y,
          vimeo_id, vimeo_hash, pdf_url, host, display_order)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
        RETURNING *`,
       [title, category, genre, format, status, description, long_description,
        video_label, bg_image, bg_image_zoom, bg_image_offset_x, bg_image_offset_y,
